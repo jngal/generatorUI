@@ -1,0 +1,60 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import withPaymentGateway from './utils/withPaymentGateway';
+
+import './PaymentGateway.scss';
+
+let _vs, _result;
+class PaymentGatewayComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    const params = new URLSearchParams(window.location.search);
+    _vs = params.get("VS");
+    _result = params.get("RESULT");
+  }
+
+  async componentDidMount() {
+    var _elm = document.getElementById('payment-gateway-container');
+
+    if(!_vs) {
+      try {
+        const { vs, amount } = this.props;
+        const res = await this.props.sign(amount, vs);
+        window.Besteron.show(document, _elm, res.Data);
+      } catch(error) {
+        console.error(error);
+      }
+    }
+
+    // var paymentData = {
+    //   cid: '1263549438',
+    //   amnt: '0.01',
+    //   vs: '564',
+    //   curr: '978',
+    //   ru: 'https://www.besteron.com',
+    //   sign: '1C4B980027262E427983FF5F7EE571D5',
+    //   language: 'sk',
+    //   paymentmethod: 'CARDANDBUTTON'
+    // };
+    // window.Besteron.show(document, _elm, paymentData);
+  }
+
+  render() {
+    return (
+      <>
+        <div className="payment-gateway-container" id="payment-gateway-container" />
+        {_vs && 
+          <div>{'Res:' +_result}</div>
+        }
+      </>
+    );
+  }
+}
+
+PaymentGatewayComponent.propTypes = {
+  vs: PropTypes.string.isRequired,
+  amount: PropTypes.number.isRequired
+}
+
+export default withPaymentGateway(PaymentGatewayComponent);

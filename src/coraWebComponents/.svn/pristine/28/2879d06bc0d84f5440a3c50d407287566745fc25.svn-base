@@ -1,0 +1,109 @@
+import React from 'react';
+import Button from '../buttons/Button';
+import * as Convert from '../../coraWebComponents/utils/convert';
+import { buildUrl } from '../utils/helper';
+import { SchedulerEditItem } from '@progress/kendo-react-scheduler';
+import { Popup } from '@progress/kendo-react-popup';
+
+
+export function EditItem({ onEditClick, onDeleteClick, getScrollOffset }) {
+  return class extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        show: false,
+        event: null,
+        offset: {
+          left: 0,
+          top: 0
+        }
+      }
+      this.ref = React.createRef();
+    }
+
+    handleClick = event => {
+      this.setState((state) => ({
+        show: !state.show,
+        event: event
+      }));
+    }
+
+    handleEdit = () => {
+      this.setState({ show: false });
+      onEditClick(this.state.event);
+    }
+
+    handleDelete = () => {
+      this.setState({ show: false });
+      onDeleteClick(this.state.event);
+    }
+
+    handleCloseClick = event => {
+      this.setState({ show: false });
+    }
+
+    onBlur = () => {
+      setTimeout(() => this.setState({ show: false }), 50);
+    }
+    
+    componentDidUpdate(prevProps, prevState) {
+      if(this.state.show && prevState.show !== this.state.show) {
+        const el = this.ref.current.element.getBoundingClientRect();
+        const scrollOffset = getScrollOffset() || 0;
+        const elementOffset = this.ref.current.element.offsetTop;
+        const pos = el.top + Math.min(el.height, 38);
+        this.setState({
+          offset: {
+            left: el.left,
+            top: scrollOffset < elementOffset ? pos : pos + Math.max(scrollOffset - elementOffset, 0)
+          }
+        });
+      }
+    }
+
+    render() {
+      return (
+        <React.Fragment>
+          <SchedulerEditItem
+            ref={this.ref}
+            {...this.props}
+            onClick={this.handleClick}
+            onBlur={this.onBlur}
+          />
+          <Popup
+            offset={this.state.offset}
+            show={this.state.show}
+            collision={{}}
+          >
+            <div className="k-scheduler-popup">
+            <div className="k-scheduler-popup-text">
+                <span><b>Začiatok:</b></span><span>{Convert.dataToLocaleStr(this.props.dataItem.Start,{ year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</span>
+              </div>
+              <div className="k-scheduler-popup-text">
+                <span><b>Koniec:</b></span><span>{Convert.dataToLocaleStr(this.props.dataItem.End,{ year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</span>
+              </div>
+              {this.props.description && <div className="k-scheduler-popup-text">
+              <span><b>Podrobnosti:</b></span><br/>
+              <span>{this.props.description}</span>
+              </div>}
+                <div className="k-scheduler-popup-buttons">
+                  <Button
+                    onClick={this.handleEdit}
+                    title="Upraviť"
+                    icon="edit"
+                  imageUrl={buildUrl('assets/toolbar-ikony_edit.svg')}
+                  />
+                  <Button
+                    onClick={this.handleDelete}
+                    icon="delete"
+                    title="Vymazať"
+                    imageUrl={buildUrl('assets/toolbar_cg_delete.svg')}
+                  />
+                </div>
+            </div>
+          </Popup>
+        </React.Fragment>
+      )
+    }
+  }
+}

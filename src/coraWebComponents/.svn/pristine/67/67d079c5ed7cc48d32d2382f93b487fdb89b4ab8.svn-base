@@ -1,0 +1,87 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Dialog from '../dialogs/Dialog';
+import ManualPDF from './ManualPDF';
+
+class ManualDialogList extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpenManualDialogPDF: false,
+      titlePDF: '',
+    }
+  }
+
+  handleOpenPDF = async (ID, N_TITLE) => {
+    await this.props.getManual(ID);
+    this.setState({
+      isOpenManualDialogPDF: true,
+      titlePDF: N_TITLE,
+    })
+  }
+
+  handleCloseList = () => {
+    this.props.handleClose();
+  }
+
+  handleClosePDF = () => {
+    this.setState({
+      isOpenManualDialogPDF: false,
+    })
+  }
+
+  render() {
+    const buildManualList = () => {
+
+      const { manualProps } = this.props;
+      const { manualListDataMap, manualListData } = manualProps;
+      
+      return (
+        <div>
+          {manualListData.map(item => {
+            console.log(item.N_TITLE);
+            console.log(Object.keys(item));
+            return (
+              <div key={item[manualListDataMap.key]} className="popis" onClick={() => this.handleOpenPDF(item[manualListDataMap.key], item.N_TITLE)}>
+                <span>{item[manualListDataMap.title]}</span><span className="popis-datum">{item.D_DATUM_UPR}</span>
+              </div>
+            )
+          })}
+        </div>
+      )
+    }
+
+    return (
+      <>
+        <Dialog
+          isOpen={this.props.isOpenManualDialogList}
+          onClose={this.handleCloseList}
+          fullscreen={true}
+          title={this.props.manualTitle}
+        >
+          {buildManualList()}
+        </Dialog>
+        <ManualPDF
+          extraDialog={true}
+          manualProps={this.props.manualProps}
+          handleClosePDF={this.handleClosePDF}
+          isOpenManualDialogPDF={this.state.isOpenManualDialogPDF}
+          getManual={this.props.getManual}
+          manualTitle={this.props.manualTitle}
+          getListManual={this.props.getListManual}
+          titlePDF={this.state.titlePDF} 
+        />
+      </>
+    )
+  }
+}
+
+ManualDialogList.propTypes = {
+  isOpenManualDialogList: PropTypes.bool.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  manualTitle: PropTypes.string.isRequired,
+}
+
+
+export default ManualDialogList;

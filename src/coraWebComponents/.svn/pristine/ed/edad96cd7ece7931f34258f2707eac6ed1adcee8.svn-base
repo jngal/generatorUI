@@ -1,0 +1,81 @@
+
+import React from 'react';
+import { Slide } from '@progress/kendo-react-animation';
+import Button from './buttons/Button';
+import './Dropdown.scss'
+
+class Dropdown extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      slide: null
+    }
+  }
+
+  componentDidMount = () => {
+    document.addEventListener("click", (evt) => {
+      const flyoutElement = this.refs.dropdown;
+      let targetElement = evt.target;
+      do {
+        if (targetElement === flyoutElement) {
+          return;
+        }
+        targetElement = targetElement.parentNode;
+      } while (targetElement);
+      this.setState({ slide: null })
+    });
+  }
+
+  handleSlide = async (name) => {
+    if (this.state.slide === name) {
+      await this.setState({ slide: null });
+    }
+    else {
+      await this.setState({ slide: name })
+    }
+  }
+
+  handleClick = (onClick) => {
+    if (onClick) {
+      onClick();
+      this.setState({
+        slide: null
+      });
+    }
+  }
+
+  render() {
+    let slides = {};
+    this.props.schema.forEach((item, i) => {
+      const slide = this.state.slide === item.title ? (
+        <div key={i} className="slide">
+          {item.children.map((child, i) => (
+            <Button key={i} onClick={() => this.handleClick(child.onClick)} disabled={child.disabled} icon={child.icon} label={child.title} imageUrl={child.imageUrl} />
+          ))}
+        </div>
+      ) : null;
+      slides = { ...slides, [item.title]: slide };
+    });
+    return (
+      <div className="dropdown" ref="dropdown">
+        {this.props.schema.map((item, i) => (
+          <React.Fragment>
+            <Slide>{slides[item.title]}</Slide>
+            {item.imageUrl
+              ?
+              <div className={this.state.slide === item.title ? "item button-item active" : "item button-item"} key={i}>
+                <Button title={item.title} imageUrl={item.imageUrl} onClick={() => this.handleSlide(item.title)} />
+              </div>
+              :
+              <div className={this.state.slide === item.title ? "item active" : "item"} key={i} onClick={() => this.handleSlide(item.title)}>
+                {item.title}
+              </div>}
+          </React.Fragment>
+        ))}
+      </div>
+    )
+  }
+}
+
+export default Dropdown;
+

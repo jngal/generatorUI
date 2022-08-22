@@ -1,0 +1,147 @@
+@import "../variables";
+@import "../themes";
+.date-range-picker {
+  margin: 5px 45px;
+  display: inline-block;
+  &.k-datepicker {
+    flex: 1;
+  }
+
+  &.disabled-field {
+    opacity: 1;
+    .k-dateinput-wrap {
+      opacity: 0.6;
+    }
+  }
+
+  .k-calendar {
+    .k-state-selected .k-link {
+      @include themed() {
+        background-color: color($primary);
+      }
+    }
+    ul.k-reset li:hover {
+      @include themed() {
+        background-color: color($secondarydarker);
+        color: color($basicwhite) !important;
+      }
+    }
+
+    .k-today {
+      @include themed() {
+        color: color($primary) !important;
+      }
+      &:hover {
+        @include themed() {
+          color: color($basicwhite) !important;
+        }
+      }
+    }
+  }
+  .k-textbox-container {
+    input {
+      z-index: 1;
+    }
+    input[value="deň. mesiac. rok"] {
+      z-index: 0;
+      background-color: none;
+      @include themed() {
+        color: color($basicwhite) !important;
+      }
+    }
+    &.k-state-focused {
+      input {
+        z-index: 1 !important;
+      }
+    }
+  }
+  .k-dateinput-wrap {
+    @include themed() {
+      background-color: color($basicwhite);
+      color: color($text-color);
+    }
+    input {
+      @include themed() {
+        background-color: color($basicwhite) !important;
+        color: color($text-color);
+      }
+    }
+  }
+  .k-textbox-container>.k-label,
+  .k-textbox-container.k-state-focused>.k-label {
+    margin: 18px 0 0 10px;
+    font-size: 18px;
+    z-index: 0;
+    @include themed() {
+      color: color($text-color);
+    }
+  }
+}
+.k-popup.k-child-animation-container{
+.k-calendar.k-calendar-range{
+  .k-range-mid{
+    @include themed() {
+      background-color: rgba(color($primary), 0.5) !important;
+      background-image: none !important;
+    }
+  }
+  .k-range-start .k-link,  .k-range-end .k-link{
+    @include themed() {
+      background-color: color($primary) !important;
+      background-image: none !important;
+    }
+  }
+  .k-state-pending-focus .k-link:hover{
+    @include themed() {
+      color: color($basicwhite);
+      background-color:color($primarylight) !important;
+      background-image: none;
+    }
+  }
+}
+}
+
+
+  .k-content .k-today {
+    @include themed() {
+      color: color($secondarydarker);
+    } 
+  }
+  .k-today {
+    .k-link {
+      @include themed() {
+        color: color($primary);
+      }
+      &:hover {
+        @include themed() {
+          color: color($basicwhite);
+          background-color: color($primary);
+        }
+      }
+    }
+  }
+  .k-state-selected .k-link, .k-content .k-state-selected .k-link{
+    @include themed() {
+      border-color: color($secondarydarker);
+      color: color($secondarylight);
+      background-color: color($secondarydarker);
+    }
+  }
+  .k-calendar-navigation {
+    li:hover {
+      @include themed() {
+        background-color: color($primary);
+        color: color($basicwhite);
+      }
+    }     
+  }
+  .k-calendar-header {
+      @include themed() {
+        color: color($primary);
+      }
+    }        
+    .k-today:hover {
+      @include themed() {
+        color: color($primary);
+      }
+    }      

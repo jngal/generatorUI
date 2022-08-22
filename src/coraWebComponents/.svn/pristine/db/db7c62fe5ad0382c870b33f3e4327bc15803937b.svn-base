@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Container.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Container.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import './Container.scss';
+
+import * as React from 'react';
+
+import { FILTERABLE, PAGE, TABS_TYPE } from './Settings';
+
+import Navigation from './navigation/Navigation';
+import PropTypes from 'prop-types';
+import Settings from './Settings';
+import Sidebar from './sidebar/Sidebar';
+import RefreshDialog from './RefreshDialog';
+import withStorage from './utils/withStorage';
+import withRouter from './utils/withRouter';
+import eventEmitter from './utils/eventEmitter';
+
+export const SIDEBAR_TYPE = {
+  NORMAL: 'normal',
+  FULLSCREEN: 'fullscreen',
+  COMPACT: 'compact',
+}
+
+let _init;
+
+/**
+ * Container component
+ * @module
+ * @param {element} brand - Brand element
+ * @param {object} user - User
+ * @param {Menu} menu - Menu
+ * @param {func} onMenuFilter - On menu filter function
+ * @param {elemetn} stats - Stats element
+ * @param {func} onSignOut - On sign out function
+ * @param {string} theme - Current theme
+ * @param {array} themes - Themes
+ * @param {element} header - Header element
+ * @param {element} footer - Footer element
+ * @param {element} userInfo - User info element
+ * @param {object} uzivatel - Uzivatel
+ * @param {func} applicationSettings - Application settings function
+ * @param {element} manual - Manual element
+ * @param {element} manualList - Manual list element
+ * @param {func} handleConfirmChangePassword - Function on password change submit
+ * @param {string} defaultSidebarType - Default sidebar type
+ * @param {object} sideBarToggleIcons - Sidebar toggle icons
+ * @param {func} navUser - Nav user
+ * @param {bool} isNavBarNotScrollable - In navbar not scrollable
+ * @param {func} onMenuSelect - On menu select function
+ */
+class Container extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.normalSidebarClassNames = "col-3 p-0 w-sidebar";
+    this.compactSidebarClassNames = "col-1 p-0 w-sidebar-compact";
+    this.fullscreenSidebarClassNames = "col p-0 w-sidebar-fullscreen";
+
+    this.state = {
+      sidebarType: props.defaultSidebarType || SIDEBAR_TYPE.NORMAL,
+      isError: false,
+      isOpenSettings: false,
+      theme: {name: "default"},
+      tabsType: null,
+      page: null,
+      filterable: null,
+      isRefreshOpen: true,
+      applicationSettings: null
+    }
+    
+    if(props.provideSession) {
+      props.storage.sessionProviderInit(() => {
+        const afterLoginLocation = props.location &amp;&amp; props.location.pathname &amp;&amp; props.location.pathname !== "/prihlasenie" &amp;&amp; props.location.pathname !== "/login" ? props.location.pathname : '/';
+        window.location.hash = "#" +afterLoginLocation;
+        window.location.reload();
+      });
+    }
+  }
+
+  getTheme = async () => {
+    let theme = await this.props.storage.getTheme();
+    if(!theme) {
+      theme = {
+        name: this.props.theme || 'default'
+      }
+    }
+    return theme;
+  }
+
+  getFilterable = async () => {
+    let filterable = await this.props.storage.getFilterable();
+    return filterable !== null ? { name: filterable ? "nie" : "áno", filterable } : FILTERABLE[0];
+  }
+
+  handleOpenSettings = async () => {
+    this.setState({
+      isOpenSettings: true,
+      theme: await this.getTheme(),
+      tabsType: await this.props.storage.getTabsType() || TABS_TYPE[0],
+      page: await this.props.storage.getPage() || PAGE[0],
+      filterable: await this.getFilterable(),
+      applicationSettings: await this.props.storage.getApplicationSettings()
+    });
+  }
+
+  handleCloseSettings = () => {
+    this.setState({ isOpenSettings: false });
+  }
+
+  handleChange = (name, value) => {
+    this.setState({ [name]: value });
+  }
+
+  handleSidebarToggle = (event, sidebarType) => {
+    this.setState((state) => ({
+      sidebarType: state.sidebarType === sidebarType ? SIDEBAR_TYPE.NORMAL : sidebarType,
+    }));
+  }
+
+  handleSidebarMenuSelect = (targetRoute, currLocation, routeHistory, isNotExpanded) => {
+    if (isNotExpanded) {
+      if (this.state.sidebarType === SIDEBAR_TYPE.FULLSCREEN) {
+        this.setState({
+          sidebarType: SIDEBAR_TYPE.NORMAL,
+        });
+      }
+    }
+
+    if (this.props.onMenuSelect) {
+      this.props.onMenuSelect(targetRoute, currLocation, routeHistory);
+    }
+  }
+
+  evaluateSidebarClassNames = () => {
+    switch (this.state.sidebarType) {
+      case SIDEBAR_TYPE.COMPACT:
+        return this.compactSidebarClassNames;
+      case SIDEBAR_TYPE.FULLSCREEN:
+        return this.fullscreenSidebarClassNames;
+      default:
+        return this.normalSidebarClassNames;
+    }
+  }
+
+  componentDidCatch(error, info) {
+    this.setState({ isError: true })
+  }
+
+  init = async () => {
+    const theme = await this.getTheme();
+    document.body.className = `theme-${theme.name}`;
+    this.setState({theme});
+  }
+
+  handleChangeSidebar = (type) => {
+    this.setState({ sidebarType: type });
+  }
+
+  componentWillMount() {
+    eventEmitter.on('CHANGE_SIDEBAR', this.handleChangeSidebar);
+  }
+
+  render() {
+    const isAuth = this.props.user !== null;
+    if(!isAuth){
+      _init = false;
+    }
+    if(!_init &amp;&amp; isAuth) {
+      _init = true;
+      this.init();
+    }
+
+    const ApplicationSettings = this.props.applicationSettings;
+    const isNavBarNotScrollable = this.props.isNavBarNotScrollable;
+
+    if (this.state.isError) {
+      return (
+        &lt;div className="error">Neočakávaná chyba.&lt;/div>
+      );
+    }
+
+    return (
+      &lt;div className='container-fluid p-0'>
+        &lt;div className="row m-0">
+          {isAuth &amp;&amp;
+            &lt;div className={this.evaluateSidebarClassNames()}>
+              &lt;Sidebar
+                onClick={(event) => this.handleSidebarToggle(event, SIDEBAR_TYPE.COMPACT)}
+                menu={this.props.menu}
+                onMenuFilter={this.props.onMenuFilter}
+                stats={this.props.stats}
+                type={this.state.sidebarType}
+                onMenuSelect={this.handleSidebarMenuSelect}
+                sideBarToggleIcons={this.props.sideBarToggleIcons}
+              />
+            &lt;/div>
+          }
+          &lt;div className={`col p-0 ${isNavBarNotScrollable ? '':'scrollable-navbar'} ${this.state.sidebarType === SIDEBAR_TYPE.FULLSCREEN ? 'hidden' : ''}`}>
+            {isAuth &amp;&amp;
+              &lt;div className="row m-0">
+                &lt;div className="col p-0">
+                  &lt;Navigation
+                    brand={this.props.brand}
+                    onSignOut={this.props.onSignOut}
+                    onClick={(event) => this.handleSidebarToggle(event, SIDEBAR_TYPE.FULLSCREEN)}
+                    userInfo={this.props.userInfo}
+                    handleOpenSettings={this.handleOpenSettings}
+                    uzivatel={this.props.user.Uzivatel || this.props.uzivatel}
+                    manualProps={this.props.manualProps}
+                    getManual={this.props.getManual}
+                    getListManual={this.props.getListManual}
+                    navUser={this.props.navUser}
+                  />
+                &lt;/div>
+              &lt;/div>
+            }
+            &lt;div className="row m-0">
+              &lt;div className={`col p-0 ${isNavBarNotScrollable ? 'scrollable-body':''}`}>
+                {(this.props.header &amp;&amp; isAuth) &amp;&amp;
+                  &lt;div className="row m-0">
+                    &lt;div className="col p-3">
+                      {this.props.header}
+                    &lt;/div>
+                  &lt;/div>
+                }
+                &lt;div className="row m-0">
+                  &lt;div className="col p-3">
+                    {this.props.children}
+                  &lt;/div>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        {this.props.footer}
+        &lt;Settings
+          handleConfirmChangePassword={this.props.handleConfirmChangePassword}
+          isOpenSettings={this.state.isOpenSettings}
+          handleCloseSettings={this.handleCloseSettings}
+          handleConfirmSettings={this.handleConfirmSettings}
+          handleChange={this.handleChange}
+          theme={this.state.theme}
+          themes={this.props.themes}
+          filterable={this.state.filterable}
+          page={this.state.page}
+          tabsType={this.state.tabsType}
+          applicationSettings={this.state.applicationSettings}
+        >
+          {ApplicationSettings &amp;&amp; 
+            &lt;ApplicationSettings value={this.state.applicationSettings} onChange={value => this.handleChange('applicationSettings', value)} />
+          }
+        &lt;/Settings>
+        &lt;RefreshDialog
+          isOpen={this.state.isRefreshOpen} 
+        />
+      &lt;/div>
+    );
+  }
+}
+
+Container.propTypes = {
+  brand: PropTypes.element,
+  user: PropTypes.object,
+  menu: PropTypes.object.isRequired,
+  onMenuFilter: PropTypes.func,
+  stats: PropTypes.element,
+  onSignOut: PropTypes.func.isRequired,
+  theme: PropTypes.string,
+  themes: PropTypes.array.isRequired,
+  header: PropTypes.element,
+  footer: PropTypes.element,
+  userInfo: PropTypes.element,
+  uzivatel: PropTypes.object,
+  applicationSettings: PropTypes.func,
+  manual: PropTypes.element,
+  manualList: PropTypes.element,
+  handleConfirmChangePassword: PropTypes.func,
+  defaultSidebarType: PropTypes.string,
+  sideBarToggleIcons: PropTypes.object,
+  navUser: PropTypes.func,
+  isNavBarNotScrollable: PropTypes.bool,
+  onMenuSelect: PropTypes.func,
+}
+
+export default withRouter(withStorage(Container));</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Alert.html">Alert</a></li><li><a href="module-animation_Slide.html">animation/Slide</a></li><li><a href="module-buttons_Button.html">buttons/Button</a></li><li><a href="module-buttons_ButtonGroup.html">buttons/ButtonGroup</a></li><li><a href="module-buttons_DropDownButton.html">buttons/DropDownButton</a></li><li><a href="module-buttons_SplitButton.html">buttons/SplitButton</a></li><li><a href="module-ChangePassword.html">ChangePassword</a></li><li><a href="module-chart_ChartComponent.html">chart/ChartComponent</a></li><li><a href="module-chart_elements_ChartCategoryAxisComponent.html">chart/elements/ChartCategoryAxisComponent</a></li><li><a href="module-chart_elements_ChartLegendComponent.html">chart/elements/ChartLegendComponent</a></li><li><a href="module-chart_elements_ChartSeriesComponent.html">chart/elements/ChartSeriesComponent</a></li><li><a href="module-chart_elements_ChartTitleComponent.html">chart/elements/ChartTitleComponent</a></li><li><a href="module-Container.html">Container</a></li><li><a href="module-detail_Detail.html">detail/Detail</a></li><li><a href="module-detail_DetailWrapper.html">detail/DetailWrapper</a></li><li><a href="module-detail_Toolbar.html">detail/Toolbar</a></li><li><a href="module-detail_ValidationMessage.html">detail/ValidationMessage</a></li><li><a href="module-dialogs_ConfirmDialog.html">dialogs/ConfirmDialog</a></li><li><a href="module-dialogs_Dialog.html">dialogs/Dialog</a></li><li><a href="module-dialogs_DialogContent.html">dialogs/DialogContent</a></li><li><a href="module-dialogs_EmailPrompt.html">dialogs/EmailPrompt</a></li><li><a href="module-dialogs_FileContent.html">dialogs/FileContent</a></li><li><a href="module-dialogs_FileDialog.html">dialogs/FileDialog</a></li><li><a href="module-dialogs_ReportDialog.html">dialogs/ReportDialog</a></li><li><a href="module-Dropdown.html">Dropdown</a></li><li><a href="module-forms_Autocomplete.html">forms/Autocomplete</a></li><li><a href="module-forms_AutocompleteLocal.html">forms/AutocompleteLocal</a></li><li><a href="module-forms_Checkbox.html">forms/Checkbox</a></li><li><a href="module-forms_DatePicker.html">forms/DatePicker</a></li><li><a href="module-forms_DateRangePicker.html">forms/DateRangePicker</a></li><li><a href="module-forms_DateTimePicker.html">forms/DateTimePicker</a></li><li><a href="module-forms_DropDownList.html">forms/DropDownList</a></li><li><a href="module-forms_Input.html">forms/Input</a></li><li><a href="module-forms_MultiSelect.html">forms/MultiSelect</a></li><li><a href="module-forms_NumericTextBox.html">forms/NumericTextBox</a></li><li><a href="module-forms_Picker.html">forms/Picker</a></li><li><a href="module-forms_Switch.html">forms/Switch</a></li><li><a href="module-forms_Textarea.html">forms/Textarea</a></li><li><a href="module-forms_TimePicker.html">forms/TimePicker</a></li><li><a href="module-forms_Upload.html">forms/Upload</a></li><li><a href="module-graph_ArcGauage.html">graph/ArcGauage</a></li><li><a href="module-grid_Cell.html">grid/Cell</a></li><li><a href="module-grid_ColumnMenu.html">grid/ColumnMenu</a></li><li><a href="module-grid_DialogFilter.html">grid/DialogFilter</a></li><li><a href="module-grid_DialogFilterForm.html">grid/DialogFilterForm</a></li><li><a href="module-grid_DropdownFilterCell.html">grid/DropdownFilterCell</a></li><li><a href="module-grid_EditBooleanCell.html">grid/EditBooleanCell</a></li><li><a href="module-grid_EditCommandCell.html">grid/EditCommandCell</a></li><li><a href="module-grid_EditDateTimeCell.html">grid/EditDateTimeCell</a></li><li><a href="module-grid_EditDropdownCell.html">grid/EditDropdownCell</a></li><li><a href="module-grid_EditPickerCell.html">grid/EditPickerCell</a></li><li><a href="module-grid_EditTimeCell.html">grid/EditTimeCell</a></li><li><a href="module-grid_FileCell.html">grid/FileCell</a></li><li><a href="module-grid_Grid.html">grid/Grid</a></li><li><a href="module-grid_GridWrapper.html">grid/GridWrapper</a></li><li><a href="module-grid_RangeFilterCell.html">grid/RangeFilterCell</a></li><li><a href="module-grid_SaveFilterDialog.html">grid/SaveFilterDialog</a></li><li><a href="module-grid_SelectionMenu.html">grid/SelectionMenu</a></li><li><a href="module-grid_Toolbar.html">grid/Toolbar</a></li><li><a href="module-grid_TooltipCell.html">grid/TooltipCell</a></li><li><a href="module-LoadingPanel.html">LoadingPanel</a></li><li><a href="module-metabase_Dashboard.html">metabase/Dashboard</a></li><li><a href="module-navigation_Hamburger.html">navigation/Hamburger</a></li><li><a href="module-navigation_Manual.html">navigation/Manual</a></li><li><a href="module-navigation_ManualDialogList.html">navigation/ManualDialogList</a></li><li><a href="module-navigation_ManualList.html">navigation/ManualList</a></li><li><a href="module-navigation_ManualPDF.html">navigation/ManualPDF</a></li><li><a href="module-navigation_ManualWrapper.html">navigation/ManualWrapper</a></li><li><a href="module-navigation_Navigation.html">navigation/Navigation</a></li><li><a href="module-navigation_Search.html">navigation/Search</a></li><li><a href="module-navigation_User.html">navigation/User</a></li><li><a href="module-RefreshDialog.html">RefreshDialog</a></li><li><a href="module-sch_ApprovalProcessStep.html">sch/ApprovalProcessStep</a></li><li><a href="module-sch_ApprovalProcessTimeline.html">sch/ApprovalProcessTimeline</a></li><li><a href="module-scheduler_Scheduler.html">scheduler/Scheduler</a></li><li><a href="module-Settings.html">Settings</a></li><li><a href="module-sidebar_Appmenu.html">sidebar/Appmenu</a></li><li><a href="module-sidebar_Footer.html">sidebar/Footer</a></li><li><a href="module-sidebar_header_Appmenu.html">sidebar/header/Appmenu</a></li><li><a href="module-sidebar_header_Header.html">sidebar/header/Header</a></li><li><a href="module-sidebar_header_SidebarToggle.html">sidebar/header/SidebarToggle</a></li><li><a href="module-sidebar_menu_Menu.html">sidebar/menu/Menu</a></li><li><a href="module-sidebar_menu_Search.html">sidebar/menu/Search</a></li><li><a href="module-sidebar_Sidebar.html">sidebar/Sidebar</a></li><li><a href="module-sidebar_Stats.html">sidebar/Stats</a></li><li><a href="module-Tab.html">Tab</a></li><li><a href="module-Tabs.html">Tabs</a></li><li><a href="module-TabsWrapper.html">TabsWrapper</a></li><li><a href="module-TitlePanel.html">TitlePanel</a></li><li><a href="module-utils_convert.html">utils/convert</a></li><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter.html">utils/eventEmitter</a></li><li><a href="module-utils_flags.html">utils/flags</a></li><li><a href="module-utils_helper.html">utils/helper</a></li><li><a href="module-utils_logger.html">utils/logger</a></li><li><a href="module-utils_requests.html">utils/requests</a></li><li><a href="module-utils_storage.html">utils/storage</a></li><li><a href="module-ValidationAlert.html">ValidationAlert</a></li><li><a href="module-views_login_Login.html">views/login/Login</a></li><li><a href="module-views_registration_Registration.html">views/registration/Registration</a></li></ul><h3>Classes</h3><ul><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter-ExtendedEventEmitter.html">ExtendedEventEmitter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getPreprocessedMenuData-zkorenamenuvyrobinovudatovustrukturumenupouzitelnunavykreslenie">getPreprocessedMenuData - z korena menu vyrobi novu datovu strukturu menu pouzitelnu na vykreslenie</a></li><li><a href="global.html#isValidDateStr">isValidDateStr</a></li><li><a href="global.html#isValidEcv">isValidEcv</a></li><li><a href="global.html#isValidID">isValidID</a></li><li><a href="global.html#isValidMail">isValidMail</a></li><li><a href="global.html#isValidPasswordStrong">isValidPasswordStrong</a></li><li><a href="global.html#isValidPhone">isValidPhone</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Thu Jan 07 2021 13:35:30 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

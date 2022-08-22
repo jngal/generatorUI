@@ -1,0 +1,39 @@
+
+import React from 'react';
+import { GridCell } from '@progress/kendo-react-grid';
+
+export function EditCommandCell({ edit, update, abortChanges, editField }) {
+  return class extends GridCell {
+    render() {
+      const { dataItem, style } = this.props;
+      const inEdit = dataItem[editField];
+      const className = "k-command-cell " + this.props.className;
+
+      return inEdit ? (
+        <td className={className} style={style}>
+          <button
+            className="k-secondary k-button k-grid-save-command"
+            onClick={() => update(dataItem)}
+          >
+            Uložiť
+                    </button>
+          <button
+            className="k-secondary k-button k-grid-cancel-command"
+            onClick={() => abortChanges(dataItem)}
+          >
+            Zrušiť
+                    </button>
+        </td>
+      ) : (
+          <td className={className} style={style}>
+            <button
+              className="k-primary k-button k-grid-edit-command"
+              onClick={() => edit(dataItem)}
+            >
+              Upraviť
+                    </button>
+          </td>
+        );
+    }
+  }
+};

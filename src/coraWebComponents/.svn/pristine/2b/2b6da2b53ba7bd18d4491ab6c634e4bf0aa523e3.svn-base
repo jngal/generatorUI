@@ -1,0 +1,14 @@
+import * as React from 'react';
+import propTypes from 'prop-types';
+import './Footer.scss';
+
+const Footer = props =>
+  <div className={`footer ${props.compact ? "compact" : ""}`}>
+    &copy; {new Date().getFullYear()}
+  </div>;
+
+Footer.propTypes = {
+  compact: propTypes.bool.isRequired,
+}
+
+export default Footer;

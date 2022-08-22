@@ -1,0 +1,58 @@
+@import '../../variables';
+@import '../../themes';
+
+.search {
+  opacity: 0.4;
+  margin: 0 20px;
+
+  .k-textbox {
+    border-color: transparent;
+    border-radius: 0;
+    margin: 9px;
+    width: calc(#{$sidebar-width} - 31px - 40px + 14px);
+    padding: 0;
+    font-size: 0.77em;
+    letter-spacing: -0.6px;
+    @include themed() {
+      background-color: color($secondary);
+      color: color($secondary) !important;
+      border-bottom-color: color($secondary);
+    }
+    
+    &::placeholder {
+      @include themed() {
+        color: color($secondary);
+      }
+    }
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+
+  .action {
+    position: absolute;
+    font-size: 13px;
+    top: 17px;
+    right: 15px;
+
+    &:not(.k-i-zoom) {
+      cursor: pointer;
+    }
+  }
+
+  &.fullscreen {
+    margin: 0 32px;
+
+    .k-textbox {
+      font-size: 1.15em;
+      letter-spacing: -0.85px;
+      width: calc(100vw - 31px - 64px + 14px);
+    }
+
+    .action {
+      font-size: 20px;
+      right: 25px;
+    }
+  }
+}

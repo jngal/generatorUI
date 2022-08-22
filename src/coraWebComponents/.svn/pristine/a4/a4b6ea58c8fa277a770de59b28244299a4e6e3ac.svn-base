@@ -1,0 +1,581 @@
+@import "../variables";
+@import "../themes";
+
+div:not(.k-window-content) > .tabs > .card > .card-body > .tab > div > .k-widget.k-grid, .k-window-content > div > .k-widget.k-grid {
+  @include themed() {
+    border: 1px solid color($secondary);
+  }
+  &.grid-multiple {
+    tr:first-child {
+      @include themed(){
+        background-color: color($secondarymedium);
+      }
+      th {
+        padding-bottom: 0px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size:0.75rem;
+        &:first-child {
+          position: absolute;
+          height: 60px;
+          padding-top: 39px;
+          width: 65px;
+          left: -6px;
+        }
+        & > div > div {
+          right: 1px !important;
+        }
+      }
+    }
+  }
+  .k-select{
+    @include themed() {
+      background-color: color($basicwhite);
+      color: color($secondarydark);
+    }
+    .k-i-filter {
+      font-size: 0.8rem; 
+    }
+  }
+  
+  .k-header {
+    &.k-grid-toolbar {
+      @include themed() {
+        background-color: transparent;
+      }
+      .button-wrapper {
+        margin: 6px 4px;
+      }
+    }
+    .k-column-resizer {
+      cursor: col-resize;
+      display: block;
+      height: 1000%;
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      width: 0.5em;
+      touch-action: none;
+    }
+  }
+  
+  .k-grid-header { 
+    .k-grid-header-wrap {
+      margin-right: 18px;
+      border-width: 0px;
+    }
+    padding: 0px !important;
+    @include themed() {
+      background-color: color($secondarymedium) !important;
+      border-top: 1px solid color($secondarymedium);
+    }
+    input {
+      @include themed() {
+        background-color: color($basicwhite);
+      }
+    }
+    th  {
+      text-align: center;
+      @include themed(){
+        background-color: color($secondarymedium);
+        border-color: color($secondarymedium);
+      }
+    }
+    @include themed() {
+      background-color: color($basicwhite);
+      color: color($secondarydarker);
+    }
+    tr:first-child {
+      @include themed(){
+        background-color: color($secondarymedium);
+      }
+      th {
+        padding-bottom: 0px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size:0.75rem;
+      }
+    }
+    .k-filter-row{
+      th {
+        padding:8px 4px;
+        .k-filtercell {
+          .k-select {
+            width: 22px;
+            background-image: none;
+            @include themed() {
+              background-color: color($basicwhite);
+            }
+          }
+          .k-filtercell-wrapper {
+            & > .k-textbox {
+              height: 30px;
+            }
+            & > .k-input, .k-textbox {
+              font-size: 0.8rem;
+              text-align: center;
+              display: inline-block;
+            }
+            & > .k-dropdown {
+              .k-dropdown-wrap {
+                .k-input {
+                  font-size: 0.8rem;
+                  padding: 4px 0px 6px 0px;
+                  text-align: center;
+                  display: inline-block;
+                }
+              }
+              .k-dropdown-operator {
+                .k-input {
+                  display: none;
+                }
+              }
+              & + .k-filtercell-operator {
+                display: none;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .k-button.k-primary.k-button-icon{    
+    border: none;
+    background-image: none;
+    @include themed() {
+      background-color: color($secondarymedium);      
+    }    
+  }
+  .k-button.k-primary.k-button-icon.zobraz{    
+    border: none;
+    background-image: none;
+    @include themed() {
+      background-color: color($alert-warning);   
+    }
+  }
+  
+  .k-master-row {
+    @include themed() {
+      color: color($secondarydarker) !important;
+    }
+    td {
+      .button-wrapper {
+        margin: 0;
+        button {
+          width: 26px;
+          height: 26px !important;
+          position: absolute;
+          margin-top: -18px !important;
+          img {
+            //-webkit-filter: invert(100%);
+            width: 18px;
+          }
+        }
+      }
+      &.k-state-selected {
+        box-shadow: none;
+      }
+    }
+    td:not(:first-child) {
+      white-space: nowrap;
+      &.tooltip-cell div {
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
+    td.numeric, td.date {
+      text-align: center;
+    }
+    font-size: 0.85rem;
+  }
+
+  .k-grid-pager {
+    @include themed() {
+      background-color: color($basicwhite);
+    }
+    * {
+      scrollbar-width: auto;
+      @include themed() {
+        scrollbar-color: color($secondarylight) color($secondarylight);
+      }
+    }
+    .k-pager-input {
+      .k-textbox {
+        @include themed() {
+          background-color: color($basicwhite);
+          color: color($secondarydarker);
+          border-color: rgba(color($secondarydarker), 0.25);
+        }
+      }
+    }
+    .k-dropdown-wrap {
+      @include themed() {
+        background-color: color($basicwhite);
+        color: color($secondarydarker);
+        border-color: rgba(color($secondarydarker), 0.25);
+      }
+    }
+    select {
+      @include themed() {
+        background-color: color($basicwhite);
+        color: color($secondarydarker);
+        padding: 6px;
+        border: 1px solid color($secondarylight);
+      }
+    }
+    @include themed() {
+      border-color: color($secondarymedium);
+      color: color($secondarydarker);
+    }
+  }
+
+  .k-grid-content {
+    min-height: 180px;
+    max-height: calc(
+      100vh - 57px - #{$nav-height} - #{$tabs-height} - #{$toolbar-height} - (2 * #{$content-padding}) - #{$grid-thead-height} -
+        #{$grid-pager-height}
+    );
+    overflow-y: scroll;
+    @include themed() {
+      background-color: color($basicwhite) !important;
+    }
+    border-radius: 0;
+    .k-grid-table {
+      width: 100%;
+      border-color: transparent;
+      tr {
+        @include themed() {
+          background-color: color($basicwhite);
+        }
+        &:hover {
+          @include themed() {
+            box-shadow: none !important;
+          }
+          td {
+            @include themed() {
+               background-color: none !important;
+            }
+          }
+        }
+        td {
+          @include themed() {
+            border: none;
+            border-bottom: 1px solid color($secondarylight);
+          }          
+        }
+      }
+    }
+
+    // :hover farba sipky pagera
+    .k-pager-nav:hover {
+      @include themed() {
+        color: color($primary);
+      }
+    }
+  }
+
+  // farby pre sort options
+  .k-sorted {
+    .k-icon,
+    .k-sort-order {
+      @include themed() {
+        color: color($primary);
+      }
+    }
+
+    .k-i-filter,
+    .k-i-filter-clear {
+      color: inherit;
+    }
+  }
+
+  // farba checkboxu
+  .k-checkbox:checked + .k-checkbox-label::before, .k-checkbox.k-state-indeterminate + .k-checkbox-label::before {
+    box-shadow: none;
+    @include themed() {
+      border-color: color($primary);
+      background-color: color($primary);
+    }
+  }
+
+  .k-checkbox-label {
+    left: 5px;
+    width: 25px;
+    margin-top: -2px;
+    &::before {
+      width: 18px;
+      height: 18px;
+      border-width: 1px;
+      @include themed(){
+        border-color: color($secondarymedium);
+      }
+    }
+    &::after {
+      margin-left: 1px;
+      margin-top: 1px;
+    }
+  }
+
+  .k-checkbox:focus + .k-checkbox-label::before {
+    box-shadow: none;
+  }
+
+  // filter, clear filter
+  .k-dropdown .k-dropdown-wrap,
+  .k-clear-button-visible {
+    background-image: none !important;
+    border-radius: 0 !important;
+    @include themed() {
+      background-color: color($basicwhite) !important;
+    }
+  }
+
+  .k-filtercell-operator .k-dropdown + .k-clear-button-visible {
+    margin-left: 2px;
+  }
+  .k-clear-button-visible {
+    .k-icon .k-i-filter-clear {
+      display: none;
+    }
+  }
+  .k-filtercell-operator {
+    width: 22px;
+    margin-left:-2px;
+  }
+
+  .k-clear-button-visible {
+    display: none;
+    @include themed() {
+      background-color: color($primary) !important;
+      color: color($secondarylight);
+    }
+  }
+
+  .k-filtercell .k-numerictextbox .k-select {
+    display: none;
+  }
+}
+
+.k-item.k-state-selected {
+  @include themed() {
+    background-color: color($primary);
+    color: color($primarylight);
+  }
+}
+
+.k-list .k-item,
+.k-list-optionlabel {
+  padding: 0px 8px;
+  min-height: 0em;
+  line-height: 30px;
+  white-space: normal;
+}
+
+.k-list-scroller{
+  > .k-list{
+    z-index: 100 !important;
+  }
+  .k-item{
+    @include themed() {
+      background-color: color($basicwhite);
+      color: color($secondarydarker);
+    }
+  }
+}
+.k-grid tbody tr:hover, .k-grid tbody tr.k-state-hover{
+  @include themed() {
+    box-shadow: 0px 1px 3px color($secondarymedium);
+  }
+  background: none;  
+}
+
+.k-grid {
+  .k-grid-header-wrap {
+    .k-icon.k-i-more-vertical {
+      margin-right: -6px;
+      @include themed() {
+        background-color: inherit;
+        color: color($text-color);
+      }
+    }
+    .k-i-arrow-60-down {
+      @include themed() {
+        color: color($text-color);
+      }
+    }
+  }
+}
+
+//fix na správne zarovnanie stĺpcov
+.initial-columns {
+  & .k-grid-container {
+    table {
+      width: calc(100% + 15px) !important;
+    }
+  }
+}
+
+//scrollbar
+.k-grid-content::-webkit-scrollbar-track {
+  @include themed() {
+    background-color: color($basicwhite);
+  }
+}
+
+.k-grid-content::-webkit-scrollbar {
+  @include themed() {
+    background-color: color($basicwhite);
+  }
+}
+
+.k-grid-content::-webkit-scrollbar-thumb {
+  border-radius: 7px;
+  @include themed() {
+    background-color: color($secondary);
+  }
+}
+
+.k-grid-content::-webkit-scrollbar-corner {
+  @include themed() { 
+    background-color: color($basicwhite);
+  }
+}
+
+.k-grid-content::-webkit-scrollbar-button:vertical:start:decrement {
+  @include themed() {
+    background:
+      linear-gradient(120deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(240deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(0deg, color($basicwhite), 30%, rgba(0, 0, 0, 0) 31%);
+    background-color: #aab1b7;
+  }
+}
+
+.k-grid-content::-webkit-scrollbar-button:vertical:end:increment {
+  @include themed() {
+    background:
+      linear-gradient(300deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(60deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(180deg, color($basicwhite), 30%, rgba(0, 0, 0, 0) 31%);
+    background-color: #aab1b7;
+  }
+}
+
+.k-grid-content::-webkit-scrollbar-button:horizontal:end:increment {
+  @include themed() {
+    background:
+      linear-gradient(210deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(330deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(90deg, color($basicwhite), 30%, rgba(0, 0, 0, 0) 31%);
+    background-color: #aab1b7;
+  }
+}
+
+.k-grid-content::-webkit-scrollbar-button:horizontal:start:decrement {
+  @include themed() {
+    background:
+      linear-gradient(30deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(150deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(270deg, color($basicwhite), 30%, rgba(0, 0, 0, 0) 31%);
+    background-color: #aab1b7;
+  }
+}
+
+.grid-validation-alert {
+  @include themed() {
+    background: #e64444;
+    display: block;
+    padding: 10px 15px;
+    color: #fff;
+  }    
+}
+
+.k-grid {
+  -moz-user-select: none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+
+.k-grid .k-master-row {
+  &.k-state-selected {
+    td {
+      @include themed() {
+        background-color: rgba(color($primarylight), 0.5);
+      }
+    }
+    &.k-grid-content-sticky {
+      @include themed() {
+        background-color: color($primary-sticky-light);
+      }
+    }
+    td:not(.k-state-selected) {
+      @include themed() {
+        background-color: rgba(color($primary), 0.3);      
+      }
+    }
+    td:not(.k-state-selected).k-grid-content-sticky {
+      @include themed() {
+        background-color: color($primary-sticky-light);
+      }
+    }
+  }  
+  td.k-grid-content-sticky {
+    @include themed() {
+      background-color: color($basicwhite);
+    }
+  }
+  td.k-state-selected {
+    @include themed() {
+      background-color: rgba(color($primary), 0.5);
+    }
+  }
+  td.k-grid-content-sticky.k-state-selected {
+    @include themed() {
+      background-color: rgba(color($primary-sticky), 1);
+    }
+  }
+  
+  .k-state-changed {
+    outline: 1px dashed red;
+    outline-offset: -1px;
+  }
+}
+
+.k-grid th,.k-grid td {
+  vertical-align: middle !important;
+  padding: 0px 12px;
+}
+
+.k-grid-content, .k-grid-content a {
+  @include themed() {
+    background-color: color($basicwhite);
+    color: color($text-color);
+  }
+}
+
+.k-grid-columnmenu-popup {
+  @include themed() {
+    background-color: color($secondarylight);
+    color: color($text-color);
+  }
+  .k-column-list-item:hover, .k-columnmenu-item:hover {
+    @include themed() {
+      background-color: color($secondarymedium);
+      color: color($text-color);
+    }
+  }
+}
+
+/*
+.k-grid tbody tr:hover {
+  @include themed() {
+    background-color: rgba(color($primarylight), 0.1) !important;
+  }   
+}
+*/
+
+
+

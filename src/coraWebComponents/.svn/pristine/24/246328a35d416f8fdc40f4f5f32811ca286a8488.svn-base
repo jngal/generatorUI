@@ -1,0 +1,22 @@
+@import "./variables";
+@import "./themes";
+
+.title-panel {
+  height: 60px;
+  margin: -1rem -1rem 1rem -1rem;
+  @include themed() {
+    background-color: color($basicwhite);
+    box-shadow: 0px 3px 7px color($secondarymedium);
+  }
+  h4 {
+    @include themed() {
+      color: color($secondarydarker);
+    }
+    position: absolute;
+    font-weight: 600;
+    font-size: 20px;
+    margin-left: 40px;
+    margin-top: 30px;
+    transform: translateY(-50%);
+  }
+}

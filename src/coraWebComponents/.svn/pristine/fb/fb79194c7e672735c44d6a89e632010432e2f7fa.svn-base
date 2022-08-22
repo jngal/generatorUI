@@ -1,0 +1,131 @@
+@import "./variables";
+@import "./themes";
+
+#grid-toolbar,
+#detail-toolbar {
+  @include themed() {
+    background-color: color($basicwhite);
+    color:  color($secondarydarker);
+  }
+
+  & > span > div,
+  & > span > span > div {
+    display: inline-block;
+  }
+
+  .k-button {
+    box-shadow: none;
+  }
+
+  //nawstavenie farby ikony pre ukladanie
+  .k-button.k-primary:focus {
+    box-shadow: none !important;
+    span {
+      opacity: 0.85;
+    }
+  }
+
+  .split-button {
+    margin: 0px;
+    button {
+      margin: 0px;
+    }
+  }
+
+  button {
+    $toolbar-button-margin: 10px;
+    $toolbar-button-height: calc(#{$toolbar-height} - 2 * #{$toolbar-button-margin});
+    margin: {
+      left: $toolbar-button-margin;
+      top: $toolbar-button-margin;
+      bottom: $toolbar-button-margin;
+    }
+    height: $toolbar-button-height;
+    width: auto;
+    min-width: $toolbar-button-height;
+    @include themed() {
+      background-color: color($basicwhite);
+    }
+    border: 0;
+    border-radius: 2%;
+    text-transform: uppercase;
+    background-image: none !important;
+  }
+
+  .k-icon,
+  .k-button-icon {
+    @include themed() {
+      color: color($primary);
+    }
+  }
+
+  .k-image {
+    width: 2em;
+  }
+
+  .k-icon {
+    font-size: 2em;
+    margin-top: 0.03em;
+  }
+
+  .right {
+    margin-right: 3px;
+    float: right;
+  }
+
+  .left,
+  .right {
+    display: inline-block;
+  }
+
+  .left {
+    max-width: 1100px;
+  }
+
+  .right {
+    max-width: 340px;
+  }
+
+  .toolbar-panelbar {
+    position: relative;
+    top: -3px;
+    background-color: transparent;
+    border: none;
+    display: block;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    .k-item {
+      margin-left:5px;
+      display: inline-block;
+      border: none;
+    }
+    .k-animation-container {
+      display: block;
+      position: absolute;
+      background: #fff;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+    }
+    .k-button {
+      padding: 0px 9px;
+      background-color: transparent !important;
+      height: 30px;
+      margin: 5px;
+      text-transform: none;
+    }
+    .button-wrapper {
+      margin: 0px;
+    }
+    .k-state-selected, .k-header {
+      background: #f7f7f7;
+      color: #222;
+      font-weight: bold;
+      font-size: 12px;
+      box-shadow: none !important;
+      padding: 5px 5px 5px 11px;
+    }
+    .k-i-arrow-n, .k-i-arrow-s {
+      position: relative;
+      right: 0px;
+    }
+  }
+}

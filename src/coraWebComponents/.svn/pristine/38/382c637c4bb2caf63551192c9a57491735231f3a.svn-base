@@ -1,0 +1,108 @@
+import './Appmenu.scss';
+
+import * as React from 'react';
+
+import Slide from '../../animation/Slide';
+import propTypes from 'prop-types';
+import { buildUrl } from '../../utils/helper';
+
+/**
+ * App menu component
+ * @module
+ * @param {bool} compact - Is app menu compact?
+ */
+
+class Appmenu extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { show: false };
+  }
+
+  handleAppmenu = () => {
+  
+    this.setState({
+      show: true
+    });
+  }
+
+  handleCloseAppmenu = () => {
+    this.setState({
+      show: false
+    })
+  }
+  
+  handleChange(event) {
+    alert('Vybrane bolo: ' + this.state.value);
+    event.preventDefault();
+  }  
+
+  render() {    
+    const appmenu = (   
+      <div className="wrapper-scroll">  
+      <div className="info-okno-left" value={this.state.value} onChange={this.handleChange}>
+        <div className="example-1">
+          <div className="icone" value="CG1">
+            CG1
+          </div>
+          <div className="popis">
+           VISCO 3
+          </div>          
+        </div>
+        <div className="example-1">
+          <div className="icone">
+            CG2
+          </div>
+          <div className="popis">
+           DISCO
+          </div>
+        </div>
+        <div className="example-1">
+          <div className="icone">
+            CG3
+          </div>
+          <div className="popis">
+           Mob. Odpočty
+          </div>
+        </div>
+        <div className="example-1">
+          <div className="icone">
+            CG4
+          </div>
+          <div className="popis">
+           MAMP
+          </div>
+        </div>
+        <div className="example-1">
+          <div className="icone">
+            CG5
+          </div>
+          <div className="popis">
+           Nazov
+          </div>
+        </div>   
+        <div className="example-3">
+          <div className="viac-CG" onClick={this.handleLogout}>
+            Viac od CORAgeo
+          </div>
+        </div>    
+      </div>
+      </div>
+    );
+
+    return (
+      <nav className="appmenu">
+        <div className="k-i-grid" style={this.props.compact ? { display: "none" } : { display: "inline-block" }} onClick={this.handleAppmenu}>
+          skuska
+          <img alt="presentation" src={buildUrl('assets/app_icon.svg')}></img>
+        </div>
+        <Slide isOpen={this.state.show} onClose={this.handleCloseAppmenu}>{appmenu}</Slide>
+      </nav>
+    );
+  }
+}
+
+Appmenu.propTypes = {
+  compact: propTypes.bool.isRequired,
+}
+
+export default Appmenu;

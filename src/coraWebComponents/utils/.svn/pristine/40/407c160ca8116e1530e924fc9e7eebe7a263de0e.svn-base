@@ -1,0 +1,115 @@
+import moment from 'moment';
+
+/**
+ * Checks if given date string is valid.
+ * e.g., 2017-05-21T08:33:05 -> true
+ * @function isValidDateStr
+ * @param {string} str string input
+ * @returns {boolean}
+ */
+export const isValidDateStr = (str) => {
+  const date = moment(str, 'D.M.YYYY', true);
+  return date.isValid();
+}
+
+/**
+ * Checks if given string contains only numbers and it's shorter than 11 characters.
+ * e.g., 170503 -> true
+ * @function isValidDateStr
+ * @param {string} rc string input
+ * @returns {boolean}
+ */
+export const isValidRc = (rc) => {
+  return /^\d{1,10}$/.test(rc);
+}
+
+/**
+ * Checks if given string is shorter than 16 characters. 
+ * Returns empty string or error message.
+ * e.g., EA010203 -> ''
+ * @function isValidID
+ * @param {string} id identity card number
+ * @returns {string}
+ */
+export const isValidID = (id) => {
+  let errorString = '';
+
+  if (id.length > 15)
+    errorString += 'Čislo OP nesmie obsahovať viac ako 15 znakov!\n';
+
+  return errorString;
+}
+
+/**
+ * Checks if given string is valid vehicle registration number.
+ * Returns empty string or error message.
+ * e.g., TN221BS -> ''
+ * @function isValidEcv
+ * @param {string} ecv vehicle registration number
+ * @returns {string}
+ */
+export const isValidEcv = (ecv) => {
+  let errorString = '';
+
+  if (ecv.length < 3)
+    errorString += 'EČV musí obsahovať viac ako 3 znaky!\n';
+
+  if (ecv.length > 20)
+    errorString += 'EČV musí obsahovať menej ako 20 znakov!\n';
+
+  if ((/[^\w]|_/g).test(ecv))
+    errorString += 'EČV môže obsahovať len písmena od A-Z a čísla od 0-9\n';
+
+  return errorString;
+}
+
+/**
+ * Checks if given string is valid email address.
+ * Returns empty string or error message.
+ * e.g., google.google@gmail.com -> ''
+ * @function isValidMail
+ * @param {string} mail email address
+ * @returns {string}
+ */
+export const isValidMail = (mail) => {
+  let errorString = '';
+
+  if (!(/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/g).test(mail))
+    errorString += 'Nesprávny format mailovej adresy!';
+
+  return errorString;
+}
+
+/**
+ * Checks if given string is valid phone number.
+ * Returns empty string or error message.
+ * e.g., +421911123123 -> ''
+ * @function isValidPhone
+ * @param {string} phone phone number
+ * @returns {string}
+ */
+export const isValidPhone = (phone) => {
+  let errorString = '';
+
+  if (!(/([+]\d{3}\s\d{3}\s\d{3}\s\d{3}|[0]{2}\d{3}\s\d{3}\s\d{3}\s\d{3})|(^\d{4}\s\d{3}\s\d{3}$)|(^\d{10}$)|([+]\d{12}|[0]{2}\d{12})|([+]\d{2}\s\d{3}\s\d{3}\s\d{4}|[0]{2}\d{2}\s\d{3}\s\d{3}\s\d{4})|([+]\d{2}\s\d{2}\s\d{4}\s\d{4}|[0]{2}\d{2}\s\d{2}\s\d{4}\s\d{4})|([+]\d{3}\s\d{2}.\d{3}\s\d{2}\s\d{2}|[0]{2}\d{3}\s\d{2}.\d{3}\s\d{2}\s\d{2})|([0]\d{2}.\d{3}\s\d{2}\s\d{2})|([+]\d{3}\s\d{2}.\d{7}|[0]{2}\d{3}\s\d{2}.\d{7})|([0]\d{2}.\d{7}$)/g).test(phone))
+    errorString += 'Nesprávny format telefónu!';
+
+  return errorString;
+}
+
+/**
+ * Checks if given string is strong password(at least 6 characters, letters and numbers required).
+ * Returns empty string or error message.
+ * e.g., password123 -> ''
+ * @function isValidPasswordStrong
+ * @param {string} psw password
+ * @returns {string}
+ */
+export const isValidPasswordStrong = (psw) => {
+  let errorString = '';
+
+  if (!(/(?=.*[a-zA-Z].*)(?=.*[0-9].*)^[a-zA-Z0-9+*/-]{6,}$/g).test(psw))
+    errorString += 'Heslo musí mať aspoň 6 znakov a musí obsahovat písmená a číslice!\n';
+
+  return errorString;
+}

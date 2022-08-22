@@ -1,0 +1,72 @@
+@import './variables';
+@import './themes';
+
+.alert-container {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  max-width: 500px;
+  text-align: left;
+  z-index: 51;   
+
+//pre chybove hlasky 
+  .alert {
+    margin: 20px;
+    border: none;
+    border-radius: 0;
+
+    @include themed() {
+      border: 1px solid color($secondarydarker);
+      background-color: color($basicwhite);
+      color: color($secondarydarker);
+    }
+      .close{
+        @include themed() {
+          color: color($secondarydarker);
+        }
+      }    
+  }
+
+  .alert-error {
+    @include themed() {
+      border: 1px solid color($alert-error-text);
+      background-color: color($alert-error);
+      color: color($alert-error-text);
+    }
+    .close{
+      @include themed() {
+        color: color($alert-error-text);
+      }
+    }    
+  }
+
+  .alert-ok {
+    @include themed() {
+      border: 1px solid color($alert-ok-text);
+      background-color: color($alert-ok);
+      color: color($alert-ok-text);
+    }
+    .close{
+      @include themed() {
+        color: color($alert-ok-text);
+      }
+    }    
+  }
+
+  .alert-warning {
+    @include themed() {
+      border: 1px solid color($alert-warning-text);
+      background-color: color($alert-warning);
+      color: color($alert-warning-text);
+    }
+    .close{
+      @include themed() {
+        color: color($alert-warning-text);
+      }
+    }    
+  }
+
+  .alert {
+    margin-bottom: 0;
+  }
+}

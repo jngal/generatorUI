@@ -1,0 +1,121 @@
+@import "../../variables";
+@import "../../themes";
+
+.appmenu {
+  height: 100%;
+  z-index: 99999;
+  
+  
+  .wrapper-scroll {
+    z-index: 99999;
+    padding-right: 2px;
+    padding-bottom: 2px;  
+    margin-top: 1px;  
+    @include themed() {
+      background-color: color($basicwhite);
+      color: color($primarylight);
+      border-right: 1px solid color($secondary);
+      border-bottom: 1px solid color($secondary);
+        
+    }
+
+    .info-okno-left::-webkit-scrollbar {
+      width: 8px;
+      border: none;
+    }
+
+    .info-okno-left::-webkit-scrollbar-track {
+      
+      @include themed() {
+        background-color: color($primary-light);
+      }
+    }
+
+    .info-okno-left::-webkit-scrollbar-thumb {
+      border-radius: 0px;
+      @include themed() {
+        background-color: color($secondary);
+      }
+      border: none;
+    }
+    .info-okno-left::-webkit-scrollbar-thumb:hover {
+      @include themed() {
+        background-color: color($secondary);
+      }
+      border: none;
+    }
+
+    .info-okno-left {
+      overflow-y: scroll !important;
+      width: 100%;
+      height: 200px;
+      display: block;
+      padding-top: 0px !important;
+      text-align: center;
+      cursor: pointer;
+      overflow: hidden;      
+      .example-1 {
+        margin: 0 auto;
+        float: left;
+        width: 33%;
+        .popis {          
+          font-weight: bold;
+          cursor: pointer;
+          font-size: 12px;
+          text-decoration: none;
+          display: inline;
+          text-align: center;
+        }
+
+        .icone {
+          margin: 12px auto;
+          font-weight: bold;
+          border-radius: 100%;
+          width: 50px;
+          text-align: center;
+          font-size: 18px;
+          line-height: 51px;
+          height: 50px;
+          box-sizing: border-box;
+          transition: 0.3s;
+          @include themed() {
+            background: color($primary);
+            color: color($secondarylight);
+          }
+          &:hover {
+            @include themed() {
+              background-color: color($secondarydarker);
+            }
+          }
+        }
+      }
+      .example-3 {
+        width: 100%;
+        float: left;
+        text-align: center;        
+      }
+      .viac-CG {
+        font-weight: bold;        
+        cursor: pointer;
+        font-size: 12px;        
+        padding: 5px;
+        margin: 10px;
+        width: 50%;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        border-radius: 5%;
+        transition: 0.3s;
+        @include themed() {          
+          background-color: color($primarylight);
+          color: color($secondarylight);          
+        }
+        &:hover {
+          @include themed() {
+            background-color: color($secondarydarker);
+          }
+        }
+      }
+    }
+  }
+}

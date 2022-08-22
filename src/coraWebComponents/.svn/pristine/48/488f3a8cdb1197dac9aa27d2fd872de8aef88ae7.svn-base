@@ -1,0 +1,71 @@
+@import '../variables';
+@import '../themes';
+
+.k-button.k-primary{
+  @include themed() {
+    background-color: color($primary);
+    border-color: color($secondarydarker); 
+  }
+}
+.k-button.k-primary:hover{
+  opacity: 0.8;
+  @include themed() {
+    background-color: color($primary); 
+    border-color: color($secondarydarker);
+  }
+}
+
+.k-checkbox:checked+.k-checkbox-label::before {
+  @include themed() {
+    background-color: color($primary);
+    border-color: color($primary);
+  }
+}
+ 
+.k-checkbox.k-state-indeterminate+.k-checkbox-label::after {
+  @include themed() {
+    color: color($basicwhite);
+    background-color: color($basicwhite);
+    width: 9px;
+    height: 2px;
+    -webkit-transform: scale(1) translate(-50%, -50%);
+    transform: scale(1) translate(-50%, -50%);
+    top: 50%;
+    left: 8px;
+  }
+}
+
+.k-checkbox.k-state-indeterminate+.k-checkbox-label::before {
+  @include themed() {
+    color: color($basicwhite);
+    background-color: color($primary);
+  }
+}
+
+.k-checkbox-label::before {
+  @include themed() {
+    border-color: color($secondarymedium);
+    background-color: color($basicwhite);
+  }
+}
+
+.k-checkbox:focus+.k-checkbox-label::before {
+  @include themed(){ 
+    border-color: rgba(color($secondarydarker), 0.2);
+  }
+}
+
+.k-checkbox-label:hover {
+  cursor: pointer;
+}
+
+.k-checkbox-label:after{
+  border-color: #000000;
+}
+.k-checkbox-label:hover::after{
+  color: #000000;
+  border-color: #000000;
+}
+.k-checkbox:hover{
+  opacity:0.5;
+}

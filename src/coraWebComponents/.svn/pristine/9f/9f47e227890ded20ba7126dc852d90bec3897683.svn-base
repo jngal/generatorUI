@@ -1,0 +1,83 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { TabStrip, TabStripTab } from '@progress/kendo-react-layout';
+import Detail from './detail/DetailWrapper';
+
+class TabStripComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      selected: 0
+    }
+  }
+
+  handleSelect = (e) => {
+    this.setState({ selected: e.selected })
+  }
+
+  buildTabStrip = (x) => {
+    switch (x.type) {
+      case "text": {
+        return (
+          <TabStripTab
+            title={x.title}
+            disabled={x.disabled}
+          >
+            <div>
+              <p>
+                {x.text}
+              </p>
+            </div>
+          </TabStripTab>
+        );
+      }
+      case "detail": {
+        return (
+          <TabStripTab
+            title={x.title}
+            disabled={x.disabled}
+          >
+            <Detail
+              toolbarHidden={true}
+              onSubmit={x.onSubmit}
+              onUpdate={x.onUpdate}
+              onCreate={x.onCreate}
+              onChange={x.onChange}
+              onBlur={x.onBlur}
+              schema={x.schema}
+              ui={x.ui}
+              data={x.data}
+              parentProps={x.props}
+              isLoading={x.isLoading}
+              primaryField={x.primaryField}
+              onGet={x.props.getRequest}
+              allData={x.allData}
+            />
+          </TabStripTab>
+        );
+      }
+      default:
+        return (
+          <TabStripTab
+            title={x.title}
+            disabled={x.disabled}
+          />
+        );
+    }
+  }
+
+  render() {
+    return (
+      <TabStrip selected={this.state.selected} onSelect={this.handleSelect}>
+        {this.props.schema.map(x => this.buildTabStrip(x))}
+      </TabStrip>
+    );
+  }
+}
+
+TabStripComponent.propTypes = {
+
+}
+
+export default TabStripComponent;

@@ -1,0 +1,71 @@
+import * as React from 'react';
+import { Tooltip } from '@progress/kendo-react-tooltip';
+import PropTypes from 'prop-types';
+import './Stats.scss';
+
+/**
+ * Stats component
+ * @module
+ * @param {object} prehlad - Prehlad
+ */
+
+const Stats = props => (
+  <div className="stats">
+    <Tooltip anchorElement="target" position="right">
+      <table className="table-sm">
+        <tbody>
+          <tr>
+            <td>
+              <small>Záznamy</small>
+            </td>
+            <td>
+              <small title="nevybavených/pridelených">{props.prehlad.ZaznamyNevybavene}/{props.prehlad.ZaznamyPridelene}</small>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <small>Na vedomie</small>
+            </td>
+            <td>
+              <small title="neprečítaných/pridelených"><span className={props.prehlad.NaVedomieNeprecitane > 0 ? "warning" : ""}>{props.prehlad.NaVedomieNeprecitane}</span>/{props.prehlad.NaVedomiePridelene}</small>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <small>V spise</small>
+            </td>
+            <td>
+              <small title="nezaradené/zaradené">{props.prehlad.VSpiseNezaradene}/{props.prehlad.VSpiseZaradene}</small>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <small>Spisy</small>
+            </td>
+            <td>
+              <small title="aktuál./uzatv./reg.str.">{props.prehlad.SpisyAktualne}/{props.prehlad.SpisyUzavrete}/{props.prehlad.SpisyRegStred}</small>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <small>Spisy aktuálne</small>
+            </td>
+            <td>
+              <small title="nevybavených/pridelených">{props.prehlad.SpisyAktNevybavene}/{props.prehlad.SpisyAktPridelene}</small>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </Tooltip>
+  </div>
+);
+
+Stats.propTypes = {
+  prehlad: PropTypes.object.isRequired
+}
+
+export default Stats;

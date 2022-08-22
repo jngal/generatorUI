@@ -1,0 +1,21 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import './TitlePanel.scss';
+
+
+class TitlePanel extends React.Component {
+  render(){
+    return (
+      <div className="title-panel">
+        <h4>{this.props.title}</h4>
+      </div>
+    )
+  }
+}
+
+TitlePanel.propTypes = {
+  title: PropTypes.string
+};
+
+export default TitlePanel;

@@ -1,0 +1,58 @@
+@import "../variables";
+@import "../themes";
+
+.nav-search {
+  display: none;
+  position: absolute;
+  right: 0;
+  width: auto;
+  height: 100%;
+  float: right;
+  margin-right: $nav-user-width;
+
+  .k-form-field {
+    margin-bottom: 0;
+  }
+
+  .k-textbox {
+    $nav-search-input-height: 30px;
+    margin: calc((#{$nav-height} - #{$nav-search-input-height}) / 2);
+    width: 188px;
+    height: $nav-search-input-height;
+    border-radius: 3px;
+    @include themed() {
+      background-color: color($primary);
+      border: 1px solid color($primarylight);
+      color: color($primarylight) !important;
+    }
+
+    &::placeholder {
+      @include themed() {
+        color: color($primarylight);
+      }
+    }
+  }
+
+  .k-icon.k-i-zoom {
+    display: none;
+    width: $sidebar-header-height;
+    text-align: center;
+    margin: 0 auto;
+    line-height: calc(#{$sidebar-header-height + 3px});
+    font-size: 24px;
+  }
+}
+
+@media only screen and (max-width: $breakpoint-md) {
+  .nav-search {
+    margin-right: 109px;
+
+    .k-form-field {
+      display: none;
+    }
+
+    .k-icon.k-i-zoom {
+      display: inherit;
+    }
+  }
+}

@@ -1,0 +1,49 @@
+import React from 'react';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
+
+export class EditBooleanCell extends React.Component {
+  localizedData = [
+    { text: 'áno', value: true },
+    { text: 'nie', value: false },
+  ];
+
+  handleChange = (e) => {
+    this.props.onChange({
+      dataItem: this.props.dataItem,
+      field: this.props.field,
+      syntheticEvent: e.syntheticEvent,
+      value: e.target.value.value
+    });
+  }
+
+  render() {
+    const { dataItem, field } = this.props;
+    const dataValue = dataItem[field] === null ? '' : dataItem[field];
+    const className = dataItem.inEdit ? "k-grid-edit-cell " : "" + this.props.className;
+
+    const td = (
+      <td colSpan={this.props.colSpan}
+          className={className} 
+          style={this.props.style} 
+          role="gridcell"
+          aria-colindex={(this.props.columnIndex || 0) - (this.props.level || 0) + 1} 
+          aria-selected={false}
+          tabIndex="0"
+      >
+        {(dataItem.inEdit === true || dataItem.inEdit === field)  ? (
+          <DropDownList
+            style={{ width: "100px" }}
+            onChange={this.handleChange}
+            value={this.localizedData.find(c => c.value === dataValue)}
+            data={this.localizedData}
+            textField="text"
+          />
+        ) : (
+            dataItem[field] ? 'áno' : 'nie'
+          )}
+      </td>
+    );
+
+    return this.props.render ? this.props.render.call(undefined, td, this.props): td;
+  }
+}

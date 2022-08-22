@@ -1,0 +1,170 @@
+import * as React from 'react';
+
+import Dialog from './dialogs/Dialog';
+import ExtendedDropDownList from './forms/DropDownList';
+import withStorage from './utils/withStorage';
+import eventEmitter from './utils/eventEmitter';
+import PropTypes from 'prop-types';
+import { getClientVersion } from './utils/helper';
+import ChangePassword from './ChangePassword';
+import Button from '../coraWebComponents/buttons/Button';
+
+export const TABS_TYPE = [
+  { name: 'štandardný', id: 0 },
+  { name: 'zoznam a detail', id: 1 },
+  { name: 'detail a zoznam', id: 2 },
+  { name: 'vedľa seba', id: 3 }
+];
+export const PAGE = [
+  { skip: 0, take: 5 },
+  { skip: 0, take: 10 },
+  { skip: 0, take: 25 },
+  { skip: 0, take: 50 },
+  { skip: 0, take: 100 },
+];
+const THEME = [
+  { name: "default" },
+];
+export const FILTERABLE = [
+  { name: "nie", filterable: true },
+  { name: "áno", filterable: false },
+];
+
+/**
+ * Settings component
+ * @module
+ * @param {func} handleConfirmChangePassword - Handle confirm change password function
+ * @param {bool} isOpenSettings - Is settings dialog open? 
+ * @param {func} handleCloseSettings - Handle close settings function
+ * @param {func} handleChange - Handle change function
+ * @param {object} theme - Current theme
+ * @param {array} themes - Themes
+ * @param {object} filterable - Filterable
+ * @param {object} applicationSettings - Application settings
+ * @param {object} page - Number of entries on one page
+ * @param {object} tabsType - Default tab type
+ * @param {element} children - Children element
+ */
+class Settings extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpenChangePassword: false
+    }
+  }
+
+  handleConfirmSettings = () => {
+    this.props.storage.setTabsType(this.props.tabsType);
+    this.props.storage.setPage(this.props.page);
+    this.props.storage.setFilterable(this.props.filterable.filterable);
+    this.props.storage.setTheme(this.props.theme);
+    this.props.storage.setApplicationSettings(this.props.applicationSettings);
+    document.body.className = `theme-${this.props.theme.name}`;
+    eventEmitter.changeTabsType(this.props.tabsType);
+    eventEmitter.changePage(this.props.page);
+    eventEmitter.changeFilterable(this.props.filterable);
+    this.props.handleCloseSettings();
+  }
+
+  openChangePasswordDialog = () => {
+    this.setState({isOpenChangePassword: true});    
+  }
+
+  handleCloseChangePassword = () => {
+    this.setState({isOpenChangePassword: false});    
+  }
+
+  render() {
+    return (
+      <>
+        <Dialog
+          isOpen={this.props.isOpenSettings}
+          onClose={this.props.handleCloseSettings}
+          onConfirm={this.handleConfirmSettings}
+          title="Nastavenia"
+        >
+          <div className="k-content k-window-content k-dialog-content settings">
+            <div className="k-form-inline">
+              <div className="k-form-field">
+                <span className="title">Téma</span>
+                <ExtendedDropDownList
+                  name="theme"
+                  data={this.props.themes || THEME}
+                  textField="name"
+                  onChange={this.props.handleChange}
+                  value={this.props.theme}
+                />
+              </div>
+              <div className="k-form-field">
+                <span className="title">Počet záznamov na strane</span>
+                <ExtendedDropDownList
+                  name={"page"}
+                  data={PAGE}
+                  textField="take"
+                  onChange={this.props.handleChange}
+                  value={this.props.page}
+                />
+              </div>
+              <div className="k-form-field">
+                <span className="title">Predvolené zobrazenie</span>
+                <ExtendedDropDownList
+                  name={"tabsType"}
+                  data={TABS_TYPE}
+                  textField="name"
+                  onChange={this.props.handleChange}
+                  value={this.props.tabsType}
+                />
+              </div>
+              <div className="k-form-field">
+                <span className="title">Kompaktný mód</span>
+                <ExtendedDropDownList
+                  name={"filterable"}
+                  data={FILTERABLE}
+                  textField="name"
+                  onChange={this.props.handleChange}
+                  value={this.props.filterable}
+                />
+              </div>              
+              {this.props.children}
+              {this.props.handleConfirmChangePassword}
+                <div className="k-form-field">
+                  <span className="title">Zmena hesla</span>
+                  <Button
+                      label="Zmeniť heslo"
+                      onClick= {this.openChangePasswordDialog}                   
+                  />
+                </div>
+              
+              <div style={{float: 'right', paddingRight: 10}}>
+                {`Verzia: ${getClientVersion()}`}
+              </div>
+              
+            </div>
+          </div>
+        </Dialog>
+        <ChangePassword
+          isOpenChangePassword={this.state.isOpenChangePassword}
+          handleConfirmChangePassword={this.props.handleConfirmChangePassword}
+          handleClose={this.handleCloseChangePassword}
+        /> 
+      </>
+    );
+  }
+}
+
+Settings.propTypes = {
+  handleConfirmChangePassword: PropTypes.func,
+  isOpenSettings: PropTypes.bool.isRequired,
+  handleCloseSettings: PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  theme: PropTypes.object.isRequired,
+  themes: PropTypes.array.isRequired,
+  filterable: PropTypes.object,
+  applicationSettings: PropTypes.object,
+  page: PropTypes.object,
+  tabsType: PropTypes.object,
+  children: PropTypes.element,
+}
+
+export default withStorage(Settings);

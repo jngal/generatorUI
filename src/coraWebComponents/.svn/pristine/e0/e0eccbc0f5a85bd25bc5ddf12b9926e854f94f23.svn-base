@@ -1,0 +1,8 @@
+@import "./variables";
+@import "./themes";
+
+.error-password {
+  margin: 5px auto 10px;
+  text-align: center;  
+  color: $alert-warning-text;
+}

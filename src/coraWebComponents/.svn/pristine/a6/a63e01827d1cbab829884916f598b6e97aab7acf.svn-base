@@ -1,0 +1,34 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { ArcGauge } from '@progress/kendo-react-gauges';
+import { Tooltip } from '@progress/kendo-react-tooltip';
+import "./ArcGauge.scss";
+
+class ArcGaugeComponent extends React.Component {
+  render() {
+    return (
+      <Tooltip anchorElement="target" position="top" openDelay={1}>
+        <div className="wrapper" title={this.props.title}>
+            <ArcGauge
+              colors={this.props.colors}
+              style={this.props.style}
+              value={this.props.value}
+              arcCenterRender={this.props.arcCenterRender}
+            />
+            <center>{this.props.underText}</center>
+        </div>
+      </Tooltip>
+    );
+  }
+}
+
+ArcGaugeComponent.propTypes = {
+  colors: PropTypes.array,
+  style: PropTypes.object,
+  value: PropTypes.number,
+  arcCenterRender: PropTypes.func,
+  title: PropTypes.string,
+  underText: PropTypes.element,
+}
+
+export default ArcGaugeComponent;

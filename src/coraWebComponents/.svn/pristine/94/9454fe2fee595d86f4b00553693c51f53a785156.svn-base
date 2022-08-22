@@ -1,0 +1,96 @@
+@import "../variables";
+
+#menu {  
+    min-height: 348px;
+    width: 100%;
+    min-width: $sidebar-width;
+    background-color: $grey-color;
+    color: $grey-color;
+    height: calc(100vh - #{$brand-height} - #{$stats-height} - #{$copy-height});
+    overflow-y: scroll;
+    margin-top: 16px;
+    padding-bottom: 16px;
+
+    .search {
+      .k-textbox {
+        background-color: $grey-color;
+        color: $grey-color;
+        border-color: $grey-color;
+        width: 100%;
+        &::placeholder {
+         color: $grey-color ; 
+        }
+      }
+    }
+    
+    &.compact {
+      div[role="tree"] {
+        display: none;
+      }
+
+      .search {
+        display: none;
+      }
+    }
+
+    .k-icon {
+        color: inherit;
+    }
+
+    .k-panelbar {
+        border: 0 !important;
+        
+        // odstranenie ciary medzi polozkami menu
+        &>.k-item+.k-item {
+            border-top-width: 0px;
+        }
+
+        // podciarkovanie polozky menu s ukazovatelom
+        .k-link:hover {
+            cursor: pointer;
+            color: $grey-color;
+            background-color: $menudark;
+        }
+
+        .k-icon {
+            margin-right: 7px;
+        }
+    }
+
+    // odstranenie radiusu okolo poloziek menu
+    .k-animation-container.k-animation-container-relative {
+        border-radius: 0;
+    }
+
+    // odstranenie tiena okolo polozky pri kliknuti na nu
+    .k-state-focused {
+        box-shadow: none;
+    }
+
+    // prefarbenie neaktivnych poloziek menu
+    div[class*="k-item"]
+    > span[class*="k-link"] {
+        background-color: $menudark;
+        color: $grey-color;
+        width: 265px;
+    }
+
+    // prefarbenie rozbaleneho menu
+    div[class*="k-state-expanded"] {
+        // prefarbenie aktivnej polozky
+        & span[class*="k-state-selected"] {
+            background-color: $menudark ;
+            color: $grey-color ;
+        }
+
+        // prefarbenie potomkov rozbaleneho menu
+        & .k-link {
+            background-color: $menudark !important;
+            color: $grey-color !important;
+
+            &:hover {
+              background-color: $menudark !important;
+            }
+        }
+    }
+}

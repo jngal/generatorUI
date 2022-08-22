@@ -1,0 +1,26 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { ChartCategoryAxis, ChartCategoryAxisItem } from '@progress/kendo-react-charts';
+
+
+class ChartCategoryAxisComponent extends React.Component {
+  render() {
+    return (
+      <ChartCategoryAxis>
+        <ChartCategoryAxisItem 
+          categories={this.props.categoryAxisProps.categories}
+          title={this.props.categoryAxisProps.title}
+        />
+      </ChartCategoryAxis>
+    )
+  }
+}
+
+ChartCategoryAxisComponent.propTypes = {
+  categoryAxisProps: PropTypes.shape({
+    categories: PropTypes.array,
+    title: PropTypes.object,
+  }),
+}
+
+export default ChartCategoryAxisComponent;

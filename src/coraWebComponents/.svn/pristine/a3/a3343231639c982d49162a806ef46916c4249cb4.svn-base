@@ -1,0 +1,595 @@
+import './Detail.scss';
+
+import DatePicker from '../forms/DatePicker';
+import DropDownList from '../forms/DropDownList';
+import Input from '../forms/Input';
+import LoadingPanel from '../LoadingPanel';
+import NumericTextBox from '../forms/NumericTextBox';
+import Picker from '../forms/Picker';
+import AutocompleteComponent from '../forms/Autocomplete';
+import MultiSelect from '../forms/MultiSelect';
+import PropTypes from 'prop-types';
+import React from 'react';
+import Switch from '../forms/Switch';
+import Textarea from '../forms/Textarea';
+import TimePicker from '../forms/TimePicker';
+import Toolbar from './Toolbar';
+import Upload from '../forms/Upload';
+import ValidationMessage from './ValidationMessage';
+import ValidationAlert from '../ValidationAlert';
+import FileContent from '../dialogs/FileContent';
+import withRequests from '../utils/withRequests';
+
+/**
+ * @typedef {Object} detailSchema
+ * @property {string} field - Unique field identifier
+ * @property {string} title - Field name
+ * @property {string} type - Field type - "string", "boolean", "enum", "date", "time", "text", "numeric", "container", "files", "password"
+ * @property {bool} required - Required
+ * @property {bool} disabled - Readonly
+ * @property {bool} autofocus - Show cursor in field?
+ * @property {number} tabIndex - Index of the tab
+ * @property {string} defaultValue - Default value
+ * @property {string} validationMessage - Validation Message
+ * @property {string} tooltip - Tooltip over the column
+ * @property {bool} recommended - Recommended
+ * @property {element} customComponent - Component displayed after the field.
+ * @param {bool} validationIcon - Show validation icon?
+ */
+
+/**
+ * Detail component
+ * @module
+ * @param {func} onSubmit - On form submit function
+ * @param {detailSchema[]} schema - Schema 
+ * @param {object} data - Data
+ * @param {func} onChange - On field change function 
+ * @param {func} onBlur - On field blur function
+ * @param {func} handleSubmit - Handle sumbit function  
+ * @param {func} handleBlur - Invokes on field blur, function
+ * @param {func} getValue - Get field value, function
+ * @param {func} onUpload - On file upload function 
+ * @param {object} parentProps - Parent props 
+ * @param {bool} disabled - Read only detail 
+ * @param {bool} isLoading - Is loading 
+ * @param {array} ui - Custom schema
+ * @param {element} toolbarActions - Toolbar actions
+ * @param {string} primaryField - Primary field 
+ * @param {bool} toolbarHidden - Toolbar hidden
+ * @param {bool} autofocus - Show cursor in field?
+ * @param {func} next - Switches to the next entry function
+ * @param {func} previous - Switches to the previous entry function
+ * @param {bool} disabledNext - Is next entry disabled? 
+ * @param {bool} disabledPrevious - Is previous entry disabled? 
+ * @param {element} currentEl - Current element
+ * @param {func} onBack - Function invoked after click on back arrow
+ * @param {object} initFilter - Init filter
+ * @param {object} fixedFilter - Fixed filter
+ * @param {func} onAdd - On entry add function
+ * @param {bool} isPicker - Is field picker
+ * @param {bool} hiddenBack - Hidden back arrow in detail toolbar
+ * @param {func} applyFilter - Apply filter function  
+ * @param {string} title - Detail title  
+ * @param {array} pages - Pages  
+ * @param {bool} hiddenSave - Hidden save button in detail toolbar 
+ * @param {bool} sidebarHorizontal - Should sidebar be horizontal?
+ */
+
+class Detail extends React.Component {
+  constructor(props) {
+    super(props);
+
+    let expandedPageIndex = 0;
+    if (props.pages) {
+      expandedPageIndex = props.pages.findIndex(page => page.active) + 1;
+    }
+
+    this.state = {
+      expandedPageIndex,
+    }
+  }
+
+  handleClick = (event, pageIndex) => {
+    this.setState({
+      expandedPageIndex: this.state.expandedPageIndex === pageIndex ? 0 : pageIndex
+    });
+  }
+
+  buildInput = x => {
+    switch (x.type) {
+      case 'files':
+        return (
+          <Upload
+            name={x.field}
+            onChange={this.props.onChange}
+            onUpload={this.props.onUpload}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            url={x.url}
+            restrictions={{
+              allowedExtensions: x.restrictions != null ? x.restrictions : []
+            }}
+            data={x.data}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+            autoUpload={x.autoUpload}
+            multiple={x.multiple}
+            requiredMaximumSize={x.requiredMaximumSize}
+          />
+        );
+
+      case 'boolean':
+        return (
+          <Switch
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            onLabel={x.onLabel}
+            offLabel={x.offLabel}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+          />
+        );
+
+      case 'enum':
+        return (
+          <DropDownList
+            name={x.field}
+            data={this.props.parentProps[x.dataField] ? this.props.parentProps[x.dataField].data : []}
+            textField={x.textField}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'date':
+        return (
+          <DatePicker
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            min={x.min}
+            max={x.max}
+            format={x.format}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'time':
+        return (
+          <TimePicker
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'numeric':
+        return (
+          <NumericTextBox
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            autofocus={x.autofocus}
+            max={x.max}
+            min={x.min}
+            format={x.format}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'container':
+        return (
+          <Picker
+            textField={x.textField}
+            valueField={x.valueField}
+            onChange={this.props.parentProps[x.onChange]}
+            onSubmit={this.props.parentProps[x.onSubmit]}
+            data={this.props.parentProps[x.data] ? this.props.parentProps[x.data].data : []}
+            isLoading={this.props.parentProps[x.data] ? this.props.parentProps[x.data].isLoading : false}
+            onSelect={this.props.onChange}
+            selected={this.props.getValue(x.field)}
+            schema={x.schema}
+            total={this.props.parentProps[x.data] ? this.props.parentProps[x.data].total : 0}
+            disabled={x.disabled || this.props.disabled}
+            name={x.field}
+            primaryField={x.primaryField}
+            title={x.title}
+            initFilter={x.initFilter}
+            fixedFilter={x.fixedFilter}
+            autofocus={x.autofocus}
+            detail={x.detail}
+            onAdd={this.props.parentProps[x.onAdd]}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            placeholder={"Zvoľte požadovanú hodnotu"}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'text':
+        return (
+          <Textarea
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            title={x.title}
+            autofocus={x.autofocus}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            minLength={x.minLength}
+            maxLength={x.maxLength}
+            onBlur={(e) => this.props.handleBlur(x)}
+            defaultExpanded={x.defaultExpanded}
+            readOnly={x.readOnly}
+          />
+        );
+
+      case 'autocomplete':
+        return (
+          <AutocompleteComponent
+            name={x.field}
+            data={this.props.parentProps[x.dataField] ? this.props.parentProps[x.dataField].data : []}
+            textField={x.textField}
+            onSelect={this.props.parentProps[x.onSelect]}
+            selected={this.props.getValue(x.field)}
+            disabled={x.disabled}
+            onChange={this.props.parentProps[x.onChange]}
+            ref={`${x.field}_ref`}
+            primaryField={x.primaryField}
+            tabIndex={x.tabIndex}
+            isLoading={this.props.parentProps[x.data] ? this.props.parentProps[x.data].isLoading : false}
+            onBlur={(e) => this.props.handleBlur(x)}
+            valueField={x.valueField}
+          />
+        );
+
+      case 'multi':
+        return (
+          <MultiSelect
+            name={x.field}
+            data={this.props.parentProps[x.dataField].data}
+            textField={x.textField}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled}
+            onChange={this.props.onChange}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+            onFilterChange={x.onFilterChange}
+          />
+        );
+      
+      case 'file':
+        return (
+          <FileContent
+            requests={this.props.requests}
+            name={x.name || this.props.data[x.nameField]}
+            url={x.url.replace('{id}', this.props.data[x.idField])}
+            mimeType={x.mimeType || this.props.data[x.mimeTypeField]}
+            id={this.props.data[x.idField]}
+            hideButton={x.hideButton}
+            imgWidth={x.imgWidth}
+            pdfWidth={x.pdfWidth}
+            pdfHeight={x.pdfHeight}
+          />
+        );
+
+      case 'string':
+      case 'password':
+      default:
+        return (
+          <Input
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            autofocus={x.autofocus}
+            minLength={x.minLength}
+            maxLength={x.maxLength}
+            pattern={x.pattern}
+            validationMessage={x.validationMessage}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            type={(x.type === 'password' || x.type === "url") ? x.type : null}
+            onBlur={(e) => this.props.handleBlur(x)}
+            copyable={x.copyable}
+          />
+        );
+    }
+  }
+
+  buildField = (x, fieldClassName) => {
+    const disabledClass = x.disabled ? "disabled-field" : "";
+    const customClass = fieldClassName || "";
+
+    return (
+      <React.Fragment key={x.field}>
+        <div className={x.required && !x.disabled ? `k-form-field required form-${x.type} form-field-${x.field} ${customClass}` : `k-form-field form-${x.type} form-field-${x.field} ${disabledClass} ${customClass}`}>
+          <span>
+            {x.validationIcon && <span className={`k-icon validation-image`}></span>}
+            {x.title}
+          </span>
+          {this.buildInput(x)}
+          {x.tooltip &&
+            <div className="detail-tooltip">
+              {x.tooltip}
+            </div>
+          }
+          {x.customComponent}
+        </div>
+        <ValidationMessage
+          required={x.required}
+          recommended={x.recommended}
+          validationMessage={x.validationMessage}
+        />
+      </React.Fragment>
+    );
+  }
+
+  buildPageTitle = pageIndex => {
+    if(this.props.pages) {
+      return this.props.pages[--pageIndex].title
+    }
+
+    switch (pageIndex) {
+      case 1:
+        return "Doplňujúce informácie";
+      case 2:
+        if (this.props.pageTitle) {
+          return this.props.pageTitle
+        }
+        else {
+          return "Workflow";
+        }
+      default:
+        return "Neznámy index strany";
+    }
+  }
+
+  buildPageCustomClass = pageIndex => {
+    if (this.props.pages && pageIndex > 0) {
+      return this.props.pages[--pageIndex].customClass
+    }
+    return null;
+  }
+
+  buildPageClassName = pageIndex => {
+    if (pageIndex > 0) {
+      if (this.state.expandedPageIndex === pageIndex) {
+        const scrollableElement = document.getElementsByClassName("scrollable-navbar")[0];
+        return `sidebar-${pageIndex} col-4 ${this.props.sidebarHorizontal ? 'sidebar-horizontal' : ''} ${scrollableElement.scrollHeight > scrollableElement.clientHeight ? '' : 'scrollable-expanded-page'}`;
+      }
+      else {
+        return `sidebar-${pageIndex} compact col-1 ${this.props.sidebarHorizontal ? 'sidebar-horizontal' : ''}`;
+      }
+    }
+    else {
+      return "page col";
+    }
+  }
+
+  buildColumnClassName = column => {
+    return column[0] && column[0].className ? `col-md ${column[0].className}` : "col-md"
+  }
+
+  buildDefaultForm = () => {
+    return this.props.ui.map((page, pageIndex) =>
+      <div key={pageIndex} className={this.buildPageClassName(pageIndex) + ' ' + this.buildPageCustomClass(pageIndex)}>
+        {pageIndex > 0 && (
+          <div>
+            <h2>{this.buildPageTitle(pageIndex)}</h2>
+            <span
+              onClick={(event) => this.handleClick(event, pageIndex)}
+              className={`sidebar-toggle k-icon ${this.state.expandedPageIndex !== pageIndex ? "compact k-i-arrow-chevron-left" : "k-i-arrow-chevron-up"}`}
+            />
+          </div>
+        )}
+        {this.props.title && pageIndex === 0 &&
+          <div className="detail-title">{this.props.title}</div>
+        }
+        {page.map((row, rowIndex) =>
+          <div key={rowIndex} className="row">
+            {row.map((column, columnIndex) =>
+              <div key={columnIndex} className={this.buildColumnClassName(column)}>
+                {column.map(field => {
+                  if (field.customComponent) {
+                    return field.customComponent;
+                  }
+                  else {
+                    let x = this.props.schema.find(f => f.field === field.field);
+                    return x ? this.buildField(x, field.className) : null;
+                  }
+                })}
+              </div>
+            )
+            }
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  buildHorizontalForm = () => {
+    const sidebarColumns = this.props.ui.filter((page, pageIndex) => pageIndex > 0);
+    const uiColumns = this.props.ui.filter((page, pageIndex) => pageIndex === 0);
+    
+    let form = [uiColumns.map((page, pageIndex) =>
+      <div key={pageIndex} className={this.buildPageClassName(pageIndex) + ' ' + this.buildPageCustomClass(pageIndex)}>
+        {this.props.title && pageIndex === 0 &&
+          <div className="detail-title">{this.props.title}</div>
+        }
+        {page.map((row, rowIndex) =>
+          <div key={rowIndex} className="row">
+            {row.map((column, columnIndex) =>
+              <div key={columnIndex} className={this.buildColumnClassName(column)}>
+                {column.map(field => {
+                  if (field.customComponent) {
+                    return field.customComponent;
+                  }
+                  else {
+                    let x = this.props.schema.find(f => f.field === field.field);
+                    return x ? this.buildField(x, field.className) : null;
+                  }
+                })}
+              </div>
+            )
+            }
+          </div>
+        )}
+      </div>
+    ),
+    <div className={`side-column ${this.state.expandedPageIndex ? `column-expanded` : ``}`}>
+      {sidebarColumns.map((page, pageIndex) =>
+        <div key={pageIndex} className={this.buildPageClassName(pageIndex + 1) + ' ' + this.buildPageCustomClass(pageIndex + 1)}>
+          <div>
+            <h2>{this.buildPageTitle(pageIndex + 1)}</h2>
+            <span
+              onClick={(event) => this.handleClick(event, pageIndex + 1)}
+              className={`sidebar-toggle k-icon ${this.state.expandedPageIndex !== pageIndex + 1 ? "compact k-i-arrow-chevron-down" : "k-i-arrow-chevron-up"}`}
+            />
+          </div>
+          {page.map((row, rowIndex) =>
+            <div key={rowIndex} className="row">
+              {row.map((column, columnIndex) =>
+                <div key={columnIndex} className={this.buildColumnClassName(column)}>
+                  {column.map(field => {
+                    if (field.customComponent) {
+                      return field.customComponent;
+                    }
+                    else {
+                      let x = this.props.schema.find(f => f.field === field.field);
+                      return x ? this.buildField(x, field.className) : null;
+                    }
+                  })}
+                </div>
+              )
+              }
+            </div>
+          )}
+        </div>
+      )}
+    </div>];
+    return form;
+  }
+
+  buildForm = () => {
+    if (this.props.ui) {
+      return (
+        <div className="detail row">
+          {this.props.sidebarHorizontal ?
+            this.buildHorizontalForm() : this.buildDefaultForm()}
+        </div>
+      );
+    }
+    else {
+      return (
+        <div className="page row">
+          <div className="col-md">
+            {this.props.title &&
+              <div className="detail-title">{this.props.title}</div>
+            }
+            {this.props.schema.map(x => this.buildField(x))}
+          </div>
+        </div>
+      );
+    }
+  }
+
+  render() {
+    return (
+      <div>
+        <ValidationAlert dataInvalid={this.props.dataInvalid} />
+        {!this.props.toolbarHidden &&
+          <Toolbar
+            disabled={this.props.disabled}
+            primaryField={this.props.primaryField}
+            previous={this.props.previous}
+            next={this.props.next}
+            disabledNext={this.props.disabledNext}
+            disabledPrevious={this.props.disabledPrevious}
+            currentEl={this.props.currentEl}
+            onBack={this.props.onBack}
+            isPicker={this.props.isPicker}
+            onSubmit={this.props.handleSubmit}
+            hiddenBack={this.props.hiddenBack}
+            hiddenSave={this.props.hiddenSave}
+          >
+            {this.props.toolbarActions}
+          </Toolbar>
+        }
+        {!this.props.isPicker ? (
+          <form id={this.props.primaryField} className="k-form-inline" onSubmit={this.props.handleSubmit}>
+            {this.props.schema && this.buildForm()}
+            {this.props.children}
+            <LoadingPanel isLoading={this.props.isLoading} />
+          </form>
+        )
+          :
+          (
+            <div id={this.props.primaryField} className="k-form-inline">
+              {this.props.schema && this.buildForm()}
+              {this.props.children}
+              <LoadingPanel isLoading={this.props.isLoading} />
+            </div>
+          )
+        }
+      </div>
+    );
+  }
+}
+
+Detail.propTypes = {
+  onSubmit: PropTypes.func,
+  schema: PropTypes.array,
+  data: PropTypes.object,
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func,
+  handleSumbit: PropTypes.func,
+  handleBlur: PropTypes.func,
+  getValue: PropTypes.func,
+  onUpload: PropTypes.func,
+  parentProps: PropTypes.object,
+  disabled: PropTypes.bool,
+  isLoading: PropTypes.bool.isRequired,
+  ui: PropTypes.array,
+  toolbarActions: PropTypes.element,
+  primaryField: PropTypes.string.isRequired,
+  toolbarHidden: PropTypes.bool,
+  autofocus: PropTypes.bool,
+  next: PropTypes.func.isRequired,
+  previous: PropTypes.func.isRequired,
+  disabledNext: PropTypes.bool,
+  disabledPrevious: PropTypes.bool,
+  currentEl: PropTypes.element,
+  onBack: PropTypes.func.isRequired,
+  initFilter: PropTypes.object,
+  fixedFilter: PropTypes.object,
+  onAdd: PropTypes.func,
+  isPicker: PropTypes.bool,
+  hiddenBack: PropTypes.bool,
+  applyFilter: PropTypes.func,
+  title: PropTypes.string,
+  pages: PropTypes.arrayOf(PropTypes.object),
+  hiddenSave: PropTypes.bool,
+  sidebarHorizontal: PropTypes.bool,
+}
+
+export default withRequests(Detail);

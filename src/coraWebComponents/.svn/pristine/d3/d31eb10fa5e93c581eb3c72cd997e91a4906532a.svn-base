@@ -1,0 +1,481 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Detail from './Detail';
+import ConfirmDialog from '../../coraWebComponents/dialogs/ConfirmDialog';
+import eventEmitter from '../utils/eventEmitter';
+import _ from 'lodash';
+
+let _lastAction = null;
+
+/**
+ * Detail wrapper component
+ * @module
+ * @param {func} onSubmit - On form submit function
+ * @param {detailSchema[]} schema - Detail Schema 
+ * @param {object} data - Data
+ * @param {func} onChange - On field change function 
+ * @param {func} onBlur - On field blur function
+ * @param {object} parentProps - Parent props 
+ * @param {bool} disabled - Read only detail  
+ * @param {bool} isLoading - Is loading 
+ * @param {array} ui - Custom schema
+ * @param {element} toolbarActions - Toolbar actions 
+ * @param {string} primaryField - Primary field 
+ * @param {func} onAdd - On entry add function 
+ * @param {func} onCreate - On entry create function 
+ * @param {func} onUpdate - On entry update function 
+ * @param {func} onUpload - On file upload function 
+ * @param {bool} toolbarHidden - Toolbar hidden
+ * @param {func} onGet - On data get function 
+ * @param {object} allData - All data
+ * @param {element} currentEl - Current element
+ * @param {func} next - Switches to the next entry function
+ * @param {func} previous - Switches to the previous entry function
+ * @param {bool} modified - Is current entry modified
+ * @param {string} discardText - Discard text
+ * @param {bool} isPicker - Is field picker 
+ * @param {bool} hiddenBack - Hidden back arrow in detail toolbar
+ * @param {string} title - Detail title
+ * @param {array} pages - Pages  
+ * @param {bool} hiddenSave - Hidden save button in detail toolbar 
+ * @param {bool} sidebarHorizontal - Should sidebar be horizontal?
+ */
+class DetailWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpenDiscard: false,
+      id: 0,
+      dataInvalid: false,
+      invalidRecommended: [],
+    }
+
+    this.passwords = []
+  }
+
+  handleOpenDiscard = () => {
+    this.setState({ isOpenDiscard: true });
+  }
+
+  handleCloseDiscard = () => {
+    this.setState({ isOpenDiscard: false });
+  }
+
+  handleConfirmDiscard = () => {
+    switch (_lastAction) {
+      case 'next':
+        this.next();
+        break;
+      case 'previous':
+        this.previous();
+        break;
+      default:
+        break;
+    }
+
+    this.handleCloseDiscard();
+  }
+
+  onSubmit = async () => {
+    const { data, primaryField, onUpdate, onCreate, onSubmit } = this.props;
+
+    if (data[primaryField]) {
+      await onUpdate(data[primaryField], data);
+    }
+    else {
+      await onCreate(data);
+    }
+
+    onSubmit();
+  }
+
+  tryNext = () => {
+    if (this.props.modified) {
+      _lastAction = 'next';
+      this.handleOpenDiscard();
+      return;
+    }
+
+    this.next();
+  }
+
+  tryPrevious = () => {
+    if (this.props.modified) {
+      _lastAction = 'previous';
+      this.handleOpenDiscard();
+      return;
+    }
+
+    this.previous();
+  }
+
+  previous = () => {
+    if (this.props.prev) {
+      this.props.prev();
+    }
+    let ID = this.props.data[this.props.primaryField]
+    let minID = this.props.allData[0][this.props.primaryField]
+    let index = this.props.allData.findIndex(item => item[this.props.primaryField] === ID)
+    if (ID !== minID) {
+      const previousId = this.props.allData[index - 1][this.props.primaryField];
+      this.props.onGet(previousId);
+      eventEmitter.changeSelected([{ [this.props.primaryField]: previousId }], this.props.primaryField);
+      this.removeInvalidClasses();
+    }
+  }
+
+  next = () => {
+    if (this.props.next) {
+      this.props.next();
+    }
+    let ID = this.props.data[this.props.primaryField]
+    let maxID = this.props.allData[this.props.allData.length - 1][this.props.primaryField]
+    let index = this.props.allData.findIndex(item => item[this.props.primaryField] === ID)
+    if (ID !== maxID) {
+
+      const nextId = this.props.allData[index + 1][this.props.primaryField];
+      this.props.onGet(nextId);
+      eventEmitter.changeSelected([{ [this.props.primaryField]: nextId }], this.props.primaryField);
+      this.removeInvalidClasses();
+    }
+  }
+
+  disabledNext = () => {
+    let ID = this.props.data ? this.props.data[this.props.primaryField] : null
+    let data = this.props.allData ? this.props.allData : []
+    let index = data.findIndex(item => item[this.props.primaryField] === ID)
+    if (index < data.length - 1) {
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
+  handleBack = () => {
+    eventEmitter.changeTab(this.props.primaryField, 0);
+  }
+
+  disabledPrevious = () => {
+    let ID = this.props.data ? this.props.data[this.props.primaryField] : null
+    let data = this.props.allData ? this.props.allData : []
+    let index = data.findIndex(item => item[this.props.primaryField] === ID)
+    if (index > 0) {
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
+  validateFields = async () => {
+    let submit = true;
+    for (let field of this.props.schema) {
+      if (field.type === "password") {
+        let passwordSubmit = this.passwordValidation(field);
+        submit = submit ? passwordSubmit : submit;
+        continue;
+      }
+      const value = this.getValue(field.field);
+      if (this.isInvalid(field, value) || await this.customValidation_(field)) {
+        submit = false;
+        this.addInvalidClass(field);
+      }
+      else if (this.isRecommendedInvalid(field, value)) {
+        this.addInvalidRecommendedClass(field);
+      }
+      else {
+        this.addValidClass(field);
+      }
+    };
+    return submit;
+  }
+
+  validateRecommendedFields = async () => {
+    let invalid = false;
+    let invalidRecommended = [];
+    for (let field of this.props.schema) {
+      if (this.isRecommendedInvalid(field, this.getValue(field.field))) {
+        invalidRecommended = [...invalidRecommended, field];
+        invalid = true;
+      }
+    };
+    this.setState({ invalidRecommended });
+    return invalid;
+  }
+
+  isRecommendedInvalid = (field, value) => {
+    if (!field.recommended) {
+      return false;
+    }
+    if (field.disabled) {
+      return false;
+    }
+
+    return (!(value || value === 0 || value === false)) || (/^\s+$/gm.test(value));
+  }
+
+  prepareSubmit = async () => {
+    if (this.props.parentProps && this.props.parentProps.isPicker) {
+      await this.onSubmit();
+      this.props.parentProps.applyFilter(this.props.data[this.props.primaryField]);
+    }
+    else {
+      this.onSubmit();
+    }
+  }
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    if (await this.validateFields()) {
+      if (await this.validateRecommendedFields()) {
+        return;
+      }
+      this.prepareSubmit();
+      this.removeInvalidClasses();
+    }
+    else {
+      this.setState({ dataInvalid: true });
+      setTimeout(() => {
+        this.setState({ dataInvalid: false });
+      }, 4500);
+    }
+  }
+
+  passwordValidation = field => {
+    const value = this.getValue(field.field);
+    let arePasswordsValid = true;
+    this.passwords = this.passwords.map(item => item.field === field.field ? { ...item, value } : item);
+    let passwordFields = this.props.schema.filter(item => item.type === "password");
+    let firstInvalid = this.isInvalid(passwordFields[0]);
+    if (firstInvalid) {
+      this.addInvalidClass(passwordFields[0]);
+      arePasswordsValid = false;
+    }
+    else {
+      this.removeInvalidClass(passwordFields[0]);
+    }
+    if (!firstInvalid && this.passwords.length === 2) {
+      if (this.passwords[0].value !== this.passwords[1].value) {
+        this.addInvalidClass(passwordFields[1]);
+        arePasswordsValid = false;
+      }
+      else {
+        this.removeInvalidClass(passwordFields[1]);
+      }
+    }
+    return arePasswordsValid;
+  }
+
+  isInvalid = (field, value) => {
+    if (field.disabled) {
+      return false;
+    }
+
+    return (
+      (((value instanceof Object && !(value instanceof Date) && field.primaryField && !_.get(value, field.primaryField.split('.')))
+        || (!(value || value === 0 || value === false)) || (/^\s+$/gm.test(value))) && field.required)
+      || (value && field.type === "numeric" && ((field.min && (value < field.min)) || ((field.max && (value > field.max)))))
+      || (value && (field.type === "string" || field.type === "password") && ((field.minLength && (value.length < field.minLength)) || ((field.maxLength && (value.length > field.maxLength)))))
+      || (value && field.type === "date" && ((field.min && (value.getTime() < field.min.getTime())) || (field.max && (value.getTime() > field.max.getTime()))))
+      || (value && field.pattern && !new RegExp(field.pattern).test(value))
+    );
+  }
+
+  removeFieldClass = (element) => {
+    element.classList.remove("validation-valid");
+    element.classList.remove("recommended-invalid");
+    element.classList.remove("validation-invalid");
+  }
+
+  addInvalidRecommendedClass = (field) => {
+    let element = document.getElementsByClassName(`form-field-${field.field}`)[0];
+    if (element) {
+      this.removeFieldClass(element);
+      element.classList.add("recommended-invalid");
+    }
+  }
+
+  addInvalidClass = (field) => {
+    let element = document.getElementsByClassName(`form-field-${field.field}`)[0];
+    if (element) {
+      this.removeFieldClass(element);
+      element.classList.add("validation-invalid");
+    }
+  }
+
+  removeInvalidClass = (field) => {
+    let element = document.getElementsByClassName(`form-field-${field.field}`)[0];
+    if (element) {
+      this.removeFieldClass(element);
+    }
+  }
+
+  addValidClass = (field) => {
+    let element = document.getElementsByClassName(`form-field-${field.field}`)[0];
+    if (element) {
+      this.removeFieldClass(element);
+      element.classList.add("validation-valid");
+    }
+  }
+
+  customValidation_ = async (field) => {
+    if (this.props.customValidation) {
+      return await this.props.customValidation(field);
+    }
+
+    return false;
+  }
+
+  handleBlur = async (field, value) => {
+    const v = value !== null ? value : this.getValue(field.field);
+
+    if (field.type === "password") {
+      this.passwordValidation(field);
+      return;
+    }
+    if (this.isInvalid(field, v) || await this.customValidation_(field)) {
+      this.addInvalidClass(field);
+    }
+    else if (this.isRecommendedInvalid(field, v)) {
+      this.addInvalidRecommendedClass(field);
+    }
+    else {
+      this.addValidClass(field);
+    }
+    if (this.props.onBlur) {
+      this.props.onBlur(field.field, v);
+    }
+  }
+
+  getValue = field => {
+    return _.get(this.props.data, field.split('.'));
+  }
+
+  removeInvalidClasses = () => {
+    this.props.schema.forEach(field => {
+      this.removeInvalidClass(field);
+    });
+  }
+
+  componentDidMount() {
+    this.passwords = this.props.schema.filter(x => x.type === "password").map(x => ({ ...x, value: undefined }));
+  }
+
+  componentDidUpdate() {
+    if (this.props.data[this.props.primaryField] !== this.state.id) {
+      this.removeInvalidClasses();
+      this.setState({ id: this.props.data[this.props.primaryField] });
+    }
+  }
+
+  buildText = (id) => {
+    return this.props.discardText ? this.props.discardText : id ? `Máte rozpracovaný záznam ${id}. Chcete zahodiť zmeny?` : "Máte rozpracovaný nový záznam. Chcete zahodiť zmeny?"
+  }
+
+  buildRecommendedText = () => {
+    const fields = this.state.invalidRecommended.map((el) => el.title);
+    return `Máte nevyplnené odporúčané ${fields.length === 1 ? "pole" : "polia"}: ${fields.toString()}. Chcete uložiť zmeny?`;
+  }
+
+  handleConfirmRecommended = () => {
+    this.prepareSubmit();
+    this.handleCloseRecommended();
+  }
+
+  handleCloseRecommended = () => {
+    this.setState({ invalidRecommended: [] })
+  }
+
+
+  render() {
+    const id = this.props.data[this.props.primaryField];
+
+    return (
+      <React.Fragment>
+        <Detail
+          onSubmit={this.onSubmit}
+          handleSubmit={this.handleSubmit}
+          schema={this.props.schema}
+          data={this.props.data}
+          onAdd={this.props.onAdd}
+          getValue={this.getValue}
+          onChange={this.props.onChange}
+          handleBlur={this.handleBlur}
+          onUpload={this.props.onUpload}
+          parentProps={this.props.parentProps}
+          disabled={this.props.disabled}
+          isLoading={this.props.isLoading}
+          ui={this.props.ui}
+          toolbarActions={this.props.toolbarActions}
+          primaryField={this.props.primaryField}
+          toolbarHidden={this.props.toolbarHidden}
+          previous={this.tryPrevious}
+          next={this.tryNext}
+          disabledNext={this.disabledNext()}
+          disabledPrevious={this.disabledPrevious()}
+          currentEl={this.props.currentEl}
+          pageTitle={this.props.pageTitle}
+          onBack={this.handleBack}
+          isPicker={this.props.isPicker}
+          hiddenBack={this.props.hiddenBack}
+          title={this.props.title}
+          pages={this.props.pages}
+          hiddenSave={this.props.hiddenSave}
+          dataInvalid={this.state.dataInvalid}
+          sidebarHorizontal={this.props.sidebarHorizontal}
+          children={this.props.children}
+        />
+        <ConfirmDialog
+          isOpen={this.state.isOpenDiscard}
+          onClose={this.handleCloseDiscard}
+          onConfirm={this.handleConfirmDiscard}
+          text={this.buildText(id)}
+        />
+        <ConfirmDialog
+          isOpen={this.state.invalidRecommended.length !== 0}
+          onClose={this.handleCloseRecommended}
+          onConfirm={this.handleConfirmRecommended}
+          text={this.buildRecommendedText()}
+          confirmText="Uložiť"
+        />
+
+      </React.Fragment>
+    )
+  }
+}
+
+DetailWrapper.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  schema: PropTypes.array,
+  data: PropTypes.object,
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func,
+  parentProps: PropTypes.object,
+  disabled: PropTypes.bool,
+  isLoading: PropTypes.bool.isRequired,
+  ui: PropTypes.array,
+  toolbarActions: PropTypes.element,
+  primaryField: PropTypes.string.isRequired,
+  onAdd: PropTypes.func,
+  onCreate: PropTypes.func,
+  onUpdate: PropTypes.func.isRequired,
+  onUpload: PropTypes.func,
+  toolbarHidden: PropTypes.bool,
+  onGet: PropTypes.func.isRequired,
+  allData: PropTypes.array.isRequired,
+  currentEl: PropTypes.element,
+  next: PropTypes.func,
+  prev: PropTypes.func,
+  modified: PropTypes.bool,
+  discardText: PropTypes.string,
+  isPicker: PropTypes.bool,
+  hiddenBack: PropTypes.bool,
+  title: PropTypes.string,
+  pages: PropTypes.arrayOf(PropTypes.object),
+  hiddenSave: PropTypes.bool,
+  sidebarHorizontal: PropTypes.bool,
+}
+
+export default DetailWrapper;

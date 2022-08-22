@@ -1,0 +1,99 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Button } from '@progress/kendo-react-buttons';
+import { Tooltip } from '@progress/kendo-react-tooltip';
+import './Button.scss';
+
+/**
+* Button
+* @module
+* @param {bool} [primary] - Primary button
+* @param {(bool | number)} [disabled] - Disabled button
+* @param {string} label - Label text
+* @param {string} [icon] - Icon name
+* @param {string} [iconClass] - ClassName for icon
+* @param {func} onClick - Function invoked on button click
+* @param {string} [title] - Title text
+* @param {string} [form] - Name of form
+* @param {string} [imageUrl] - Image URL
+* @param {string} type - Type of button ("button" | "submit" | "reset")
+* @param {string} [className] - Button class name
+* @param {string} [buttonWrapperClassName] - Class name for button wrapper
+* @param {func} [customTooltipContent] - Custom tooltip content
+*/
+class ButtonComponent extends React.Component {
+  onClick = (e) => {
+    if (!this.props.form && !this.props.type) {
+      e.preventDefault();
+      this.props.onClick(e);
+    }
+  }
+
+  onMouseOver = (e) => {
+    e.target.title = this.props.title;
+  }
+
+  render() {
+    const className = `button-wrapper ${this.props.buttonWrapperClassName || ""}`;
+    return (
+      <>
+        {this.props.notUseTooltip ?
+          <div className={className} title={this.props.title} onMouseOver={this.props.title ? this.onMouseOver : null}>
+            <Button
+              className={this.props.className}
+              type={this.props.form ? 'submit' : this.props.type}
+              primary={this.props.primary}
+              disabled={this.props.disabled}
+              icon={this.props.icon}
+              onClick={this.onClick}
+              iconClass={this.props.iconClass}
+              form={this.props.form}
+              imageUrl={this.props.imageUrl ? this.props.imageUrl : null}
+              onMouseOver={this.props.title ? this.onMouseOver : null}
+            >
+              {this.props.label}
+            </Button>
+          </div>
+          :
+          <Tooltip anchorElement="target" content={this.props.customTooltipContent ? () => this.props.customTooltipContent : null} position="top" openDelay={0}>
+            <div className={className} title={this.props.title} onMouseOver={this.props.title ? this.onMouseOver : null}>
+              <Button
+                className={this.props.className}
+                type={this.props.form ? 'submit' : this.props.type}
+                primary={this.props.primary}
+                disabled={this.props.disabled}
+                icon={this.props.icon}
+                onClick={this.onClick}
+                iconClass={this.props.iconClass}
+                form={this.props.form}
+                imageUrl={this.props.imageUrl ? this.props.imageUrl : null}
+                onMouseOver={this.props.title ? this.onMouseOver : null}
+              >
+                {this.props.label}
+              </Button>
+            </div>
+          </Tooltip>
+        }
+      </>
+    );
+  }
+}
+
+ButtonComponent.propTypes = {
+  primary: PropTypes.bool,
+  notUseTooltip: PropTypes.bool,
+  disabled: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  label: PropTypes.string,
+  icon: PropTypes.string,
+  iconClass: PropTypes.string,
+  onClick: PropTypes.func,
+  title: PropTypes.string,
+  form: PropTypes.string,
+  imageUrl: PropTypes.string,
+  type: PropTypes.string,
+  className: PropTypes.string,
+  buttonWrapperClassName: PropTypes.string,
+  customTooltipContent: PropTypes.object
+}
+
+export default ButtonComponent;

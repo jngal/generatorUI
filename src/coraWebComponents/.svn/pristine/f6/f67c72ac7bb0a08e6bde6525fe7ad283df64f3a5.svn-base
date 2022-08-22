@@ -1,0 +1,124 @@
+import React from 'react';
+import Button from '../buttons/Button';
+import fileSaver from 'file-saver';
+import PropTypes from 'prop-types';
+import Dialog from '../dialogs/Dialog';
+
+let _createdUrl = null;
+class ManualDialogPDF extends React.Component {
+
+  handleConfirm = () => {
+    this.handleStatementPrint();
+  }
+
+  componentDidMount() {
+    if(!this.props.extraDialog)
+      this.props.getManual();
+  }
+
+  handleStatementPrint = () => {
+    if (this.iframePdf !== undefined) {
+      const iframePdfContent = this.iframePdf.contentWindow;
+      if (iframePdfContent) {
+        try {
+          iframePdfContent.focus();
+          iframePdfContent.print();
+        }
+        catch (e) {
+          var win = window.open(_createdUrl, '_blank');
+          win.focus();
+        }
+      }
+    }
+  }
+
+  handleDownload = () => {
+    if (this.props.manualProps.manualBlob) {
+      fileSaver.saveAs(this.props.manualProps.manualBlob, this.props.manualProps.manualFileName);
+    }
+  }
+  handleClose = () => {
+    this.props.handleClosePDF();
+  }
+
+  render() {
+    const { manualProps } = this.props;
+    _createdUrl = null;
+    if (manualProps.manualBlob) {
+      _createdUrl = URL.createObjectURL(manualProps.manualBlob, manualProps.manualFileName);
+    }
+
+    return this.props.extraDialog ? (
+      <Dialog
+        isOpen={this.props.isOpenManualDialogPDF}
+        onClose={this.handleClose}
+        onConfirm={this.handleClose}
+        fullscreen={true}
+        title={this.props.titlePDF}
+      >
+
+        <div style={{ width: '100%', height: '100%' }}>
+          <div className="report-buttons">
+            <Button
+              label="Tlačiť"
+              primary={true}
+              icon="print"
+              onClick={this.handleStatementPrint}
+            />
+
+            <Button
+              label="Stiahnúť dokument"
+              primary={true}
+              icon="download"
+              onClick={this.handleDownload}
+            />
+          </div>
+          <iframe
+            src={_createdUrl + '#toolbar=0&navpanes=0'}
+            width="100%"
+            height="100%"
+            title={this.props.manualTitle}
+            ref={(frame) => { this.iframePdf = frame }}
+          >
+          </iframe>
+        </div>
+      </Dialog>
+    ) :
+      (_createdUrl && <React.Fragment>
+        <div style={{ width: '100%', height: '100%' }}>
+          <div className="report-buttons">
+            <Button
+              label="Tlačiť"
+              primary={true}
+              icon="print"
+              onClick={this.handleStatementPrint}
+            />
+
+            <Button
+              label="Stiahnúť dokument"
+              primary={true}
+              icon="download"
+              onClick={this.handleDownload}
+            />
+          </div>
+          <iframe
+            src={_createdUrl + '#toolbar=0&navpanes=0'}
+            width="100%"
+            height="100%"
+            title={this.props.manualTitle}
+            ref={(frame) => { this.iframePdf = frame }}
+          >
+          </iframe>
+        </div>
+      </React.Fragment>
+      )
+  }
+}
+
+ManualDialogPDF.propTypes = {
+  isOpenManualDialogPDF: PropTypes.bool.isRequired,
+  handleClosePDF: PropTypes.func.isRequired,
+  titlePDF: PropTypes.string.isRequired,
+}
+
+export default ManualDialogPDF;

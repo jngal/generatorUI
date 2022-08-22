@@ -1,0 +1,17 @@
+@import "../variables";
+@import "../themes";
+
+.timepicker {
+  flex: 1;
+  display: flex;
+
+  .k-dateinput-wrap {
+    flex: 1;
+  }
+  &.disabled-field:hover {
+    @include themed() {
+      background-color: color($secondarylight);
+    }
+  }
+}
+

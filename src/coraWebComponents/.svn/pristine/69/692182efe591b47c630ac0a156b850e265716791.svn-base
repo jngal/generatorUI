@@ -1,0 +1,37 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { ChartSeries, ChartSeriesItem } from '@progress/kendo-react-charts';
+
+
+class ChartSeriesComponent extends React.Component {
+  render() {
+    return (
+      <ChartSeries>
+        {this.props.seriesProps.map(props => {
+            return (
+              <ChartSeriesItem 
+                data={props.data}
+                gap={props.gap}
+                name={props.name}
+                spacing={props.spacing}
+                type={props.type}
+              />
+            )
+          })
+        }
+      </ChartSeries>
+    )
+  }
+}
+
+ChartSeriesComponent.propTypes = {
+  seriesProps: PropTypes.arrayOf({
+    data: PropTypes.array,
+    gap: PropTypes.number,
+    name: PropTypes.string,
+    spacing: PropTypes.number,
+    type: PropTypes.string,
+  }),
+}
+
+export default ChartSeriesComponent;

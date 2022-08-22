@@ -1,0 +1,7 @@
+@import "../variables";
+@import "../themes";
+
+.multipicker {
+  flex: 1;
+  display: flex;
+}

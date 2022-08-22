@@ -1,0 +1,45 @@
+import './Navigation.scss';
+
+import * as React from 'react';
+
+import Hamburger from './Hamburger';
+import PropTypes from 'prop-types';
+import Search from './Search';
+import User from './User';
+
+class Navigation extends React.Component {
+  render() {
+
+    return (
+     <div className="nav">
+        <Hamburger onClick={this.props.onClick} />
+        <div className="brand">
+          {this.props.brand}
+        </div>
+        <Search />
+        {this.props.navUser        
+          ? this.props.navUser(this.props)
+          : <User
+              uzivatel={this.props.uzivatel}
+              onSignOut={this.props.onSignOut}
+              userInfo={this.props.userInfo}
+              handleOpenSettings={this.props.handleOpenSettings}
+              manual={this.props.manual}
+              manualList={this.props.manualList}
+            />      
+        }
+        
+      </div>
+    );
+  }
+}
+
+Navigation.propTypes = {
+  uzivatel: PropTypes.object,
+  brand: PropTypes.element,
+  onSignOut: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
+  navUser: PropTypes.func,
+}
+
+export default Navigation;

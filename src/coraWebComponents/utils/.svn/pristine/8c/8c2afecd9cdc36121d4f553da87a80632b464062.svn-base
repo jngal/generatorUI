@@ -1,0 +1,20 @@
+{
+  "datepicker": {
+    "toggleCalendar": "Kalender",
+    "okLabel": "Einfügen",
+    "clearLabel": "Löschen",
+    "cancelLabel": "Stornieren",
+    "invalidDateMessage": "Falsches Datum",
+    "maxDateMessage": "Das Datum ist größer als das zulässige Datum.",
+    "minDateMessage": "Das Datum ist kleiner als das zulässige Datum."
+  },
+  "timepicker": {
+    "set": "Einrichten",
+    "cancel": "Stornieren",
+    "clear": "Löschen",
+    "now": "Jetzt",
+    "selectNow": "Auswahl jetzt",
+    "toggleTimeSelector": "Lochtimer",
+    "toggleClock": "Zeitschaltuhr"
+  }
+}

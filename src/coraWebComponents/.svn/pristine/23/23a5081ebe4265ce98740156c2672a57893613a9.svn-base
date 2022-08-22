@@ -1,0 +1,48 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { SplitButton } from '@progress/kendo-react-buttons';
+import './SplitButton.scss';
+
+class SplitButtonComponent extends React.Component {
+  onClick = (e) => {
+    if (e.itemIndex !== undefined) {
+      this.props.onClick(e.itemIndex, e.item.text);
+    } else {
+      this.props.onClick(-1, this.props.text);
+    }
+  }
+
+  render() {
+    return (
+      <div className="split-button">
+        <SplitButton
+          text={this.props.text}
+          items={this.props.items}
+          className={this.props.className}
+          buttonClass={this.props.buttonClassName}
+          icon={this.props.icon}
+          onButtonClick={e => this.onClick(e)}
+          onItemClick={e => this.onClick(e)}
+          disabled={this.props.disabled}
+          popupSettings={this.props.popupSettings}
+        />
+      </div>
+    );
+  }
+}
+
+SplitButtonComponent.propTypes = {
+  text: PropTypes.string.isRequired,
+  items: PropTypes.arrayOf(PropTypes.shape({
+    text: PropTypes.string.isRequired,
+    icon: PropTypes.string,
+  })).isRequired,
+  className: PropTypes.string,
+  buttonClassName: PropTypes.string,
+  icon: PropTypes.string,
+  onClick: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  popupSettings: PropTypes.object
+}
+
+export default SplitButtonComponent;

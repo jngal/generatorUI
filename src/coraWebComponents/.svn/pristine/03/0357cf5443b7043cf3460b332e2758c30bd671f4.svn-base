@@ -1,0 +1,73 @@
+import "./Navigation.scss";
+
+import * as React from "react";
+
+import Hamburger from "./Hamburger";
+import PropTypes from "prop-types";
+import Search from "./Search";
+import User from "./User";
+
+/**
+ * Navigation component
+ * @module
+ * @param {object} [uzivatel] - User object
+ * @param {element} [brand] - Brand element
+ * @param {func} onSignOut - Function invoked on sign out
+ * @param {func} onClick - Function invoked on click
+ * @param {func} [navUser] - Navigation user function
+ * @param {func} [getManual] - Function to get manual
+ * @param {func} [getListManual] - Function to get manual list
+ * @param {manualProps} [manualProps] - Props for manual
+ */
+
+class Navigation extends React.Component {
+  render() {
+    return (
+      <div className="nav">
+        <Hamburger
+          onClick={this.props.onClick}
+          icon={this.props.hamburgerIcon}
+        />
+        <div className="brand">{this.props.brand}</div>
+        <Search />
+        {this.props.navUser ? (
+          this.props.navUser(this.props)
+        ) : (
+          <User
+            uzivatel={this.props.uzivatel}
+            onSignOut={this.props.onSignOut}
+            userInfo={this.props.userInfo}
+            handleOpenSettings={this.props.handleOpenSettings}
+            manualProps={this.props.manualProps}
+            getManual={this.props.getManual}
+            getListManual={this.props.getListManual}
+          />
+        )}
+      </div>
+    );
+  }
+}
+
+Navigation.propTypes = {
+  uzivatel: PropTypes.object,
+  brand: PropTypes.element,
+  onSignOut: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
+  navUser: PropTypes.func,
+  getManual: PropTypes.func,
+  getListManual: PropTypes.func,
+  hamburgerIcon: PropTypes.string,
+  manualProps: PropTypes.shape({
+    hasList: PropTypes.bool.isRequired,
+    listManual: PropTypes.object,
+    user: PropTypes.object,
+    manualBlob: PropTypes.object,
+    manualFileName: PropTypes.string,
+    manualTitle: PropTypes.string,
+    manualList: PropTypes.arrayOf(PropTypes.object),
+    manualListData: PropTypes.array,
+    manualListDataMap: PropTypes.object,
+  }),
+};
+
+export default Navigation;

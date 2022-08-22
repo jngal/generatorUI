@@ -1,0 +1,32 @@
+@import "../variables";
+@import "../themes";
+
+.dropdown-button{
+  margin: 15px 5px;
+  >.k-dropdown-button{
+    > .k-button{
+      background-image: none;
+      @include themed() {
+        background-color: color($primary);
+        color: color($primary-light);
+      }
+    }
+    .k-button:hover, .k-button.k-state-hover{
+        opacity: 0.8;
+      }
+  }
+}
+
+div.k-animation-container.k-animation-container-shown > .k-popup > .k-list > .k-item { 
+  .k-image {
+    margin-right: 8px;
+  }
+  .k-image, .k-icon {
+    font-size: 2em;
+    margin-top: 0.03em;
+
+    @include themed() {
+      color: color($primary);
+    }
+  }
+}

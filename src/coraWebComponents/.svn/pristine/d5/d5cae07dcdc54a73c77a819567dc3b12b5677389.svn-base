@@ -1,0 +1,39 @@
+@import "../variables";
+@import "../themes";
+
+.dropdownlist {
+  display: flex;
+  flex: 1;
+  .k-input {
+    @include themed() {
+      color: color($text-color);
+    }
+  }
+}
+
+.k-nodata {
+  @include themed() {
+    background-color: color($basicwhite);
+    color: color($text-color);
+  }
+}
+
+
+.k-form-inline{
+  .k-form-field {
+    //nastavenie farby pre dropdownlist
+    .k-dropdown-wrap.dropdownlist.k-state-default {
+      @include themed() {
+        background-color: color($secondary);
+        background-image: linear-gradient( color($basicwhite), color($basicwhite));
+        color: color($secondarydarker);
+      }
+    }  
+  }
+}
+
+.k-dropdown-wrap.k-state-default { 
+  @include themed() {
+    border-color: $secondarydarker;
+  } 
+}

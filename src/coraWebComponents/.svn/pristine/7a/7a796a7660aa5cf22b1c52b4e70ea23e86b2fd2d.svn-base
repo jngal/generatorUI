@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: dialogs/Dialog</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: dialogs/Dialog</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Dialog</div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>isOpen</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Is dialog open?</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onClose</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">func</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Function invoked on dialog close</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onCancel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">func</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Function invoked on cancel</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onConfirm</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">func</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Function invoked on confirm</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>children</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Children content of dialog</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>title</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Title text of dialog</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fullscreen</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Full screen dialog</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hideButtons</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Hide dialog buttons</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>confirmDisabled</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Confirm disabled</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>form</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Form</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>className</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Dialog class name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onEsc</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">func</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when user presses esc</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>confirmText</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Text of confirm button</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cancelText</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Text of cancel button</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dialogs_Dialog.js.html">dialogs/Dialog.js</a>, <a href="dialogs_Dialog.js.html#line8">line 8</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Alert.html">Alert</a></li><li><a href="module-animation_Slide.html">animation/Slide</a></li><li><a href="module-buttons_Button.html">buttons/Button</a></li><li><a href="module-buttons_ButtonGroup.html">buttons/ButtonGroup</a></li><li><a href="module-buttons_DropDownButton.html">buttons/DropDownButton</a></li><li><a href="module-buttons_SplitButton.html">buttons/SplitButton</a></li><li><a href="module-ChangePassword.html">ChangePassword</a></li><li><a href="module-chart_ChartComponent.html">chart/ChartComponent</a></li><li><a href="module-chart_elements_ChartCategoryAxisComponent.html">chart/elements/ChartCategoryAxisComponent</a></li><li><a href="module-chart_elements_ChartLegendComponent.html">chart/elements/ChartLegendComponent</a></li><li><a href="module-chart_elements_ChartSeriesComponent.html">chart/elements/ChartSeriesComponent</a></li><li><a href="module-chart_elements_ChartTitleComponent.html">chart/elements/ChartTitleComponent</a></li><li><a href="module-Container.html">Container</a></li><li><a href="module-detail_Detail.html">detail/Detail</a></li><li><a href="module-detail_DetailWrapper.html">detail/DetailWrapper</a></li><li><a href="module-detail_Toolbar.html">detail/Toolbar</a></li><li><a href="module-detail_ValidationMessage.html">detail/ValidationMessage</a></li><li><a href="module-dialogs_ConfirmDialog.html">dialogs/ConfirmDialog</a></li><li><a href="module-dialogs_Dialog.html">dialogs/Dialog</a></li><li><a href="module-dialogs_DialogContent.html">dialogs/DialogContent</a></li><li><a href="module-dialogs_EmailPrompt.html">dialogs/EmailPrompt</a></li><li><a href="module-dialogs_FileContent.html">dialogs/FileContent</a></li><li><a href="module-dialogs_FileDialog.html">dialogs/FileDialog</a></li><li><a href="module-dialogs_ReportDialog.html">dialogs/ReportDialog</a></li><li><a href="module-Dropdown.html">Dropdown</a></li><li><a href="module-forms_Autocomplete.html">forms/Autocomplete</a></li><li><a href="module-forms_AutocompleteLocal.html">forms/AutocompleteLocal</a></li><li><a href="module-forms_Checkbox.html">forms/Checkbox</a></li><li><a href="module-forms_DatePicker.html">forms/DatePicker</a></li><li><a href="module-forms_DateRangePicker.html">forms/DateRangePicker</a></li><li><a href="module-forms_DateTimePicker.html">forms/DateTimePicker</a></li><li><a href="module-forms_DropDownList.html">forms/DropDownList</a></li><li><a href="module-forms_Input.html">forms/Input</a></li><li><a href="module-forms_MultiSelect.html">forms/MultiSelect</a></li><li><a href="module-forms_NumericTextBox.html">forms/NumericTextBox</a></li><li><a href="module-forms_Picker.html">forms/Picker</a></li><li><a href="module-forms_Switch.html">forms/Switch</a></li><li><a href="module-forms_Textarea.html">forms/Textarea</a></li><li><a href="module-forms_TimePicker.html">forms/TimePicker</a></li><li><a href="module-forms_Upload.html">forms/Upload</a></li><li><a href="module-graph_ArcGauage.html">graph/ArcGauage</a></li><li><a href="module-grid_Cell.html">grid/Cell</a></li><li><a href="module-grid_ColumnMenu.html">grid/ColumnMenu</a></li><li><a href="module-grid_DialogFilter.html">grid/DialogFilter</a></li><li><a href="module-grid_DialogFilterForm.html">grid/DialogFilterForm</a></li><li><a href="module-grid_DropdownFilterCell.html">grid/DropdownFilterCell</a></li><li><a href="module-grid_EditBooleanCell.html">grid/EditBooleanCell</a></li><li><a href="module-grid_EditCommandCell.html">grid/EditCommandCell</a></li><li><a href="module-grid_EditDateTimeCell.html">grid/EditDateTimeCell</a></li><li><a href="module-grid_EditDropdownCell.html">grid/EditDropdownCell</a></li><li><a href="module-grid_EditPickerCell.html">grid/EditPickerCell</a></li><li><a href="module-grid_EditTimeCell.html">grid/EditTimeCell</a></li><li><a href="module-grid_FileCell.html">grid/FileCell</a></li><li><a href="module-grid_Grid.html">grid/Grid</a></li><li><a href="module-grid_GridWrapper.html">grid/GridWrapper</a></li><li><a href="module-grid_RangeFilterCell.html">grid/RangeFilterCell</a></li><li><a href="module-grid_SaveFilterDialog.html">grid/SaveFilterDialog</a></li><li><a href="module-grid_SelectionMenu.html">grid/SelectionMenu</a></li><li><a href="module-grid_Toolbar.html">grid/Toolbar</a></li><li><a href="module-grid_TooltipCell.html">grid/TooltipCell</a></li><li><a href="module-LoadingPanel.html">LoadingPanel</a></li><li><a href="module-metabase_Dashboard.html">metabase/Dashboard</a></li><li><a href="module-navigation_Hamburger.html">navigation/Hamburger</a></li><li><a href="module-navigation_Manual.html">navigation/Manual</a></li><li><a href="module-navigation_ManualDialogList.html">navigation/ManualDialogList</a></li><li><a href="module-navigation_ManualList.html">navigation/ManualList</a></li><li><a href="module-navigation_ManualPDF.html">navigation/ManualPDF</a></li><li><a href="module-navigation_ManualWrapper.html">navigation/ManualWrapper</a></li><li><a href="module-navigation_Navigation.html">navigation/Navigation</a></li><li><a href="module-navigation_Search.html">navigation/Search</a></li><li><a href="module-navigation_User.html">navigation/User</a></li><li><a href="module-RefreshDialog.html">RefreshDialog</a></li><li><a href="module-sch_ApprovalProcessStep.html">sch/ApprovalProcessStep</a></li><li><a href="module-sch_ApprovalProcessTimeline.html">sch/ApprovalProcessTimeline</a></li><li><a href="module-scheduler_Scheduler.html">scheduler/Scheduler</a></li><li><a href="module-Settings.html">Settings</a></li><li><a href="module-sidebar_Appmenu.html">sidebar/Appmenu</a></li><li><a href="module-sidebar_Footer.html">sidebar/Footer</a></li><li><a href="module-sidebar_header_Appmenu.html">sidebar/header/Appmenu</a></li><li><a href="module-sidebar_header_Header.html">sidebar/header/Header</a></li><li><a href="module-sidebar_header_SidebarToggle.html">sidebar/header/SidebarToggle</a></li><li><a href="module-sidebar_menu_Menu.html">sidebar/menu/Menu</a></li><li><a href="module-sidebar_menu_Search.html">sidebar/menu/Search</a></li><li><a href="module-sidebar_Sidebar.html">sidebar/Sidebar</a></li><li><a href="module-sidebar_Stats.html">sidebar/Stats</a></li><li><a href="module-Tab.html">Tab</a></li><li><a href="module-Tabs.html">Tabs</a></li><li><a href="module-TabsWrapper.html">TabsWrapper</a></li><li><a href="module-TitlePanel.html">TitlePanel</a></li><li><a href="module-utils_convert.html">utils/convert</a></li><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter.html">utils/eventEmitter</a></li><li><a href="module-utils_flags.html">utils/flags</a></li><li><a href="module-utils_helper.html">utils/helper</a></li><li><a href="module-utils_logger.html">utils/logger</a></li><li><a href="module-utils_requests.html">utils/requests</a></li><li><a href="module-utils_storage.html">utils/storage</a></li><li><a href="module-ValidationAlert.html">ValidationAlert</a></li><li><a href="module-views_login_Login.html">views/login/Login</a></li><li><a href="module-views_registration_Registration.html">views/registration/Registration</a></li></ul><h3>Classes</h3><ul><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter-ExtendedEventEmitter.html">ExtendedEventEmitter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getPreprocessedMenuData-zkorenamenuvyrobinovudatovustrukturumenupouzitelnunavykreslenie">getPreprocessedMenuData - z korena menu vyrobi novu datovu strukturu menu pouzitelnu na vykreslenie</a></li><li><a href="global.html#isValidDateStr">isValidDateStr</a></li><li><a href="global.html#isValidEcv">isValidEcv</a></li><li><a href="global.html#isValidID">isValidID</a></li><li><a href="global.html#isValidMail">isValidMail</a></li><li><a href="global.html#isValidPasswordStrong">isValidPasswordStrong</a></li><li><a href="global.html#isValidPhone">isValidPhone</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Thu Jan 07 2021 13:35:30 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

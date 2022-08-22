@@ -1,0 +1,12 @@
+.report-buttons > div {
+  display: inline-block;
+}
+
+.fullscreen-report {
+  z-index: 52 !important;
+  .k-window {
+    height: 88% !important;
+    max-height: 88%;
+  }
+}
+

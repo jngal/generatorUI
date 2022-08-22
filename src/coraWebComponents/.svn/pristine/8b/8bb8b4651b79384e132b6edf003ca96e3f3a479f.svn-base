@@ -1,0 +1,118 @@
+import './Input.scss';
+
+import { Input } from '@progress/kendo-react-inputs';
+import Button from '../buttons/Button';
+import PropTypes from 'prop-types';
+import React from 'react';
+
+/**
+ * Input component
+ * @module
+ * @param {string} [validationMessage] - Validation message if field is invalid
+ * @param {string} name - Name
+ * @param {bool} [required] - Is input required?
+ * @param {func} onChange - Function invoked on value change
+ * @param {(string | number)} [value] - Current value
+ * @param {bool} [disabled] - Is input readonly?
+ * @param {string} [type] - Type of input
+ * @param {string} [placeholder] - Input placeholder
+ * @param {func} [onClick] - Function invoked on click, if input has button
+ * @param {bool} [autofocus] - Should input be focused?
+ * @param {number} [minLength] - Minimum length
+ * @param {number} [maxLength] - Maximum length
+ * @param {string} [pattern] - Regex for validity check
+ * @param {bool} [readOnly] - Read only
+ * @param {number} [tabIndex] - Input tabindex
+ * @param {bool} [isPicker] - Is picker 
+ * @param {func} [onBlur] - Function invoked on input blur
+ */
+class InputComponent extends React.Component {
+
+  onBlur = () => {
+    if (this.props.onBlur) {
+      this.props.onBlur();
+    }
+  }
+
+  handleCopy = () => {
+    navigator.clipboard.writeText(this.props.value);
+  }
+
+  handleOpenUrl = () => {
+    window.open(this.props.value);
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <Input
+          className={`input ${this.props.disabled ? 'disabled-field' : ''} `}
+          validationMessage={this.props.validationMessage || 'Povinné'}
+          required={this.props.required}
+          onChange={(e) => this.props.onChange(this.props.name, e.target.value)}
+          value={this.props.value !== null ? this.props.value : ''}
+          disabled={this.props.disabled}
+          type={this.props.type}
+          placeholder={this.props.placeholder}
+          onClick={this.props.onClick}
+          autoFocus={this.props.autofocus}
+          minLength={this.props.minLength}
+          maxLength={this.props.maxLength}
+          pattern={this.props.pattern}
+          tabIndex={this.props.tabIndex}
+          onBlur={this.onBlur}
+          readOnly={this.props.readOnly}
+        />
+        {this.props.copyable && this.props.value &&
+          <div className="copyable">
+            <Button
+              className="copyable-button"
+              primary={true}
+              icon="copy"
+              onClick={this.handleCopy}
+              disabled={false}
+              title="Kopírovať text"
+            />
+          </div>
+        }
+        {this.props.type === "url" && this.props.value &&
+          <div className="hyperlink">
+            <Button
+              className="hyperlink-button"
+              primary={true}
+              icon="hyperlink-open-sm"
+              onClick={this.handleOpenUrl}
+              disabled={false}
+              title="Otvoriť url"
+            />
+          </div>
+        }
+      </React.Fragment>
+    );
+  }
+}
+
+InputComponent.propTypes = {
+  validationMessage: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  required: PropTypes.bool,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  disabled: PropTypes.bool,
+  readOnly: PropTypes.bool,
+  type: PropTypes.string,
+  placeholder: PropTypes.string,
+  onClick: PropTypes.func,
+  autofocus: PropTypes.bool,
+  minLength: PropTypes.number,
+  maxLength: PropTypes.number,
+  pattern: PropTypes.string,
+  tabIndex: PropTypes.number,
+  isPicker: PropTypes.bool,
+  onBlur: PropTypes.func
+}
+
+export default InputComponent;

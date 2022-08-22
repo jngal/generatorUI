@@ -1,0 +1,67 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { DateRangePicker } from '@progress/kendo-react-dateinputs';
+import './DateRangePicker.scss'
+
+/**
+ * Date range picker 
+ * @module
+ * @param {string} name - Name
+ * @param {func} onChange - Function invoked on value change
+ * @param {object} [value] - Current value
+ * @param {bool} [disabled] - Is input readonly?
+ * @param {bool} [required] - Is input required?
+ * @param {string} [validationMessage] - Validation message if field is invalid
+ * @param {Date} [min] - Minimum date
+ * @param {Date} [max] - Maximum date
+ * @param {object} [calendarSettings] - Calendar settings
+ * @param {object} [format] - Date format
+ * @param {func} [onBlur] - Function invoked on input blur
+ */
+class DateRangePickerComponent extends React.Component {
+
+  onBlur = () => {
+    if(this.props.onBlur) {
+      this.props.onBlur(this.props.name, this.props.value);
+    }
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <DateRangePicker
+          className={`date-range-picker ${this.props.disabled ? 'disabled-field' : ''} `}
+          onChange={e => this.props.onChange(this.props.name, e.target.value)}
+          value={this.props.value}
+          disabled={this.props.disabled}
+          required={this.props.required}
+          validationMessage={this.props.validationMessage || 'Povinné'}
+          min={this.props.min}
+          max={this.props.max}
+          calendarSettings={this.props.calendarSettings}
+          format={this.props.format}
+          onBlur={this.onBlur}
+        />
+      </React.Fragment>
+    );
+  }
+}
+
+DateRangePickerComponent.propTypes = {
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.shape({
+    start: PropTypes.instanceOf(Date),
+    end: PropTypes.instanceOf(Date)
+  }),
+  disabled: PropTypes.bool,
+  required: PropTypes.bool,
+  validationMessage: PropTypes.string,
+  min: PropTypes.instanceOf(Date),
+  max: PropTypes.instanceOf(Date),
+  calendarSettings: PropTypes.object,
+  format: PropTypes.object,
+  onBlue: PropTypes.func,
+}
+
+export default DateRangePickerComponent;

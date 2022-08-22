@@ -1,0 +1,78 @@
+@import "../variables";
+@import "../themes";
+
+$approved: #81d27c;
+$started: #81d27c;
+$denied: #fd7070;
+$returned: #ecbf6a;
+$in-process: #d2d2d2;
+
+.approval-process-step {  
+  padding: 20px 0;
+  @include themed() {
+    border-bottom: 1px solid color($secondarylight);
+  }
+  .step-indicator {
+    width: 24px;
+    height: 24px;
+    border-radius: 20px;
+    border: 2px solid black;    
+  }
+  &.approved {
+    // @include themed() {
+    //   border-color: color($alert-ok-text);
+    // }
+    .step-indicator {
+      border-color: $approved;
+    }
+    .step-state-label {
+      background: $approved;
+    }
+  }
+  &.denied {
+    .step-indicator {
+      border-color: $denied;
+    }
+    .step-state-label {
+      background: $denied;
+    }
+  }
+  &.returned {
+    .step-indicator {
+      border-color: $returned;
+    }
+    .step-state-label {
+      background: $returned;
+    }
+  }
+  &.started {
+    .step-indicator {
+      border-color: $started;
+    }
+    .step-state-label {
+      background: $started;
+    }
+  }
+  &.in-process {
+    .step-indicator {
+      border-color: $in-process;
+    }
+    .step-state-label {
+      background: $in-process;
+    }
+  }
+  .step-name {
+    padding-left: 10px;
+    font-weight: 600;
+  }
+  .step-state-label {
+    padding: 4px 10px;
+    color: #fff;
+    border-radius: 20px;
+  }
+  .approver-date {
+    font-size: 13px;
+    text-align: right;
+    padding-top: 7px;
+  }
+}

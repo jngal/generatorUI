@@ -1,0 +1,52 @@
+import './Tooltip.scss';
+
+import { Tooltip } from '@progress/kendo-react-tooltip';
+import PropTypes from 'prop-types';
+import React from 'react';
+
+
+/**
+ * Tooltip component
+ * @module
+ * @param {string} anchorElement - Sets the anchor element of the Tooltip
+ * @param {string} className - Sets a class of the Tooltip animation container
+ * @param {function} content - Sets the content of the Tooltip
+ * @param {function} filter - Represents a callback function which determines if a Tooltip will be displayed
+ * @param {number} openDelay - Sets a delay in milliseconds
+ * @param {string} position - Sets the position of the Tooltip
+ */
+class TooltipComponent extends React.Component {
+  render() {
+    const { 
+      className,
+      content,
+      children,
+      filter,
+      openDelay,
+      position
+    } = this.props;
+
+    return (
+        <Tooltip
+          anchorElement="target"
+          className={className}
+          content={content ? (props) => content(props) : null}
+          filter={(element) => filter ? filter(element) : true}
+          openDelay={openDelay || 0}
+          position={position || "top"}
+        >
+          {children}
+        </Tooltip>
+    );
+  }
+}
+
+TooltipComponent.propTypes = {
+  className: PropTypes.string,
+  content: PropTypes.func,
+  filter: PropTypes.func,
+  openDelay: PropTypes.number,
+  position: PropTypes.string
+}
+
+export default TooltipComponent;

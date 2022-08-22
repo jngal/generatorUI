@@ -1,0 +1,287 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import ExtendedDropDownList from '../forms/DropDownList';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
+import Input from '../forms/Input';
+import DatePicker from '../forms/DatePicker';
+import NumericTextBox from '../forms/NumericTextBox';
+import sk from '../res/sk.json';
+import './DialogFilter.scss';
+
+const FILTER_OPERATORS = {
+  text: [
+    { text: sk.grid.filterContainsOperator, operator: 'contains' },
+    { text: sk.grid.filterNotContainsOperator, operator: 'doesnotcontain' },
+    { text: sk.grid.filterEqOperator, operator: 'eq' },
+    { text: sk.grid.filterNotEqOperator, operator: 'neq' },
+    { text: sk.grid.filterStartsWithOperator, operator: 'startswith' },
+    { text: sk.grid.filterEndsWithOperator, operator: 'endswith' },
+    { text: sk.grid.filterIsEmptyOperator, operator: 'isempty' },
+    { text: sk.grid.filterIsNotEmptyOperator, operator: 'isnotempty' }
+  ],
+  numeric: [
+    { text: sk.grid.filterEqOperator, operator: 'eq' },
+    { text: sk.grid.filterNotEqOperator, operator: 'neq' },
+    { text: sk.grid.filterGteOperator, operator: 'gte' },
+    { text: sk.grid.filterGtOperator, operator: 'gt' },
+    { text: sk.grid.filterLteOperator, operator: 'lte' },
+    { text: sk.grid.filterLtOperator, operator: 'lt' },
+    { text: sk.grid.filterIsNullOperator, operator: 'isnull' },
+    { text: sk.grid.filterIsNotNullOperator, operator: 'isnotnull' }
+  ],
+  date: [
+    { text: sk.grid.filterEqOperator, operator: 'eq' },
+    { text: sk.grid.filterNotEqOperator, operator: 'neq' },
+    { text: sk.grid.filterAfterOrEqualOperator, operator: 'gte' },
+    { text: sk.grid.filterAfterOperator, operator: 'gt' },
+    { text: sk.grid.filterBeforeOperator, operator: 'lt' },
+    { text: sk.grid.filterBeforeOrEqualOperator, operator: 'lte' },
+    { text: sk.grid.filterIsNullOperator, operator: 'isnull' },
+    { text: sk.grid.filterIsNotNullOperator, operator: 'isnotnull' }
+  ],
+  boolean: [
+    { text: sk.grid.filterBooleanAll, operator: '' },
+    { text: sk.grid.filterIsTrue, operator: true },
+    { text: sk.grid.filterIsFalse, operator: false }
+  ],
+  container: [
+    { text: sk.grid.filterContainsOperator, operator: 'contains' },
+    { text: sk.grid.filterNotContainsOperator, operator: 'doesnotcontain' },
+    { text: sk.grid.filterEqOperator, operator: 'eq' },
+    { text: sk.grid.filterNotEqOperator, operator: 'neq' },
+    { text: sk.grid.filterStartsWithOperator, operator: 'startswith' },
+    { text: sk.grid.filterEndsWithOperator, operator: 'endswith' },
+    { text: sk.grid.filterIsEmptyOperator, operator: 'isempty' },
+    { text: sk.grid.filterIsNotEmptyOperator, operator: 'isnotempty' }
+  ]
+};
+
+
+/**
+ * Dialog fiter form component
+ * @module
+ * @param {array} schema - Schema
+ * @param {object} [parentProps] - Parent props
+ * @param {object} filter - Filter 
+ * @param {string} enumDefault - Enum default value
+ */
+class DialogFilterForm extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      input: {}
+    }
+    
+    this.ref = React.createRef();
+  }
+
+
+  createInput = () => {
+    let input = {};
+    this.props.filter.filters.forEach(item => {
+      input[item.field + 'Operator'] = item.operator;
+      input[item.field + 'Value'] = item.value;
+    });
+    this.setState({ input });
+  }
+
+  componentDidMount() {
+    this.createInput();
+
+    
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.filter !== prevProps.filter) {
+      this.createInput();
+    }
+  }
+
+  handleChange = (name, value) => {
+
+    this.setState(prevState => ({
+      input: {
+        ...prevState.input,
+        [name]: value ? (value.text ? value.operator : value) : null
+      }
+    }));
+    /*
+    if (name.match(/Value$/)) {
+      const field = name.replace(/[Value|Operator]$/, '');
+      const operatorEl = this.ref.current.querySelector('[name="' + field + 'Operator"]');
+      if (operatorEl) {
+        this.setState(prevState => ({
+          input: {
+            ...prevState.input,
+            [field + 'Operator']: value ? (value.text ? value.operator : value) : null
+          }
+        }));
+      }
+    }*/
+  }
+
+  operatorSK = (item) => {
+    let value
+    if (item.filter === 'boolean') {
+      value = this.state.input[item.field + 'Value'] === false ? false : (this.state.input[item.field + 'Value'] ? true : null)
+    }
+    else {
+      value = this.state.input[item.field + 'Operator'] ? this.state.input[item.field + 'Operator'] : null
+    }
+    return FILTER_OPERATORS[item.filter && item.filter !== "none" ? item.filter : 'text'].find(item => item.operator === value)
+  }
+
+  hasValue = (value) => {
+    return value && value !== this.props.enumDefault;
+  }
+
+  render() {
+    return (
+      <div ref={this.ref} className="k-form-inline dialogFilter">
+        {this.props.schema.map(item => {
+          switch (item.filter) {
+
+            case "cmd":
+              return (
+                <div className="k-form-field" key={item.field}>
+
+                </div>
+              )
+            case "enum":
+              return (
+                <div className="k-form-field" key={item.field}>
+                  <span className="title">{item.title}</span>
+                  <div></div>
+                  <div>
+                    <DropDownList
+                      data={this.props.parentProps[item.dataField]}
+                      onChange={(event) => {
+                        const hasValue = this.hasValue(event.target.value);
+                        this.handleChange(
+                          item.field + 'Value',
+                          hasValue ? event.target.value : '',
+                        );
+                      }}
+                      value={this.state.input[item.field + 'Value'] || this.props.enumDefault}
+                      defaultItem={this.props.enumDefault}
+                    />
+                  </div>
+                </div>
+              )
+            case "boolean":
+              return (
+                <div className="k-form-field" key={item.field}>
+                  <span className="title">{item.title}</span>
+                  <div></div>
+                  <div>
+                    <ExtendedDropDownList
+                      name={item.field + 'Value'}
+                      data={FILTER_OPERATORS["boolean"]}
+                      textField="text"
+                      onChange={this.handleChange}
+                      value={this.operatorSK(item)}
+                    />
+                  </div>
+                </div>
+              )
+
+            case "date":
+              return (
+                <div className="k-form-field" key={item.field}>
+                  <span className="title">{item.title}</span>
+                  <div>
+                    <ExtendedDropDownList
+                      name={item.field + 'Operator'}
+                      data={FILTER_OPERATORS["date"]}
+                      textField="text"
+                      onChange={this.handleChange}
+                      value={this.operatorSK(item)}
+                    />
+                  </div>
+                  <DatePicker
+                    name={item.field + 'Value'}
+                    onChange={this.handleChange}
+                    value={this.state.input[item.field + 'Value'] || null}
+                  />
+                </div>
+              )
+
+            case "numeric":
+              return (
+                <div className="k-form-field" key={item.field}>
+                  <span className="title">{item.title}</span>
+                  <div>
+                    <ExtendedDropDownList
+                      name={item.field + 'Operator'}
+                      data={FILTER_OPERATORS["numeric"]}
+                      textField="text"
+                      onChange={this.handleChange}
+                      value={this.operatorSK(item)}
+                    />
+                  </div>
+                  <NumericTextBox
+                    name={item.field + 'Value'}
+                    onChange={this.handleChange}
+                    value={this.state.input[item.field + 'Value'] || null}
+                  />
+                </div>
+              )
+
+              case "container":
+              return (
+                <div className="k-form-field" key={item.field}>
+                  <span className="title">{item.title}</span>
+                  <div>
+                    <ExtendedDropDownList
+                      name={item.field + '.' + item.textField + 'Operator'}
+                      data={FILTER_OPERATORS["text"]}
+                      textField="text"
+                      onChange={this.handleChange}
+                      value={this.operatorSK(item)}
+                    />
+                  </div>
+                  <Input
+                    name={item.field + '.' + item.textField + 'Value'}
+                    onChange={this.handleChange}
+                    value={this.state.input[item.field + '.' + item.textField + 'Value'] || ""}
+                  />
+                </div>
+              )    
+
+            default:
+              return (
+                <div className="k-form-field" key={item.field}>
+                  <span className="title">{item.title}</span>
+                  <div>
+                    <ExtendedDropDownList
+                      name={item.field + 'Operator'}
+                      data={FILTER_OPERATORS["text"]}
+                      textField="text"
+                      onChange={this.handleChange}
+                      value={this.operatorSK(item)}
+                    />
+                  </div>
+                  <Input
+                    name={item.field + 'Value'}
+                    onChange={this.handleChange}
+                    value={this.state.input[item.field + 'Value'] || ""}
+                  />
+                </div>
+              )
+          }
+        })}
+      </div>
+    );
+  }
+}
+
+
+DialogFilterForm.propTypes = {
+  schema: PropTypes.array.isRequired,
+  parentProps: PropTypes.object,
+  filter: PropTypes.object.isRequired,
+  enumDefault: PropTypes.string.isRequired
+}
+
+export default DialogFilterForm;

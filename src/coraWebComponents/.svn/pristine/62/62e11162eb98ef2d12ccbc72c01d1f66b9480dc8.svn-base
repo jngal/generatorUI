@@ -1,0 +1,33 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Dialog from './Dialog';
+
+class ConfirmDialog extends React.Component {
+  render() {
+    return (
+      <div className="confirm-dialog">
+        <Dialog
+          title="Potvrdenie"
+          onClose={this.props.onClose}
+          onConfirm={this.props.onConfirm}
+          isOpen={this.props.isOpen}
+          confirmText={this.props.confirmText}
+          cancelText={this.props.cancelText}
+        >          
+        <p style={{ margin: "15px", textAlign: "center" }}>{this.props.text}</p>
+        </Dialog>
+      </div>
+    );
+  }
+}
+
+ConfirmDialog.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  text: PropTypes.string.isRequired,
+  confirmText: PropTypes.string,
+  cancelText: PropTypes.string
+}
+
+export default ConfirmDialog;

@@ -1,0 +1,28 @@
+import './Header.scss';
+
+import Appmenu from './Appmenu';
+import React from 'react';
+import SidebarToggle from './SidebarToggle';
+import propTypes from 'prop-types';
+
+const Header = props => 
+  <div className="header navbar">
+    <Appmenu compact={props.sidebarType === 'compact'} />
+    <SidebarToggle
+      sidebarType={props.sidebarType}
+      onClick={props.onClick}
+      sideBarToggleIcons={props.sideBarToggleIcons}
+    />
+  </div>;
+
+Header.propTypes = {
+  sidebarType: propTypes.oneOf([
+    'normal',
+    'compact',
+    'fullscreen',
+  ]),
+  onClick: propTypes.func.isRequired,
+  sideBarToggleIcons: propTypes.object,
+}
+
+export default Header;

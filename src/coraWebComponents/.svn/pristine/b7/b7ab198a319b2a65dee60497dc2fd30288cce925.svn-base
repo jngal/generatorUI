@@ -1,0 +1,45 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Slide } from '@progress/kendo-react-animation';
+
+import './Alert.scss';
+
+let _timer;
+
+/**
+ * Alert compontetn
+ * @module
+ * @param {func} onHideMsg - Function invoked after message dissapears
+ * @param {object} [msg] - Alert message
+ */
+class AlertComponent extends React.Component {
+  render() {
+    const { msg } = this.props;
+    if (msg) {
+      if (_timer) {
+        clearTimeout(_timer);
+      }
+      _timer = setTimeout(this.props.onHideMsg, 8000);
+    }
+
+    return (
+      <Slide className="alert-container" direction={'up'}>
+        {msg &&
+          <div className={'alert alert-' + msg.messageType}>
+            {msg.message}
+            <button type="button" className="close" onClick={this.props.onHideMsg} data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        }
+      </Slide >
+    );
+  }
+}
+
+AlertComponent.propTypes = {
+  onHideMsg: PropTypes.func.isRequired,
+  msg: PropTypes.object
+}
+
+export default AlertComponent;

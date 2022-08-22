@@ -1,0 +1,156 @@
+@import "./variables";
+@import "./themes";
+
+.p-0 {
+  @include themed(){
+    background-color: color($secondarylight);
+  }
+  .k-form {
+    input {
+      transition: 0.4s;
+      padding: 10px 20px;
+      height: auto;
+      @include themed(){
+        border: 1px solid color($secondary);
+        background-color: color($basicwhite);
+      }
+    }
+    input:hover, input:active, input:focus {
+      @include themed(){
+        border: 1px solid color($secondarydark);
+        background-color: color($basicwhite);
+      }
+    }
+    .k-form-field {
+      margin-bottom: 0;
+      &:not(:first-child){
+        margin-top: 20px;
+      }
+      & > span {
+        transition:0.4s;
+      }
+      &:hover > span, &:active  span {
+        @include themed(){
+          color: color($primary);
+        }
+      }
+    }
+  }
+}
+
+.w-sidebar {
+    max-width: $sidebar-width !important;
+}
+
+.w-sidebar-compact {
+    max-width: $sidebar-compact-width !important;
+
+    #menu {
+        min-width: 100%;
+    }
+}
+
+.w-sidebar-fullscreen {
+    max-width: 100vw;
+    height: 100vh;
+}
+
+.scrollable-navbar {
+  height: 100vh;
+  width: 100vw;
+  overflow-y: scroll;
+}
+
+.scrollable-body {
+  height: calc(100vh - #{$nav-height}); 
+  width: 100vw;
+  overflow-y: scroll;
+}
+
+.k-tooltip {
+    @include themed() {
+        background-color: color($primarydark);
+        color: color($secondarylight);
+    }
+    .k-callout {
+        @include themed() {
+            color: color($primarydark);
+        }
+    }
+    max-width: 380px;
+    text-align: center;
+}
+
+::selection {
+  @include themed() {
+    background-color: color($primary) !important;
+    color: color($secondarylight) !important;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.col .p-3 div:not(.k-window-content) > .tabs > .card {
+  padding:15px;
+  background-color: transparent;
+  padding-top:0px;
+}
+
+.scrollable::-webkit-scrollbar {      
+  @include themed() {
+    background-color: color($basicwhite);
+  }
+}
+
+.scrollable::-webkit-scrollbar-thumb {                             
+  border-radius: 10px;
+  @include themed() {
+    background-color: color($secondary);
+  }
+}
+
+.scrollable::-webkit-scrollbar-corner {                            
+  background: #FFF;
+}
+
+.scrollable::-webkit-scrollbar-button:vertical:start:decrement {
+  @include themed() {
+    background:
+      linear-gradient(120deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(240deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(0deg, color($basicwhite), 30%, rgba(0, 0, 0, 0) 31%);
+    background-color: color($secondarylight);
+  }
+}
+
+.scrollable::-webkit-scrollbar-button:vertical:end:increment {
+  @include themed() {
+    background:
+      linear-gradient(300deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(60deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(180deg, color($basicwhite), 30%, rgba(0, 0, 0, 0) 31%);
+    background-color: #aab1b7;
+  }
+}
+
+.scrollable::-webkit-scrollbar-button:horizontal:end:increment {
+  @include themed() {
+    background:
+      linear-gradient(210deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(330deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(90deg, color($basicwhite), 30%, rgba(0, 0, 0, 0) 31%);
+    background-color: #aab1b7;
+  }
+}
+
+.scrollable::-webkit-scrollbar-button:horizontal:start:decrement {
+  @include themed() {
+    background:
+      linear-gradient(30deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(150deg, color($basicwhite), 40%, rgba(0, 0, 0, 0) 41%),
+      linear-gradient(270deg, color($basicwhite), 30%, rgba(0, 0, 0, 0) 31%);
+    background-color: #aab1b7;
+  }
+}

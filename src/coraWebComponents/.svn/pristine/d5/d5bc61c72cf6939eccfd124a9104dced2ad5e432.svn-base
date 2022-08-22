@@ -1,0 +1,192 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import Input from '../../forms/Input';
+import Button from '../../buttons/Button';
+import LoadingPanel from '../../LoadingPanel';
+import './Registration.scss';
+import { isValidMail, isValidPasswordStrong } from '../../utils/validator';
+import { getClientVersion } from '../../utils/helper';
+
+/**
+ * Registration component
+ * @module
+ * @param {array} additionalElements - Additional elements
+ * @param {string} [emailLabel] - Email label, "Email" if not provided
+ * @param {element} header - Header element
+ * @param {bool} isLoading - Is loading?
+ * @param {string} [loginLabel] - Login label, "Prihlásenie" if not provided
+ * @param {string} [loginPath] - Login path, empty if not provided
+ * @param {string} [passwordLabel] - Password label, "Heslo" if not provided
+ * @param {bool} [showLoginLabel] - Should login table show?
+ * @param {string} [verifyPasswordLabel] - Verify password label, "Overenie hesla" if not provided
+ * @param {string} [userNameLabel] - User name label, "Prihlasovacie meno" if not provided
+ */
+class Registration extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      username: '',
+      email: '',
+      password: '',
+      verifyPassword: '',
+      errorMsg: {
+        email: "",
+        password: "",
+      },
+    };
+  }
+
+  handleChange = (name, value) => {
+    this.setState({ [name]: value });
+  };
+
+  onBlurEmail = () => {
+    const validMsg = isValidMail(this.state.email);
+    if (validMsg === '')
+      this.setState({ errorMsg: { ...this.state.errorMsg, email: "" } } );
+    else
+      this.setState({ errorMsg: { ...this.state.errorMsg, email: validMsg } } );
+  };
+
+  onBlurPassword = () => {
+    if (this.state.password !== this.state.verifyPassword)
+      this.setState({ errorMsg: {...this.state.errorMsg, password: "Hesla sa nezhodujú" } } );
+    else {
+      const validMsg = isValidPasswordStrong(this.state.password);
+      if (validMsg === '')
+        this.setState({ errorMsg: {...this.state.errorMsg, password: "" } } );
+      else
+        this.setState({ errorMsg: {...this.state.errorMsg, password: validMsg } } );
+    }
+  }
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (this.state.errorMsg.email !== "")
+      return;
+    if (this.state.errorMsg.password !== "")
+      return;
+
+    this.props.onSubmit(this.state);
+  }
+
+  render() {
+    if (this.props.emailValue && (this.props.emailValue !== this.state.email))
+      this.setState({ email: this.props.emailValue });
+
+    return (
+      <div className="row m-0">
+        <div className="col-4 offset-4 p-0">
+          <div className="card registration">
+            <div className="card-body">
+              <div className="card-title">
+                <div>
+                  {this.props.header}
+                </div>
+                <div style={{float: 'right', fontSize: 12, paddingRight: 16}}>
+                  {getClientVersion()}
+                </div>
+              </div>
+              <form className="k-form" onSubmit={this.handleSubmit}>
+
+                {/* Default elements */}
+                {this.props.showUsernameInput && 
+                  <div className="k-form-field">
+                    <span>{this.props.userNameLabel || "Prihlasovacie meno"}</span>
+                    <Input
+                      name="username"
+                      onChange={this.handleChange}
+                      value={this.state.username}
+                    />
+                </div>
+                }
+                <div className="k-form-field">
+                  <span>{`*${this.props.emailLabel || "Email"}`}</span>
+                  <Input
+                    name="email"
+                    required={true}
+                    onBlur={this.onBlurEmail}
+                    onChange={this.handleChange}
+                    value={this.state.email}
+                  />
+                  {this.state.errorMsg.email &&
+                    <h6 className="errorMessage">{this.state.errorMsg.email}</h6>
+                  }
+                </div>
+                <div className="k-form-field">
+                  <span>{`*${this.props.passwordLabel || "Heslo"}`}</span>
+                  <Input
+                    type="password"
+                    name="password"
+                    required={true}
+                    onBlur={this.onBlurPassword}
+                    onChange={this.handleChange}
+                    value={this.state.password}
+                  />
+                </div>
+                <div className="k-form-field">
+                  <span>{`*${this.props.verifyPasswordLabel || "Overenie hesla"}`}</span>
+                  <Input
+                    type="password"
+                    name="verifyPassword"
+                    required={true}
+                    onBlur={this.onBlurPassword}
+                    onChange={this.handleChange}
+                    value={this.state.verifyPassword}
+                  />
+                  {this.state.errorMsg.password &&
+                    <h6 className="errorMessage">{this.state.errorMsg.password}</h6>
+                  }
+                </div>
+                
+                {/* Render additonal elements */}
+                {this.props.additionalElements &&
+                  this.props.additionalElements.map(e => e)
+                }
+
+                {/* Register button with Login hyperLink */}
+                <div className="k-form-field">
+                  <div className="footerContainer">
+                    {this.props.showLoginLabel &&
+                      <a className="login" href={`#${this.props.loginPath || ''}`}>
+                        {this.props.loginLabel || "Prihlásenie"}
+                      </a>
+                    }
+                    <Button
+                      primary={true}
+                      disabled={this.props.isLoading}
+                      label="Registrovať"
+                      type="submit"
+                    />
+                  </div>
+                </div>
+              </form>
+
+              <LoadingPanel isLoading={this.props.isLoading} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+Registration.propTypes = {
+  additionalElements: PropTypes.arrayOf(PropTypes.element),
+  emailLabel: PropTypes.string,
+  emailValue: PropTypes.string,
+  header: PropTypes.element.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  loginLabel: PropTypes.string,
+  loginPath: PropTypes.string,
+  passwordLabel: PropTypes.string,
+  showLoginLabel: PropTypes.bool,
+  showUsernameInput: PropTypes.bool,
+  onSubmit: PropTypes.func.isRequired,
+  verifyPasswordLabel: PropTypes.string,
+  userNameLabel: PropTypes.string,
+}
+
+export default Registration;

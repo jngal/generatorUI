@@ -1,0 +1,68 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Chart, ChartTooltip } from '@progress/kendo-react-charts';
+
+// elements
+import ChartTitleComponent from './elements/ChartTitleComponent';
+import ChartLegendComponent from './elements/ChartLegendComponent';
+import ChartCategoryAxisComponent from './elements/ChartCategoryAxisComponent';
+import ChartSeriesComponent from './elements/ChartSeriesComponent';
+
+/**
+ * Chart component
+ * @module
+ * @param {categoryAxisProps} categoryAxisProps - Category axis props
+ * @param {legendProps} legendProps - Legend props
+ * @param {seriesProps} seriesProps - Series props
+ * @param {titleProps} titleProps - Title props
+ */
+
+class ChartComponent extends React.Component {
+  render() {
+    return (
+      <Chart>
+        {this.props.titleProps &&
+          <ChartTitleComponent
+            titleProps={this.props.titleProps}
+          />
+        }
+        {this.props.legendProps &&
+          <ChartLegendComponent
+            legendProps={this.props.legendProps}
+          />
+        }
+        {this.props.categoryAxisProps &&
+          <ChartCategoryAxisComponent
+            categoryAxisProps={this.props.categoryAxisProps}
+          />
+        }
+        <ChartSeriesComponent
+          seriesProps={this.props.seriesProps}
+        />
+        <ChartTooltip />
+      </Chart>
+    )
+  }
+}
+
+ChartComponent.propTypes = {
+  categoryAxisProps: PropTypes.shape({
+    categories: PropTypes.array,
+    title: PropTypes.object,
+  }),
+  legendProps: PropTypes.shape({
+    position: PropTypes.string,
+  }).isRequired,
+  seriesProps: PropTypes.arrayOf({
+    data: PropTypes.array,
+    gap: PropTypes.number,
+    name: PropTypes.string,
+    spacing: PropTypes.number,
+    type: PropTypes.string,
+  }),
+  titleProps: PropTypes.shape({
+    text: PropTypes.string,
+  }),
+};
+
+export default ChartComponent;

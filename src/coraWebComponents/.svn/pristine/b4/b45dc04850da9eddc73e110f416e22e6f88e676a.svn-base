@@ -1,0 +1,192 @@
+import React from "react";
+import PropTypes from "prop-types";
+import { AutoComplete } from "@progress/kendo-react-dropdowns";
+import "./Autocomplete.scss";
+
+import _ from "lodash";
+
+const SORT = [];
+const PAGE = {
+  skip: 0,
+  take: 10,
+};
+
+let _timer;
+
+/**
+ * Autocomplete input
+ * @module
+ * @param {string} textField - Text field
+ * @param {string} [valueField] - Value field, used for regex
+ * @param {object} [selected] - Selected item
+ * @param {func} onChange - Function invoked on field change
+ * @param {array} data - All data
+ * @param {bool} isLoading - Loading
+ * @param {func} onSelect - Function invoked on item select
+ * @param {object} [filter] - Filter
+ * @param {func} [onFilter] - On filter Function
+ * @param {bool} [required] - Field is required
+ * @param {bool} [disabled] - Field is disabled
+ * @param {string} [validationMessage] - Validation message if field is invalid
+ * @param {bool} [autofocus] - Should input be focused?
+ * @param {string} [textFilter] - Text filter
+ * @param {string} [placeholder] - Placeholder for input
+ * @param {number} [tabIndex] - Tabindex for input
+ */
+class AutocompleteComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      filter: {
+        filters: [],
+      },
+    };
+    this.autoComplete = React.createRef();
+  }
+
+  buildFilter = (value) => {
+    return {
+      logic: "and",
+      filters: [
+        {
+          field: this.props.textField,
+          operator: "contains",
+          value,
+          ignoreCase: true,
+        },
+      ],
+    };
+  };
+
+  onClose = async (event) => {
+    await this.props.onBlur;
+    const value = this.refs.autoComplete._input.value;
+
+    if (value) {
+      this.props.data.forEach((object) => {
+        if (object[this.props.textField] === value) {
+          this.props.onSelect(object);
+        }
+      });
+    }
+    if (this.props.onBlur) {
+      this.props.onBlur();
+    }
+  };
+
+  onChange = (event) => {
+    const filter = this.buildFilter(event.target.value);
+    // this.setState({ filter });
+    if (this.props.onFilter) {
+      this.props.onFilter(filter);
+    }
+
+    const eventType = event.nativeEvent.type;
+    if (
+      eventType === "click" ||
+      (eventType === "keydown" && event.nativeEvent.keyCode === 13)
+    ) {
+      const value = this.props.data.find(
+        (x) => x[this.props.textField] === event.target.value
+      );
+      this.props.onSelect(value);
+    } else {
+      if (this.props.selected !== null) {
+        this.props.onSelect(null);
+      }
+
+      if (_timer) {
+        clearTimeout(_timer);
+      }
+      _timer = setTimeout(async () => {
+        this.props.onChange(filter, SORT, PAGE);
+      }, 500);
+    }
+  };
+
+  buildValue = () => {
+    if (this.props.textFilter !== undefined) {
+      return this.props.textFilter;
+    }
+    if (this.props.selected === undefined) {
+      return "";
+    }
+
+    if (this.props.selected) {
+      if (this.props.valueField) {
+        let toReplace = this.props.valueField.match(/{([^}]+)}/g);
+        let finalString = this.props.valueField;
+        toReplace.forEach((element) => {
+          let propName = element.replace(/[{}]/g, "");
+          const replaceWith = _.get(this.props.selected, propName);
+          finalString = finalString.replace(
+            element,
+            replaceWith != null ? replaceWith : ""
+          );
+        });
+        return finalString;
+      } else {
+        return this.props.selected[this.props.textField];
+      }
+    }
+
+    const filter = this.props.filter;
+    if (!filter) {
+      return undefined;
+    }
+    const f = filter.filters.find((x) => x.field === this.props.textField);
+    return f && f.value ? f.value.toString() : "";
+  };
+
+  componentDidMount = () => {
+    if (this.props.autofocus) {
+      this.refs.autoComplete._input.focus();
+    }
+  };
+
+  render() {
+    return (
+      <AutoComplete
+        className={`autocomplete ${
+          this.props.disabled ? "disabled-field" : ""
+        } ${this.props.className}`}
+        validationMessage={this.props.validationMessage || "Povinné"}
+        data={this.props.data}
+        onChange={this.onChange}
+        onBlur={this.onClose}
+        textField={this.props.textField}
+        loading={this.props.isLoading}
+        value={this.buildValue()}
+        required={this.props.required}
+        disabled={this.props.disabled}
+        placeholder={this.props.placeholder}
+        ref="autoComplete"
+        tabIndex={this.props.tabIndex}
+      />
+    );
+  }
+}
+
+AutocompleteComponent.propTypes = {
+  className: PropTypes.string,
+  textField: PropTypes.string.isRequired,
+  valueField: PropTypes.string,
+  primaryField: PropTypes.string.isRequired,
+  selected: PropTypes.object,
+  onChange: PropTypes.func.isRequired,
+  data: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  filter: PropTypes.object,
+  onFilter: PropTypes.func,
+  required: PropTypes.bool,
+  disabled: PropTypes.bool,
+  validationMessage: PropTypes.string,
+  autofocus: PropTypes.bool,
+  textFilter: PropTypes.string,
+  placeholder: PropTypes.string,
+  tabIndex: PropTypes.number,
+};
+
+export default AutocompleteComponent;

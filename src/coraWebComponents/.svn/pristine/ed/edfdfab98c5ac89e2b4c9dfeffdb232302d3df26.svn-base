@@ -1,0 +1,149 @@
+@import "./variables";
+@import "./themes";
+
+.tabs{
+  .card {
+    border: 0 !important;
+    .breadcrumb {
+      margin-bottom: 0;
+      padding: 0;
+      border-radius: 0;
+      @include themed() {
+        background-color: color($secondarylight);
+        border-bottom: 1px solid color($secondary);
+        color: color($secondary);
+      }
+      & > li > button {
+        font-size: 12px;
+        text-transform: uppercase;
+        padding-bottom: 10px;
+        &:hover {
+          @include themed(){
+            background-color: color($secondarylight) !important;
+          }
+        }
+        &::after, &::before {
+          content: none;
+        }
+        &:hover {
+          @include themed(){
+            color: color($secondarydarker) !important;
+          }
+        }
+      }
+      .breadcrumb-item + .breadcrumb-item::before {
+        display: inline-block;
+        padding:0px;
+        color: #6c757d;
+        content: ">";
+        font-size:10px;
+        margin-left: -5px;
+        position: relative;
+        top: 4px;
+      }
+    }
+
+    .compact {
+      #detail-toolbar .button-back {
+        display: none;
+      } 
+    }
+  }
+
+  .k-dropdown-wrap{
+    @include themed() {
+      background-image: linear-gradient( color($basicwhite), color($basicwhite));
+      color: color($secondarydarker) !important;
+    }
+  }
+
+  .card-header {
+    height: $tabs-height;
+    border-bottom: 0 !important;
+    padding: 0 !important;
+    margin-top: 15px;
+    @include themed() {
+      color: color($secondary) !important;
+      background-color: color($secondarylight) !important;
+    }
+    
+    &:first-child {
+      border-radius: 0 !important;
+    }
+
+    button {
+      padding: 0;
+      border-radius: 0;
+      background-image: none !important;
+      font-size: 20px;
+      padding-bottom: 2px;
+      margin: 10px 5px 5px 5px;
+      @include themed() {
+        background-color: color($secondarylight) !important;
+        border: solid color($secondarylight) !important;
+        color: color($secondarydarker);
+      }
+
+      &.k-primary {
+        @include themed() {
+          background-color: color($secondarylight) !important;
+          color: color($primary) !important;
+          border-bottom: 2px solid color($primary) !important;
+        }
+      }
+
+      &:hover {
+        @include themed() {
+          color: color($primary);
+        }
+      }
+
+      &:focus {
+        box-shadow: none !important;
+      }
+    }
+
+    .switch {
+      float: right;
+      margin-top: 10px;
+    }
+  }
+
+  .card-body {
+    padding: 0px;
+    @include themed(){
+      border: 1px solid color($secondarymedium);
+      box-shadow: 0px 3px 8px rgba(color($secondarydarker),0.2);
+    }
+    .k-widget.k-grid {
+      border: 0 !important;
+
+      .k-header.k-grid-toolbar {
+        padding: 0 !important;
+        @include themed(){
+          border-bottom: 1px solid color($primary);
+        }
+      }
+    }
+    //padding odstraneny pre > "Nastaviť vybavujúceho"
+    /*
+    .k-form-inline {
+      padding: 0 !important;
+    }
+    */
+    
+
+    .tab.visible {
+      display: block;
+      margin-top: 0 !important;
+
+      & + .tab.visible {
+        padding-top: 20px !important;
+      }
+    }
+
+    .tab.hidden {
+      display: none;
+    }
+  }
+}

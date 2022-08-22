@@ -1,0 +1,214 @@
+@import "../variables";
+@import "../themes";
+.datepicker {
+  &.k-datepicker {
+    flex: 1;
+  }
+
+  &.disabled-field {
+    background-color: inherit !important;
+    .k-picker-wrap {
+      opacity: 1 !important;
+      .k-dateinput-wrap {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .k-dateinput {
+    .k-state-focused {
+      @include themed() {
+        background-color: color($basicwhite) !important;
+        color: color($text-color) !important;
+      }
+    }
+  }
+
+  .k-calendar {
+    .k-state-selected .k-link {
+      @include themed() {
+        background-color: color($primary);
+      }
+    }
+    ul.k-reset li:hover {
+      @include themed() {
+        background-color: color($secondarydarker);
+        color: color($basicwhite) !important;
+      }
+    }
+
+    .k-today {
+      @include themed() {
+        color: color($primary) !important;
+      }
+      &:hover {
+        @include themed() {
+          color: color($basicwhite) !important;
+        }
+      }
+    }
+  }
+}
+
+.k-calendar {
+  .k-today {
+    @include themed() {
+      color: color($secondarydarker);
+    }
+  }
+  @include themed() {
+    background-color: color($secondarylight);
+    color: color($secondarydarker);
+  }
+  .k-calendar-navigation {
+    @include themed() {
+      background-color: color($secondarylight);
+      color: color($secondarydarker);
+    }
+  }
+  .k-content {
+    @include themed() {
+      background-color: color($secondarylight);
+      color: color($secondarydarker);
+    }
+  }
+  .k-content td {
+    border-radius: 0px;
+  }
+  .k-state-selected.k-today > .k-link {
+    @include themed() {
+      color: color($basicwhite) !important;
+      background-color: color($primary) !important;
+    }
+  }
+  .k-link:hover {
+    @include themed() {
+      background-color: color($primary) !important;
+      color: color($basicwhite);
+    }
+  }
+  .k-state-disabled{
+    @include themed() {
+      background-color: color($secondary);
+    }
+  }
+}
+
+.k-filtercell {
+  input[value="deň. mesiac. rok"] {
+    @include themed() {
+      color: color($basicwhite) !important;
+    }
+  }
+}
+
+.k-calendar-container {
+  .k-calendar .k-content .k-today {
+    @include themed() {
+      color: color($secondarydarker);
+    } 
+  }
+  .k-today {
+    .k-link {
+      @include themed() {
+        color: color($primary);
+      }
+      &:hover {
+        @include themed() {
+          color: color($basicwhite);
+          background-color: color($primary);
+        }
+      }
+    }
+  }
+  .k-calendar .k-state-selected .k-link, .k-calendar .k-content .k-state-selected .k-link{
+    @include themed() {
+      border-color: color($secondarydarker);
+      color: color($secondarylight);
+      background-color: color($secondarydarker);
+    }
+  }
+  .k-calendar-navigation {
+    li:hover {
+      @include themed() {
+        background-color: color($primary);
+        color: color($basicwhite);
+      }
+    }     
+  }
+    .k-calendar-header {
+        .k-today {
+          @include themed() {
+            color: color($primary);
+          }
+        }        
+        .k-today:hover {
+          @include themed() {
+            color: color($primary);
+          }
+        }      
+    }       
+}
+
+.k-form-inline {
+  .k-form-field {
+    &:hover {
+      .datepicker-reset{
+        display:block !important;
+        line-height: 39px;
+      }
+    }
+    //nastavenie pozicie pre button reset-date
+    .datepicker-reset {
+      position: absolute;
+      right: 58px;
+      transform: translateY(-70%);
+      margin-right: 7px;
+      align-self: center;
+      display: none;
+      @include themed() {
+        color:color($secondary);
+      }
+    }
+    .datepicker-reset:hover {
+      cursor: pointer;
+      @include themed() {
+        color: color($secondarydarker);
+      }
+    }
+    //button na nastavenie dnesneho datumu
+    .datepicker-today {
+      padding: 0;
+      border-radius: 0;
+      position: relative;
+      width: 28px;
+      height: 28px;
+      left: 1px;
+      // top: 11px;
+      overflow: hidden;
+      line-height: 28px;
+      text-align: center;
+      cursor: pointer;
+      @include themed() {
+        background-color: color($secondarydark);
+        color: color($basicwhite);
+      }
+      // position: absolute;
+      // right: 41px;
+      // top: 1px;
+      // height: 40px;
+      // width: 2.6rem;
+      // line-height: 40px;
+      // text-align: center;
+      // cursor: pointer;
+      // @include themed() {
+      //   color: color($basicwhite); 
+      //   background-color: color($primary);
+      // }
+    }
+    //diplay pre disabled
+    .datepicker-reset-disabled,.datepicker-today-disabled{
+      display:none;
+    }
+  }
+}

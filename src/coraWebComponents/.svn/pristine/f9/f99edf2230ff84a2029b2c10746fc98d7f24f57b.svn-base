@@ -1,0 +1,6 @@
+@import "../variables";
+@import "../themes";
+
+.google {
+  width: 100%;
+}

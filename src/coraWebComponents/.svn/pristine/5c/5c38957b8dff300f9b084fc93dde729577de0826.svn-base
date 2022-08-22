@@ -1,0 +1,15 @@
+.dialogFilter {
+  width: 700px;
+  max-height: calc(100vh - 85px);
+  overflow: auto;
+
+  //odsadenie polí v dialog filtri
+  .k-form-field{
+    div:nth-child(2){
+      margin-right: 10px !important;
+    }
+    div:empty:not(.datepicker-reset){
+      margin-right: 0px !important;
+    }
+  } 
+}

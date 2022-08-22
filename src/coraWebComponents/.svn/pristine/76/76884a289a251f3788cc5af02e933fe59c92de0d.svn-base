@@ -1,0 +1,12 @@
+@import "../../variables";
+@import "../../themes";
+
+.header.navbar {
+  height: $sidebar-header-height;
+  padding: 0 !important;
+  align-items: initial !important;
+  flex-wrap: initial !important;
+  @include themed() {
+    border-bottom: 1px solid color($menubasic);
+  }
+}

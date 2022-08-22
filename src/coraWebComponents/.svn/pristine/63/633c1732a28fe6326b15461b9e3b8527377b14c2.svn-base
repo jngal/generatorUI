@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: detail/Detail.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: detail/Detail.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import './Detail.scss';
+
+import DatePicker from '../forms/DatePicker';
+import DropDownList from '../forms/DropDownList';
+import Input from '../forms/Input';
+import LoadingPanel from '../LoadingPanel';
+import NumericTextBox from '../forms/NumericTextBox';
+import Picker from '../forms/Picker';
+import AutocompleteComponent from '../forms/Autocomplete';
+import MultiSelect from '../forms/MultiSelect';
+import PropTypes from 'prop-types';
+import React from 'react';
+import Switch from '../forms/Switch';
+import Textarea from '../forms/Textarea';
+import TimePicker from '../forms/TimePicker';
+import Toolbar from './Toolbar';
+import Upload from '../forms/Upload';
+import ValidationMessage from './ValidationMessage';
+import ValidationAlert from '../ValidationAlert';
+import FileContent from '../dialogs/FileContent';
+import withRequests from '../utils/withRequests';
+
+/**
+ * @typedef {Object} detailSchema
+ * @property {string} field - Unique field identifier
+ * @property {string} title - Field name
+ * @property {string} type - Field type - "string", "boolean", "enum", "date", "time", "text", "numeric", "container", "files", "password"
+ * @property {bool} required - Required
+ * @property {bool} disabled - Readonly
+ * @property {bool} autofocus - Show cursor in field?
+ * @property {number} tabIndex - Index of the tab
+ * @property {string} defaultValue - Default value
+ * @property {string} validationMessage - Validation Message
+ * @property {string} tooltip - Tooltip over the column
+ */
+
+/**
+ * Detail component
+ * @module
+ * @param {func} onSubmit - On form submit function
+ * @param {detailSchema[]} schema - Schema 
+ * @param {object} data - Data
+ * @param {func} onChange - On field change function 
+ * @param {func} onBlur - On field blur function
+ * @param {func} handleSubmit - Handle sumbit function  
+ * @param {func} handleBlur - Invokes on field blur, function
+ * @param {func} getValue - Get field value, function
+ * @param {func} onUpload - On file upload function 
+ * @param {object} parentProps - Parent props 
+ * @param {bool} disabled - Read only detail 
+ * @param {bool} isLoading - Is loading 
+ * @param {array} ui - Custom schema
+ * @param {element} toolbarActions - Toolbar actions
+ * @param {string} primaryField - Primary field 
+ * @param {bool} toolbarHidden - Toolbar hidden
+ * @param {bool} autofocus - Show cursor in field?
+ * @param {func} next - Switches to the next entry function
+ * @param {func} previous - Switches to the previous entry function
+ * @param {bool} disabledNext - Is next entry disabled? 
+ * @param {bool} disabledPrevious - Is previous entry disabled? 
+ * @param {element} currentEl - Current element
+ * @param {func} onBack - Function invoked after click on back arrow
+ * @param {object} initFilter - Init filter
+ * @param {object} fixedFilter - Fixed filter
+ * @param {func} onAdd - On entry add function
+ * @param {bool} isPicker - Is field picker
+ * @param {bool} hiddenBack - Hidden back arrow in detail toolbar
+ * @param {func} applyFilter - Apply filter function  
+ * @param {string} title - Detail title  
+ * @param {array} pages - Pages  
+ * @param {bool} hiddenSave - Hidden save button in detail toolbar 
+ * @param {bool} sidebarHorizontal - Should sidebar be horizontal?
+ */
+
+class Detail extends React.Component {
+  constructor(props) {
+    super(props);
+
+    let expandedPageIndex = 0;
+    if (props.pages) {
+      expandedPageIndex = props.pages.findIndex(page => page.active) + 1;
+    }
+
+    this.state = {
+      expandedPageIndex,
+    }
+  }
+
+  handleClick = (event, pageIndex) => {
+    this.setState({
+      expandedPageIndex: this.state.expandedPageIndex === pageIndex ? 0 : pageIndex
+    });
+  }
+
+  buildInput = x => {
+    switch (x.type) {
+      case 'files':
+        return (
+          &lt;Upload
+            name={x.field}
+            onChange={this.props.onChange}
+            onUpload={this.props.onUpload}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            url={x.url}
+            restrictions={{
+              allowedExtensions: x.restrictions != null ? x.restrictions : []
+            }}
+            data={x.data}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'boolean':
+        return (
+          &lt;Switch
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            onLabel={x.onLabel}
+            offLabel={x.offLabel}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+          />
+        );
+
+      case 'enum':
+        return (
+          &lt;DropDownList
+            name={x.field}
+            data={this.props.parentProps[x.dataField] ? this.props.parentProps[x.dataField].data : []}
+            textField={x.textField}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'date':
+        return (
+          &lt;DatePicker
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            min={x.min}
+            max={x.max}
+            format={x.format}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'time':
+        return (
+          &lt;TimePicker
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'numeric':
+        return (
+          &lt;NumericTextBox
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            autofocus={x.autofocus}
+            max={x.max}
+            min={x.min}
+            format={x.format}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'container':
+        return (
+          &lt;Picker
+            textField={x.textField}
+            valueField={x.valueField}
+            onChange={this.props.parentProps[x.onChange]}
+            onSubmit={this.props.parentProps[x.onSubmit]}
+            data={this.props.parentProps[x.data] ? this.props.parentProps[x.data].data : []}
+            isLoading={this.props.parentProps[x.data] ? this.props.parentProps[x.data].isLoading : false}
+            onSelect={this.props.onChange}
+            selected={this.props.getValue(x.field)}
+            schema={x.schema}
+            total={this.props.parentProps[x.data] ? this.props.parentProps[x.data].total : 0}
+            disabled={x.disabled || this.props.disabled}
+            name={x.field}
+            primaryField={x.primaryField}
+            title={x.title}
+            initFilter={x.initFilter}
+            fixedFilter={x.fixedFilter}
+            autofocus={x.autofocus}
+            detail={x.detail}
+            onAdd={this.props.parentProps[x.onAdd]}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            placeholder={"Zvoľte požadovanú hodnotu"}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'text':
+        return (
+          &lt;Textarea
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            title={x.title}
+            autofocus={x.autofocus}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            minLength={x.minLength}
+            maxLength={x.maxLength}
+            onBlur={(e) => this.props.handleBlur(x)}
+            defaultExpanded={x.defaultExpanded}
+            readOnly={x.readOnly}
+          />
+        );
+
+      case 'autocomplete':
+        return (
+          &lt;AutocompleteComponent
+            name={x.field}
+            data={this.props.parentProps[x.dataField] ? this.props.parentProps[x.dataField].data : []}
+            textField={x.textField}
+            onSelect={this.props.parentProps[x.onSelect]}
+            selected={this.props.getValue(x.field)}
+            disabled={x.disabled}
+            onChange={this.props.parentProps[x.onChange]}
+            ref={`${x.field}_ref`}
+            primaryField={x.primaryField}
+            tabIndex={x.tabIndex}
+            isLoading={this.props.parentProps[x.data] ? this.props.parentProps[x.data].isLoading : false}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+
+      case 'multi':
+        return (
+          &lt;MultiSelect
+            name={x.field}
+            data={this.props.parentProps[x.dataField].data}
+            textField={x.textField}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled}
+            onChange={this.props.onChange}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            onBlur={(e) => this.props.handleBlur(x)}
+          />
+        );
+      
+      case 'file':
+        return (
+          &lt;FileContent
+            requests={this.props.requests}
+            name={x.name || this.props.data[x.nameField]}
+            url={x.url.replace('{id}', this.props.data[x.idField])}
+            mimeType={x.mimeType || this.props.data[x.mimeTypeField]}
+            id={this.props.data[x.idField]}
+            hideButton={x.hideButton}
+            imgWidth={x.imgWidth}
+            pdfWidth={x.pdfWidth}
+            pdfHeight={x.pdfHeight}
+          />
+        );
+
+      case 'string':
+      case 'password':
+      default:
+        return (
+          &lt;Input
+            name={x.field}
+            onChange={this.props.onChange}
+            value={this.props.getValue(x.field)}
+            disabled={x.disabled || this.props.disabled}
+            autofocus={x.autofocus}
+            minLength={x.minLength}
+            maxLength={x.maxLength}
+            pattern={x.pattern}
+            validationMessage={x.validationMessage}
+            ref={`${x.field}_ref`}
+            tabIndex={x.tabIndex}
+            type={(x.type === 'password' || x.type === "url") ? x.type : null}
+            onBlur={(e) => this.props.handleBlur(x)}
+            copyable={x.copyable}
+          />
+        );
+    }
+  }
+
+  buildField = (x, fieldClassName) => {
+    const disabledClass = x.disabled ? "disabled-field" : "";
+    const customClass = fieldClassName || "";
+
+    return (
+      &lt;React.Fragment key={x.field}>
+        &lt;div className={x.required &amp;&amp; !x.disabled ? `k-form-field required form-${x.type} form-field-${x.field} ${customClass}` : `k-form-field form-${x.type} form-field-${x.field} ${disabledClass} ${customClass}`}>
+          &lt;span>{x.title}&lt;/span>
+          {this.buildInput(x)}
+          {x.tooltip &amp;&amp;
+            &lt;div className="detail-tooltip">
+              {x.tooltip}
+            &lt;/div>
+          }
+        &lt;/div>
+        &lt;ValidationMessage
+          required={x.required}
+          validationMessage={x.validationMessage}
+        />
+      &lt;/React.Fragment>
+    );
+  }
+
+  buildPageTitle = pageIndex => {
+    if(this.props.pages) {
+      return this.props.pages[--pageIndex].title
+    }
+
+    switch (pageIndex) {
+      case 1:
+        return "Doplňujúce informácie";
+      case 2:
+        if (this.props.pageTitle) {
+          return this.props.pageTitle
+        }
+        else {
+          return "Workflow";
+        }
+      default:
+        return "Neznámy index strany";
+    }
+  }
+
+  buildPageCustomClass = pageIndex => {
+    if (this.props.pages &amp;&amp; pageIndex > 0) {
+      return this.props.pages[--pageIndex].customClass
+    }
+    return null;
+  }
+
+  buildPageClassName = pageIndex => {
+    if (pageIndex > 0) {
+      if (this.state.expandedPageIndex === pageIndex) {
+        return `sidebar-${pageIndex} col-4 ${this.props.sidebarHorizontal ? 'sidebar-horizontal' : ''}`;
+      }
+      else {
+        return `sidebar-${pageIndex} compact col-1 ${this.props.sidebarHorizontal ? 'sidebar-horizontal' : ''}`;
+      }
+    }
+    else {
+      return "page col";
+    }
+  }
+
+  buildColumnClassName = column => {
+    return column[0] &amp;&amp; column[0].className ? `col-md ${column[0].className}` : "col-md"
+  }
+
+  buildDefaultForm = () => {
+    return this.props.ui.map((page, pageIndex) =>
+      &lt;div key={pageIndex} className={this.buildPageClassName(pageIndex) + ' ' + this.buildPageCustomClass(pageIndex)}>
+        {pageIndex > 0 &amp;&amp; (
+          &lt;div>
+            &lt;h2>{this.buildPageTitle(pageIndex)}&lt;/h2>
+            &lt;span
+              onClick={(event) => this.handleClick(event, pageIndex)}
+              className={`sidebar-toggle k-icon ${this.state.expandedPageIndex !== pageIndex ? "compact k-i-arrow-chevron-left" : "k-i-arrow-chevron-up"}`}
+            />
+          &lt;/div>
+        )}
+        {this.props.title &amp;&amp; pageIndex === 0 &amp;&amp;
+          &lt;div className="detail-title">{this.props.title}&lt;/div>
+        }
+        {page.map((row, rowIndex) =>
+          &lt;div key={rowIndex} className="row">
+            {row.map((column, columnIndex) =>
+              &lt;div key={columnIndex} className={this.buildColumnClassName(column)}>
+                {column.map(field => {
+                  if (field.customComponent) {
+                    return field.customComponent;
+                  }
+                  else {
+                    let x = this.props.schema.find(f => f.field === field.field);
+                    return x ? this.buildField(x, field.className) : null;
+                  }
+                })}
+              &lt;/div>
+            )
+            }
+          &lt;/div>
+        )}
+      &lt;/div>
+    )
+  }
+
+  buildHorizontalForm = () => {
+    const sidebarColumns = this.props.ui.filter((page, pageIndex) => pageIndex > 0);
+    const uiColumns = this.props.ui.filter((page, pageIndex) => pageIndex === 0);
+    
+    let form = [uiColumns.map((page, pageIndex) =>
+      &lt;div key={pageIndex} className={this.buildPageClassName(pageIndex) + ' ' + this.buildPageCustomClass(pageIndex)}>
+        {this.props.title &amp;&amp; pageIndex === 0 &amp;&amp;
+          &lt;div className="detail-title">{this.props.title}&lt;/div>
+        }
+        {page.map((row, rowIndex) =>
+          &lt;div key={rowIndex} className="row">
+            {row.map((column, columnIndex) =>
+              &lt;div key={columnIndex} className={this.buildColumnClassName(column)}>
+                {column.map(field => {
+                  if (field.customComponent) {
+                    return field.customComponent;
+                  }
+                  else {
+                    let x = this.props.schema.find(f => f.field === field.field);
+                    return x ? this.buildField(x, field.className) : null;
+                  }
+                })}
+              &lt;/div>
+            )
+            }
+          &lt;/div>
+        )}
+      &lt;/div>
+    ),
+    &lt;div className={`side-column ${this.state.expandedPageIndex ? `column-expanded` : ``}`}>
+      {sidebarColumns.map((page, pageIndex) =>
+        &lt;div key={pageIndex} className={this.buildPageClassName(pageIndex + 1) + ' ' + this.buildPageCustomClass(pageIndex + 1)}>
+          &lt;div>
+            &lt;h2>{this.buildPageTitle(pageIndex + 1)}&lt;/h2>
+            &lt;span
+              onClick={(event) => this.handleClick(event, pageIndex + 1)}
+              className={`sidebar-toggle k-icon ${this.state.expandedPageIndex !== pageIndex + 1 ? "compact k-i-arrow-chevron-down" : "k-i-arrow-chevron-up"}`}
+            />
+          &lt;/div>
+          {page.map((row, rowIndex) =>
+            &lt;div key={rowIndex} className="row">
+              {row.map((column, columnIndex) =>
+                &lt;div key={columnIndex} className={this.buildColumnClassName(column)}>
+                  {column.map(field => {
+                    if (field.customComponent) {
+                      return field.customComponent;
+                    }
+                    else {
+                      let x = this.props.schema.find(f => f.field === field.field);
+                      return x ? this.buildField(x, field.className) : null;
+                    }
+                  })}
+                &lt;/div>
+              )
+              }
+            &lt;/div>
+          )}
+        &lt;/div>
+      )}
+    &lt;/div>];
+    return form;
+  }
+
+  buildForm = () => {
+    if (this.props.ui) {
+      return (
+        &lt;div className="detail row">
+          {this.props.sidebarHorizontal ?
+            this.buildHorizontalForm() : this.buildDefaultForm()}
+        &lt;/div>
+      );
+    }
+    else {
+      return (
+        &lt;div className="page row">
+          &lt;div className="col-md">
+            {this.props.title &amp;&amp;
+              &lt;div className="detail-title">{this.props.title}&lt;/div>
+            }
+            {this.props.schema.map(x => this.buildField(x))}
+          &lt;/div>
+        &lt;/div>
+      );
+    }
+  }
+
+  render() {
+    return (
+      &lt;div>
+        &lt;ValidationAlert dataInvalid={this.props.dataInvalid} />
+        {!this.props.toolbarHidden &amp;&amp;
+          &lt;Toolbar
+            disabled={this.props.disabled}
+            primaryField={this.props.primaryField}
+            previous={this.props.previous}
+            next={this.props.next}
+            disabledNext={this.props.disabledNext}
+            disabledPrevious={this.props.disabledPrevious}
+            currentEl={this.props.currentEl}
+            onBack={this.props.onBack}
+            isPicker={this.props.isPicker}
+            onSubmit={this.props.handleSubmit}
+            hiddenBack={this.props.hiddenBack}
+            hiddenSave={this.props.hiddenSave}
+          >
+            {this.props.toolbarActions}
+          &lt;/Toolbar>
+        }
+        {!this.props.isPicker ? (
+          &lt;form id={this.props.primaryField} className="k-form-inline" onSubmit={this.props.handleSubmit}>
+            {this.props.schema &amp;&amp; this.buildForm()}
+            {this.props.children}
+            &lt;LoadingPanel isLoading={this.props.isLoading} />
+          &lt;/form>
+        )
+          :
+          (
+            &lt;div id={this.props.primaryField} className="k-form-inline">
+              {this.props.schema &amp;&amp; this.buildForm()}
+              {this.props.children}
+              &lt;LoadingPanel isLoading={this.props.isLoading} />
+            &lt;/div>
+          )
+        }
+      &lt;/div>
+    );
+  }
+}
+
+Detail.propTypes = {
+  onSubmit: PropTypes.func,
+  schema: PropTypes.array,
+  data: PropTypes.object,
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func,
+  handleSumbit: PropTypes.func,
+  handleBlur: PropTypes.func,
+  getValue: PropTypes.func,
+  onUpload: PropTypes.func,
+  parentProps: PropTypes.object,
+  disabled: PropTypes.bool,
+  isLoading: PropTypes.bool.isRequired,
+  ui: PropTypes.array,
+  toolbarActions: PropTypes.element,
+  primaryField: PropTypes.string.isRequired,
+  toolbarHidden: PropTypes.bool,
+  autofocus: PropTypes.bool,
+  next: PropTypes.func.isRequired,
+  previous: PropTypes.func.isRequired,
+  disabledNext: PropTypes.bool,
+  disabledPrevious: PropTypes.bool,
+  currentEl: PropTypes.element,
+  onBack: PropTypes.func.isRequired,
+  initFilter: PropTypes.object,
+  fixedFilter: PropTypes.object,
+  onAdd: PropTypes.func,
+  isPicker: PropTypes.bool,
+  hiddenBack: PropTypes.bool,
+  applyFilter: PropTypes.func,
+  title: PropTypes.string,
+  pages: PropTypes.arrayOf(PropTypes.object),
+  hiddenSave: PropTypes.bool,
+  sidebarHorizontal: PropTypes.bool,
+}
+
+export default withRequests(Detail);</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Alert.html">Alert</a></li><li><a href="module-animation_Slide.html">animation/Slide</a></li><li><a href="module-buttons_Button.html">buttons/Button</a></li><li><a href="module-buttons_ButtonGroup.html">buttons/ButtonGroup</a></li><li><a href="module-buttons_DropDownButton.html">buttons/DropDownButton</a></li><li><a href="module-buttons_SplitButton.html">buttons/SplitButton</a></li><li><a href="module-ChangePassword.html">ChangePassword</a></li><li><a href="module-chart_ChartComponent.html">chart/ChartComponent</a></li><li><a href="module-chart_elements_ChartCategoryAxisComponent.html">chart/elements/ChartCategoryAxisComponent</a></li><li><a href="module-chart_elements_ChartLegendComponent.html">chart/elements/ChartLegendComponent</a></li><li><a href="module-chart_elements_ChartSeriesComponent.html">chart/elements/ChartSeriesComponent</a></li><li><a href="module-chart_elements_ChartTitleComponent.html">chart/elements/ChartTitleComponent</a></li><li><a href="module-Container.html">Container</a></li><li><a href="module-detail_Detail.html">detail/Detail</a></li><li><a href="module-detail_DetailWrapper.html">detail/DetailWrapper</a></li><li><a href="module-detail_Toolbar.html">detail/Toolbar</a></li><li><a href="module-detail_ValidationMessage.html">detail/ValidationMessage</a></li><li><a href="module-dialogs_ConfirmDialog.html">dialogs/ConfirmDialog</a></li><li><a href="module-dialogs_Dialog.html">dialogs/Dialog</a></li><li><a href="module-dialogs_DialogContent.html">dialogs/DialogContent</a></li><li><a href="module-dialogs_EmailPrompt.html">dialogs/EmailPrompt</a></li><li><a href="module-dialogs_FileContent.html">dialogs/FileContent</a></li><li><a href="module-dialogs_FileDialog.html">dialogs/FileDialog</a></li><li><a href="module-dialogs_ReportDialog.html">dialogs/ReportDialog</a></li><li><a href="module-Dropdown.html">Dropdown</a></li><li><a href="module-forms_Autocomplete.html">forms/Autocomplete</a></li><li><a href="module-forms_AutocompleteLocal.html">forms/AutocompleteLocal</a></li><li><a href="module-forms_Checkbox.html">forms/Checkbox</a></li><li><a href="module-forms_DatePicker.html">forms/DatePicker</a></li><li><a href="module-forms_DateRangePicker.html">forms/DateRangePicker</a></li><li><a href="module-forms_DateTimePicker.html">forms/DateTimePicker</a></li><li><a href="module-forms_DropDownList.html">forms/DropDownList</a></li><li><a href="module-forms_Input.html">forms/Input</a></li><li><a href="module-forms_MultiSelect.html">forms/MultiSelect</a></li><li><a href="module-forms_NumericTextBox.html">forms/NumericTextBox</a></li><li><a href="module-forms_Picker.html">forms/Picker</a></li><li><a href="module-forms_Switch.html">forms/Switch</a></li><li><a href="module-forms_Textarea.html">forms/Textarea</a></li><li><a href="module-forms_TimePicker.html">forms/TimePicker</a></li><li><a href="module-forms_Upload.html">forms/Upload</a></li><li><a href="module-graph_ArcGauage.html">graph/ArcGauage</a></li><li><a href="module-grid_Cell.html">grid/Cell</a></li><li><a href="module-grid_ColumnMenu.html">grid/ColumnMenu</a></li><li><a href="module-grid_DialogFilter.html">grid/DialogFilter</a></li><li><a href="module-grid_DialogFilterForm.html">grid/DialogFilterForm</a></li><li><a href="module-grid_DropdownFilterCell.html">grid/DropdownFilterCell</a></li><li><a href="module-grid_EditBooleanCell.html">grid/EditBooleanCell</a></li><li><a href="module-grid_EditCommandCell.html">grid/EditCommandCell</a></li><li><a href="module-grid_EditDateTimeCell.html">grid/EditDateTimeCell</a></li><li><a href="module-grid_EditDropdownCell.html">grid/EditDropdownCell</a></li><li><a href="module-grid_EditPickerCell.html">grid/EditPickerCell</a></li><li><a href="module-grid_EditTimeCell.html">grid/EditTimeCell</a></li><li><a href="module-grid_FileCell.html">grid/FileCell</a></li><li><a href="module-grid_Grid.html">grid/Grid</a></li><li><a href="module-grid_GridWrapper.html">grid/GridWrapper</a></li><li><a href="module-grid_RangeFilterCell.html">grid/RangeFilterCell</a></li><li><a href="module-grid_SaveFilterDialog.html">grid/SaveFilterDialog</a></li><li><a href="module-grid_SelectionMenu.html">grid/SelectionMenu</a></li><li><a href="module-grid_Toolbar.html">grid/Toolbar</a></li><li><a href="module-grid_TooltipCell.html">grid/TooltipCell</a></li><li><a href="module-LoadingPanel.html">LoadingPanel</a></li><li><a href="module-metabase_Dashboard.html">metabase/Dashboard</a></li><li><a href="module-navigation_Hamburger.html">navigation/Hamburger</a></li><li><a href="module-navigation_Manual.html">navigation/Manual</a></li><li><a href="module-navigation_ManualDialogList.html">navigation/ManualDialogList</a></li><li><a href="module-navigation_ManualList.html">navigation/ManualList</a></li><li><a href="module-navigation_ManualPDF.html">navigation/ManualPDF</a></li><li><a href="module-navigation_ManualWrapper.html">navigation/ManualWrapper</a></li><li><a href="module-navigation_Navigation.html">navigation/Navigation</a></li><li><a href="module-navigation_Search.html">navigation/Search</a></li><li><a href="module-navigation_User.html">navigation/User</a></li><li><a href="module-RefreshDialog.html">RefreshDialog</a></li><li><a href="module-sch_ApprovalProcessStep.html">sch/ApprovalProcessStep</a></li><li><a href="module-sch_ApprovalProcessTimeline.html">sch/ApprovalProcessTimeline</a></li><li><a href="module-scheduler_Scheduler.html">scheduler/Scheduler</a></li><li><a href="module-Settings.html">Settings</a></li><li><a href="module-sidebar_Appmenu.html">sidebar/Appmenu</a></li><li><a href="module-sidebar_Footer.html">sidebar/Footer</a></li><li><a href="module-sidebar_header_Appmenu.html">sidebar/header/Appmenu</a></li><li><a href="module-sidebar_header_Header.html">sidebar/header/Header</a></li><li><a href="module-sidebar_header_SidebarToggle.html">sidebar/header/SidebarToggle</a></li><li><a href="module-sidebar_menu_Menu.html">sidebar/menu/Menu</a></li><li><a href="module-sidebar_menu_Search.html">sidebar/menu/Search</a></li><li><a href="module-sidebar_Sidebar.html">sidebar/Sidebar</a></li><li><a href="module-sidebar_Stats.html">sidebar/Stats</a></li><li><a href="module-Tab.html">Tab</a></li><li><a href="module-Tabs.html">Tabs</a></li><li><a href="module-TabsWrapper.html">TabsWrapper</a></li><li><a href="module-TitlePanel.html">TitlePanel</a></li><li><a href="module-utils_convert.html">utils/convert</a></li><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter.html">utils/eventEmitter</a></li><li><a href="module-utils_flags.html">utils/flags</a></li><li><a href="module-utils_helper.html">utils/helper</a></li><li><a href="module-utils_logger.html">utils/logger</a></li><li><a href="module-utils_requests.html">utils/requests</a></li><li><a href="module-utils_storage.html">utils/storage</a></li><li><a href="module-ValidationAlert.html">ValidationAlert</a></li><li><a href="module-views_login_Login.html">views/login/Login</a></li><li><a href="module-views_registration_Registration.html">views/registration/Registration</a></li></ul><h3>Classes</h3><ul><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter-ExtendedEventEmitter.html">ExtendedEventEmitter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getPreprocessedMenuData-zkorenamenuvyrobinovudatovustrukturumenupouzitelnunavykreslenie">getPreprocessedMenuData - z korena menu vyrobi novu datovu strukturu menu pouzitelnu na vykreslenie</a></li><li><a href="global.html#isValidDateStr">isValidDateStr</a></li><li><a href="global.html#isValidEcv">isValidEcv</a></li><li><a href="global.html#isValidID">isValidID</a></li><li><a href="global.html#isValidMail">isValidMail</a></li><li><a href="global.html#isValidPasswordStrong">isValidPasswordStrong</a></li><li><a href="global.html#isValidPhone">isValidPhone</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Thu Jan 07 2021 13:35:30 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

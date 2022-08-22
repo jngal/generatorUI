@@ -1,0 +1,53 @@
+import React from 'react';
+import { getUser } from './storage';
+import $ from 'jquery';
+window.jQuery = $;
+require('signalr');
+
+let _hub;
+export default (WrappedComponent) => {
+  class HOC extends React.Component {
+
+    init({ onNotification }) {
+      // Reference the auto-generated proxy for the hub.
+      var connection = $.hubConnection();
+      _hub = connection.createHubProxy('notificationHub');
+
+      // Create a function that the hub can call back to display messages.
+      _hub.on('join', (data) => {
+        console.log("hub joined: " +data);
+      });
+
+      _hub.on('notification', (data) => {
+        if(onNotification) {
+          onNotification(data);
+        }
+      });
+
+      // Start the connection.
+      connection.url = `${window.config.url}/hub`;
+      connection.qs = { "token": getUser().Token };
+      connection.logging = true;
+      connection.start();
+    }
+
+    send(msg) {
+      const user = getUser();
+      _hub.invoke("send", `${user.Uzivatel.MenoPriezvisko}: ${msg}`);
+    }
+
+    render() {
+      return (
+        <WrappedComponent
+          {...this.props}
+          notifications={{
+            init: this.init,
+            send: this.send
+          }}
+        />
+      );
+    }
+  }
+
+  return HOC;
+};

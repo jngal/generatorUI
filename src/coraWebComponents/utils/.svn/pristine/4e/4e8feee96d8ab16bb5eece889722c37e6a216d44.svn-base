@@ -1,0 +1,102 @@
+import React from 'react';
+
+import { IntlProvider, load, LocalizationProvider, loadMessages } from '@progress/kendo-react-intl';
+import likelySubtags from 'cldr-data/supplemental/likelySubtags.json';
+import currencyData from 'cldr-data/supplemental/currencyData.json';
+import weekData from 'cldr-data/supplemental/weekData.json';
+import * as requests from './requests';
+
+import numbers from 'cldr-data/main/sk/numbers.json';
+import currencies from 'cldr-data/main/sk/currencies.json';
+import caGregorian from 'cldr-data/main/sk/ca-gregorian.json';
+import dateFields from 'cldr-data/main/sk/dateFields.json';
+import timeZoneNames from 'cldr-data/main/sk/timeZoneNames.json';
+import _ from 'lodash';
+
+import sk from './sk.json';
+import en from './en.json';
+import de from './de.json';
+
+import ReactHtmlParser from 'react-html-parser';
+
+load(likelySubtags, currencyData, weekData, numbers, currencies, caGregorian, dateFields, timeZoneNames);
+loadMessages(sk, 'sk-SK');
+
+const Context = React.createContext();
+
+class LocalizationProviderWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.locales = {
+      'en-US': { ...en, ...this.props.en },
+      'sk-SK': { ...sk, ...this.props.sk },
+      'de-DE': { ...de, ...this.props.de }
+    };
+  }
+
+  translate = locale => key => {
+    return _.get(this.locales[locale], key);
+  }
+
+  translateWithLocale = (locale, key) => {
+    return this.translate(locale)(key);
+  }
+
+  translateAsync = locale => async key => {
+    try {
+      const url = `/api/meta/localization?key=${key}&locale=${locale}`;
+
+      const txt = await requests.get(url);
+      if (txt.Data && txt.Data.length > 0) {
+        return ReactHtmlParser(txt.Data[0].Txt);
+      }
+
+      return '';
+    }
+    catch (error) {
+      return '';
+    }
+  }
+
+  translateWithLocaleAsync = (locale, key) => {
+    return this.translateAsync(locale)(key);
+  }
+
+  render() {
+    return (
+      <LocalizationProvider language={this.props.locale}>
+        <IntlProvider locale={this.props.locale.split('-').shift()}>
+          <Context.Provider
+            value={{
+              locale: this.props.locale,
+              translate: this.translate(this.props.locale),
+              translateAsync: this.translateAsync(this.props.locale),
+              translateWithLocale: this.translateWithLocale,
+              translateWithLocaleAsync: this.translateWithLocaleAsync
+            }}
+          >
+            {this.props.children}
+          </Context.Provider>
+        </IntlProvider>
+      </LocalizationProvider>
+    );
+  }
+}
+
+export const withLocalizationConsumer = (WrappedComponent) => {
+  return (props) => {
+    return (
+      <Context.Consumer>
+        {x =>
+          <WrappedComponent
+            {...props}
+            {...x}
+          />
+        }
+      </Context.Consumer>
+    );
+  }
+};
+
+export default LocalizationProviderWrapper;

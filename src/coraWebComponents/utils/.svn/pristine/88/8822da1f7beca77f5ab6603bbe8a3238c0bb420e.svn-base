@@ -1,0 +1,124 @@
+{
+  "datepicker": {
+    "toggleCalendar": "kalendár",
+    "okLabel": "Vložiť",
+    "clearLabel": "Vymazať",
+    "cancelLabel": "Zrušiť",
+    "invalidDateMessage": "Nesprávny dátum.",
+    "maxDateMessage": "Zadaný dátum je väčší ako povolený dátum.",
+    "minDateMessage": "Zadaný dátum je menší ako povolený dátum."
+  },
+  "datetimepicker": {
+    "date": "Dátum",
+    "time": "Čas",
+    "cancel": "Zrušiť",
+    "set": "Nastaviť",
+    "toggleDateTimeSelector": "kalendár"
+  },
+  "calendar": {
+    "today": "dnes"
+  },
+  "dateinput": {
+    "increment": "inkrement",
+    "decrement": "dekrement"
+  },
+  "timepicker": {
+    "set": "Zvoľ",
+    "cancel": "Zrušiť",
+    "clear": "Vymazať",
+    "now": "Aktuálny čas",
+    "selectNow": "Zvoľ aktuálny čas",
+    "toggleTimeSelector": "Otvoriť nástroj na vybratie času",
+    "toggleClock": "Prepnúť hodiny"
+  },
+  "daterangepicker": {
+    "swapStartEnd": "Vymeniť zatiatok a koniec",
+    "start": "od",
+    "end": "do"
+  },
+  "numerictextbox": {
+    "increment": "inkrement",
+    "decrement": "dekrement"
+  },
+  "dropdowns": {
+    "nodata": "Žiadne dáta",
+    "clear": "Zrušiť"
+  },
+  "grid": {
+    "extra": {
+      ".k-i-sort-asc-sm": "Zoradenie",
+      ".k-i-sort-desc-sm": "Zoradenie",
+      ".k-i-filter": "Operátor filtra",
+      ".k-i-filter-clear": "Zrušiť filter",
+      ".k-i-refresh": "Obnovenie",
+      ".k-clear-button-visible": "Zrušiť filter"
+    },
+    "groupPanelEmpty": "Potiahni sem stĺpec",
+    "noRecords": "Žiadne záznamy.",
+    "pagerFirstPage": "Prvá",
+    "pagerPreviousPage": "Predchádzajúca",
+    "pagerNextPage": "Nasledujúca",
+    "pagerLastPage": "Posledná",
+    "pagerPage": "Strana",
+    "pagerOf": "z",
+    "pagerItems": "záznamy",
+    "pagerInfo": "{0} - {1} z {2} záznamov",
+    "pagerItemsPerPage": "záznamov na strane",
+    "filterEqOperator": "je rovné",
+    "filterNotEqOperator": "nie je rovné",
+    "filterIsNullOperator": "je prázdne",
+    "filterIsNotNullOperator": "nie je prázdne",
+    "filterIsEmptyOperator": "je prázdne",
+    "filterIsNotEmptyOperator": "nie je prázdne",
+    "filterStartsWithOperator": "začína s",
+    "filterContainsOperator": "obsahuje",
+    "filterNotContainsOperator": "neobsahuje",
+    "filterEndsWithOperator": "končí s",
+    "filterGteOperator": "je väčšie alebo rovné",
+    "filterGtOperator": "je väčšie",
+    "filterLteOperator": "je menšie alebo rovné",
+    "filterLtOperator": "je menšie",
+    "filterIsTrue": "Áno",
+    "filterIsFalse": "Nie",
+    "filterBooleanAll": "(Všetko)",
+    "filterAfterOrEqualOperator": "je po alebo sa rovná",
+    "filterAfterOperator": "je po",
+    "filterBeforeOperator": "je pred",
+    "filterBeforeOrEqualOperator": "je pred alebo sa rovná",
+    "filterFilterButton": "Filtrovať",
+    "filterClearButton": "Zrušiť",
+    "filterAndLogic": "a",
+    "filterOrLogic": "alebo"
+  },
+  "upload": {
+    "cancel": "Zrušiť",
+    "clearSelectedFiles": "Vyčistiť",
+    "dropFilesHere": "alebo potiahnite súbory sem",
+    "headerStatusUploaded": "Ok",
+    "headerStatusUploading": "Nahravam...",
+    "invalidFileExtension": "Nepodporovaný typ súboru",
+    "invalidFiles": "Nepodporovaný súbor",
+    "invalidMaxFileSize": "Nepodporovaná veľkosť súboru.",
+    "invalidMinFileSize": "Nepodporovaná veľkosť súboru.",
+    "remove": "Odstrániť",
+    "retry": "Opakovať",
+    "select": "Vyber súbory...",
+    "uploadSelectedFiles": "Nahraj",
+    "total": "spolu",
+    "files": "súborov"
+  },
+  "scheduler": {
+    "today": "Dnes",
+    "allDay": "Celý deň",
+    "showWorkDay": "Zobraz pracovný čas",
+    "showFullDay": "Zobraz celý deň",
+    "timelineViewTitle": "Časová os",
+    "dayViewTitle": "Deň",
+    "weekViewTitle": "Týždeň",
+    "monthViewTitle": "Mesiac",
+    "editCancel": "Zrušiť",
+    "editorDelete": "OK",
+    "deleteConfirmation": "Naozaj chcete odstrániť túto položku?",
+    "deleteDialogTitle": "Odstránenie položky z kalendára"
+  }
+}

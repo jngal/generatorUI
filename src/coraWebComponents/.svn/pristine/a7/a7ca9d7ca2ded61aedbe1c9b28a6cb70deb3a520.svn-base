@@ -1,0 +1,309 @@
+import "./Menu.scss";
+
+import * as React from "react";
+
+import { PanelBar, PanelBarItem } from "@progress/kendo-react-layout";
+
+import PropTypes from "prop-types";
+import Search from "./Search";
+import { withRouter } from "react-router-dom";
+import { buildUrl } from "../../utils/helper";
+import Tooltip from "../../forms/Tooltip";
+
+let _timer = null;
+
+/**
+ * @typedef {Object} Menu
+ * @property {number} MenuID - Menu item ID
+ * @property {number} NadMenuID - ID of parent item
+ * @property {string} Label - Menu item label
+ * @property {string} Title - Menu item title
+ * @property {array} children - Children of menu item
+ */
+
+/**
+ * Menu Componet
+ * @module
+ * @param {Menu} menu - Menu
+ * @param {string} sidebarType - Sidebar type ('normal','compact','fullscreen')
+ * @param {func} onSelect - Function invoked on item select
+ * @param {func} [onMenuFilter] -Function invoked on menu filter
+ */
+
+class Menu extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      search: "",
+      selected: "",
+      expanded: [],
+    };
+  }
+
+  /**
+   * @function buildMenu - vyrobi menu pre @function render
+   * @param rootMenuItem - koren menu
+   * @param depth - hlbka @var rootMenuItem v strome poloziek menu
+   * @returns @var PanelBarItem - jedna polozka v menu alebo strom
+   */
+
+  buildMenu = () => {
+    if (this.props.menu.Route) {
+      return (
+        <Tooltip position="right">
+          <PanelBar
+            className="items"
+            expandMode={"multiple"}
+            onSelect={this.handleSelect}
+            selected={this.state.selected}
+            expanded={this.state.expanded}
+          >
+            {this.props.menu.children.map((menuItem) =>
+              this.buildMenuItems(menuItem, 0)
+            )}
+          </PanelBar>
+        </Tooltip>
+      );
+    }
+  };
+
+  getTextWidth = (txt) => {
+    this.element = document.createElement("canvas");
+    this.context = this.element.getContext("2d");
+    this.context.font = "13px sans-serif";
+    return this.context.measureText(txt).width;
+  };
+
+  buildNotificationCount = (rootMenuItem, depth) => {
+    let leftMargin, topMargin;
+    switch (depth) {
+      case 0:
+        leftMargin = 50;
+        topMargin = 11;
+        break;
+      case 2:
+        leftMargin = 40;
+        break;
+      case 1:
+      default:
+        leftMargin = 30;
+        break;
+    }
+    let style = {
+      paddingLeft: rootMenuItem.CNT >= 10 ? 3.5 : 6.5,
+      marginLeft: this.getTextWidth(rootMenuItem.Title) + leftMargin + 20,
+      marginTop: topMargin ? topMargin : 2.5,
+    };
+    return (
+      <div className="menuItemCount" style={style}>
+        {rootMenuItem.CNT}
+      </div>
+    );
+  };
+
+  buildItemWithNofication = (rootMenuItem, depth) => {
+    if (this.menuItemHasChildren(rootMenuItem, depth)) {
+      return [
+        this.buildNotificationCount(rootMenuItem, depth),
+        <PanelBarItem
+          imageUrl={buildUrl(rootMenuItem.Icon)}
+          key={rootMenuItem.MenuID}
+          title={
+            <div className="custom-tooltip" title={rootMenuItem.Tooltip}>
+              {rootMenuItem.Title}
+            </div>
+          }
+          route={rootMenuItem.Route}
+          className={`parent indent-${depth}`}
+          expanded={this.state.search ? true : false}
+        >
+          {rootMenuItem.children.map((menuItem) =>
+            this.buildMenuItems(menuItem, depth + 1)
+          )}
+        </PanelBarItem>,
+      ];
+    }
+    return [
+      this.buildNotificationCount(rootMenuItem, depth),
+      <PanelBarItem
+        imageUrl={buildUrl(rootMenuItem.Icon)}
+        key={rootMenuItem.MenuID}
+        title={
+          <div className="custom-tooltip" title={rootMenuItem.Tooltip}>
+            {rootMenuItem.Title}
+          </div>
+        }
+        route={rootMenuItem.Route}
+        className={`indent-${depth}`}
+      />,
+    ];
+  };
+
+  buildItem = (rootMenuItem, depth) => {
+    if (this.menuItemHasChildren(rootMenuItem, depth)) {
+      return (
+        <PanelBarItem
+          imageUrl={buildUrl(rootMenuItem.Icon)}
+          key={rootMenuItem.MenuID}
+          title={
+            <div className="custom-tooltip" title={rootMenuItem.Tooltip}>
+              {rootMenuItem.Title}
+            </div>
+          }
+          route={rootMenuItem.Route}
+          className={`parent indent-${depth}`}
+          expanded={this.state.search ? true : false}
+        >
+          {rootMenuItem.children.map((menuItem) =>
+            this.buildMenuItems(menuItem, depth + 1)
+          )}
+        </PanelBarItem>
+      );
+    } else {
+      return (
+        <PanelBarItem
+          imageUrl={buildUrl(rootMenuItem.Icon)}
+          key={rootMenuItem.MenuID}
+          title={
+            <div className="custom-tooltip" title={rootMenuItem.Tooltip}>
+              {rootMenuItem.Title}
+            </div>
+          }
+          route={rootMenuItem.Route}
+          className={`indent-${depth}`}
+        />
+      );
+    }
+  };
+
+  buildMenuItems = (rootMenuItem, depth) => {
+    if (rootMenuItem.CNT) {
+      return this.buildItemWithNofication(rootMenuItem, depth);
+    } else {
+      return this.buildItem(rootMenuItem, depth);
+    }
+  };
+
+  /**
+   * @function menuItemHasChildren - zisti, ci @param menuItem ma potomkov
+   * @param menuItem - polozka menu
+   * @returns @var bool - true alebo false
+   */
+  menuItemHasChildren = (menuItem) => {
+    return menuItem.children && menuItem.children.length > 0;
+  };
+
+  handleSelect = (event) => {
+    const m = event.target.props;
+    let selected = this.state.selected;
+
+    let expanded = [];
+    let isExpanded;
+    if (this.state.expanded.includes(m.uniquePrivateKey)) {
+      expanded = this.state.expanded.filter((x) => x !== m.uniquePrivateKey);
+      isExpanded = true;
+    } else {
+      expanded = [...this.state.expanded, m.uniquePrivateKey];
+      isExpanded = false;
+    }
+
+    const currLocation = this.props.location;
+    const routeHistory = this.props.history;
+    const targetRoute = m.route;
+
+    if (!m.children) {
+      selected = m.uniquePrivateKey;
+      routeHistory.push(targetRoute);
+      this.props.onSelect(targetRoute, currLocation, routeHistory, !isExpanded);
+    } else {
+      if (m.route && m.route !== "/" && !m.route.endsWith(":id")) {
+        this.props.onSelect(
+          targetRoute,
+          currLocation,
+          routeHistory,
+          !isExpanded
+        );
+
+        if (!isExpanded) {
+          selected = m.uniquePrivateKey;
+          routeHistory.push(targetRoute);
+
+          for (let i = 0; i < m.children.length; i++) {
+            const x = m.children[i];
+            if (x.props.route === targetRoute) {
+              selected = x.props.uniquePrivateKey;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    this.setState({ selected, expanded });
+  };
+
+  handleChange = (name, value) => {
+    //NOTE(Dávid Svitana): build filter object if we specify search query
+    if (name === "search") {
+      if (this.props.onMenuFilter) {
+        if (_timer) {
+          clearTimeout(_timer);
+        }
+        _timer = setTimeout(() => {
+          const filterObject = {
+            logic: "and",
+            filters: [
+              {
+                field: "Title",
+                operator: "contains",
+                value: this.state.search,
+              },
+            ],
+          };
+
+          this.props.onMenuFilter(filterObject);
+        }, 500);
+      }
+    }
+
+    this.setState({ [name]: value });
+  };
+
+  handleClick = () => {
+    this.setState({
+      search: "",
+    });
+
+    if (this.props.onMenuFilter) this.props.onMenuFilter(null);
+  };
+
+  render() {
+    return (
+      <div id="menu" className={this.props.sidebarType}>
+        <Search
+          className={this.props.sidebarType}
+          search={this.state.search}
+          onChange={this.handleChange}
+          sidebarType={this.props.sidebarType}
+          onClick={this.handleClick}
+        />
+        {this.buildMenu()}
+      </div>
+    );
+  }
+}
+
+Menu.propTypes = {
+  menu: PropTypes.shape({
+    MenuID: PropTypes.number,
+    NadMenuID: PropTypes.number,
+    Label: PropTypes.string,
+    Title: PropTypes.string,
+    children: PropTypes.array,
+  }),
+  sidebarType: PropTypes.oneOf(["normal", "compact", "fullscreen"]),
+  onSelect: PropTypes.func.isRequired,
+  onMenuFilter: PropTypes.func,
+};
+
+export default withRouter(Menu);

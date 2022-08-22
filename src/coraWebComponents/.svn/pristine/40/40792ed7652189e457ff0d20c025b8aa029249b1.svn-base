@@ -1,0 +1,87 @@
+@import "variables";
+@import "themes";
+
+
+.dropdown {
+    .item { 
+        @include themed (){ 
+          background: color($basicwhite);
+          color: color($primarydark);
+        }
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: bold;
+        color: #222;
+        display: inline-block;
+        padding: 18px 20px 18px 20px;
+        transition: 0.4s;
+        margin-left:-1px;
+        &:hover {
+            @include themed (){ 
+                background: color($secondarylight) !important;
+                color: color($primarydark) !important;
+                cursor: pointer;
+            }
+            .k-i-arrow-s{
+                color: white !important;
+            }
+        }
+    }
+    .button-item {
+      padding: 6px 0px;
+    }
+    .slide {
+        @include themed() {
+          background: color($basicwhite);
+          border:1px solid color($secondarymedium);
+        }
+        box-sizing: border-box;
+        & > div {
+            margin: 0px 15px;
+            padding: 4px 0px;
+            @include themed() {
+                border-bottom:1px solid color($secondarymedium);
+            }
+            &:last-child {
+                border-bottom: none;
+            }
+            & > div > button > span, & > div > button > img {
+                margin-right: 15px;
+            }
+        }
+    }
+    .k-animation-container {
+        position: absolute;
+        margin-left: -1px;
+        top: 56px;
+        overflow:hidden;
+    }
+    .k-button {
+        padding: 0px 9px !important;
+        height: 30px !important;
+        margin: 5px !important;
+        text-transform: none !important;
+        
+    }
+    .button-wrapper {
+        margin: 0px !important;
+        background-color: transparent !important;
+    }
+
+    .k-i-arrow-s{
+        @include themed(){
+            color: color($secondarydarker) !important;
+        }
+    }
+    .active {
+        @include themed (){
+          background-color: color($secondarylight) !important;
+          color: color($primarydark) !important;
+        }
+    }
+    
+}
+#grid-toolbar .button-wrapper button {
+    background-color: transparent;
+}
+

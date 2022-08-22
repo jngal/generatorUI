@@ -1,0 +1,23 @@
+import "./Hamburger.scss";
+
+import PropTypes from "prop-types";
+import React from "react";
+
+/**
+ * Hamburger Component
+ * @module
+ * @param {func} onClick - Function invoked on click
+ */
+
+const Hamburger = (props) => (
+  <div className="hamburger" onClick={props.onClick}>
+    <span className={`k-icon ${props.icon || "k-i-menu"}`} />
+  </div>
+);
+
+Hamburger.propTypes = {
+  icon: PropTypes.string,
+  onClick: PropTypes.func.isRequired,
+};
+
+export default Hamburger;

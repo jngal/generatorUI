@@ -1,0 +1,29 @@
+import React from 'react';
+import { SchedulerViewSlot} from '@progress/kendo-react-scheduler';
+import { connect } from 'react-redux';
+
+class CustomSchedulerViewSlot extends React.Component{
+
+  render() {
+    const start = new Date(new Date(this.props.start.getTime()).setHours(0,0,0,0));
+    const today = new Date(new Date().setHours(0,0,0,0));
+    let classNames = start.getTime() === today.getTime() ? "k-today " :"";
+    classNames += start.getDay() === 6 ||  start.getDay() === 0 ? "k-weekend " :"";
+    return(
+<SchedulerViewSlot className= {classNames}
+        {...this.props}
+        style={{
+            ...this.props.style
+        }}
+/>
+    );
+  }    
+}
+
+const mapStateToProps = (state) => {
+  return {
+    calendar: state.calendar.data,
+  }
+}
+
+export default connect(mapStateToProps)(CustomSchedulerViewSlot);

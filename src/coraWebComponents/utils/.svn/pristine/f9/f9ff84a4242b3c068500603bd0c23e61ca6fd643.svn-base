@@ -1,0 +1,28 @@
+{
+  "datepicker": {
+    "toggleCalendar": "kalendár",
+    "okLabel": "OK",
+    "clearLabel": "Clear",
+    "cancelLabel": "Cancel",
+    "invalidDateMessage": "Incorrect date.",
+    "maxDateMessage": "The date is greater than the allowed date",
+    "minDateMessage": "The date is less than the allowed date"
+  },
+  "timepicker": {
+    "set": "Set",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "now": "Now",
+    "selectNow": "Select now",
+    "toggleTimeSelector": "Open time selector",
+    "toggleClock": "Toggle clock"
+  },
+  "datetimepicker": {
+    "date": "Date",
+    "time": "Time",
+    "cancel": "Cancel",
+    "set": "Set",
+    "toggleDateTimeSelector": "calendar"
+
+  }
+}

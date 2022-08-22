@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: detail/DetailWrapper.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: detail/DetailWrapper.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from 'react';
+import PropTypes from 'prop-types';
+import Detail from './Detail';
+import ConfirmDialog from '../../coraWebComponents/dialogs/ConfirmDialog';
+import eventEmitter from '../utils/eventEmitter';
+import _ from 'lodash';
+
+let _lastAction = null;
+
+/**
+ * Detail wrapper component
+ * @module
+ * @param {func} onSubmit - On form submit function
+ * @param {detailSchema[]} schema - Detail Schema 
+ * @param {object} data - Data
+ * @param {func} onChange - On field change function 
+ * @param {func} onBlur - On field blur function
+ * @param {object} parentProps - Parent props 
+ * @param {bool} disabled - Read only detail  
+ * @param {bool} isLoading - Is loading 
+ * @param {array} ui - Custom schema
+ * @param {element} toolbarActions - Toolbar actions 
+ * @param {string} primaryField - Primary field 
+ * @param {func} onAdd - On entry add function 
+ * @param {func} onCreate - On entry create function 
+ * @param {func} onUpdate - On entry update function 
+ * @param {func} onUpload - On file upload function 
+ * @param {bool} toolbarHidden - Toolbar hidden
+ * @param {func} onGet - On data get function 
+ * @param {object} allData - All data
+ * @param {element} currentEl - Current element
+ * @param {func} next - Switches to the next entry function
+ * @param {func} previous - Switches to the previous entry function
+ * @param {bool} modified - Is current entry modified
+ * @param {string} discardText - Discard text
+ * @param {bool} isPicker - Is field picker 
+ * @param {bool} hiddenBack - Hidden back arrow in detail toolbar
+ * @param {string} title - Detail title
+ * @param {array} pages - Pages  
+ * @param {bool} hiddenSave - Hidden save button in detail toolbar 
+ * @param {bool} sidebarHorizontal - Should sidebar be horizontal?
+ */
+class DetailWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpenDiscard: false, 
+      id: 0,
+      dataInvalid: false,
+    }
+
+    this.passwords = []
+  }
+
+  handleOpenDiscard = () => {
+    this.setState({ isOpenDiscard: true });
+  }
+
+  handleCloseDiscard = () => {
+    this.setState({ isOpenDiscard: false });
+  }
+
+  handleConfirmDiscard = () => {
+    switch(_lastAction) {
+      case 'next':
+        this.next();
+        break;
+      case 'previous':
+        this.previous();
+        break;
+      default:
+        break;
+    }
+
+    this.handleCloseDiscard();
+  }
+
+  onSubmit = async () => {
+    const { data, primaryField, onUpdate, onCreate, onSubmit } = this.props;
+
+    if (data[primaryField]) {
+      await onUpdate(data[primaryField], data);
+    }
+    else {
+      await onCreate(data);
+    }
+
+    onSubmit();
+  }
+
+  tryNext = () => {
+    if (this.props.modified) {
+      _lastAction = 'next';
+      this.handleOpenDiscard();
+      return;
+    }
+
+    this.next();
+  }
+
+  tryPrevious = () => {
+    if (this.props.modified) {
+      _lastAction = 'previous';
+      this.handleOpenDiscard();
+      return;
+    }
+
+    this.previous();
+  }
+
+  previous = () => {
+    if (this.props.prev) {
+      this.props.prev();
+    }
+    let ID = this.props.data[this.props.primaryField]
+    let minID = this.props.allData[0][this.props.primaryField]
+    let index = this.props.allData.findIndex(item => item[this.props.primaryField] === ID)
+    if (ID !== minID) {
+      const previousId = this.props.allData[index - 1][this.props.primaryField];
+      this.props.onGet(previousId);
+      eventEmitter.changeSelected([{ [this.props.primaryField]: previousId }], this.props.primaryField);
+      this.removeInvalidClasses();
+    }
+  }
+
+  next = () => {
+    if (this.props.next) {
+      this.props.next();
+    }
+    let ID = this.props.data[this.props.primaryField]
+    let maxID = this.props.allData[this.props.allData.length - 1][this.props.primaryField]
+    let index = this.props.allData.findIndex(item => item[this.props.primaryField] === ID)
+    if (ID !== maxID) {
+
+      const nextId = this.props.allData[index + 1][this.props.primaryField];
+      this.props.onGet(nextId);
+      eventEmitter.changeSelected([{ [this.props.primaryField]: nextId }], this.props.primaryField);
+      this.removeInvalidClasses();
+    }
+  }
+
+  disabledNext = () => {
+    let ID = this.props.data ? this.props.data[this.props.primaryField] : null
+    let data = this.props.allData ? this.props.allData : []
+    let index = data.findIndex(item => item[this.props.primaryField] === ID)
+    if (index &lt; data.length - 1) {  
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
+  handleBack = () => {
+    eventEmitter.changeTab(this.props.primaryField, 0);
+  }
+
+  disabledPrevious = () => {
+    let ID = this.props.data ? this.props.data[this.props.primaryField] : null
+    let data = this.props.allData ? this.props.allData : []
+    let index = data.findIndex(item => item[this.props.primaryField] === ID)
+    if (index > 0) {
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
+  validateFields = async () => {
+    let submit = true;
+    for(let field of this.props.schema) {
+      if(field.type === "password") {
+        let passwordSubmit = this.passwordValidation(field);
+        submit = submit ? passwordSubmit : submit;
+        continue;
+      }
+      if (this.isInvalid(field) || await this.customValidation_(field)) {
+        submit = false;
+        this.addInvalidClass(field);
+      }
+      else {
+        this.removeInvalidClass(field);
+      }
+    };
+    return submit;
+  }
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    if (await this.validateFields()) {
+      if (this.props.parentProps &amp;&amp; this.props.parentProps.isPicker) {
+        await this.onSubmit();
+        this.props.parentProps.applyFilter(this.props.data[this.props.primaryField]);
+      }
+      else {
+        this.onSubmit();
+      }
+    }
+    else {
+      this.setState({ dataInvalid:true });
+      setTimeout(()=> { this.setState({ dataInvalid: false });
+      }, 4500);
+    }
+  }
+
+  passwordValidation = field => {
+    const value = this.getValue(field.field);
+    let arePasswordsValid = true;
+    this.passwords = this.passwords.map(item => item.field === field.field ? { ...item, value } : item);
+    let passwordFields = this.props.schema.filter(item => item.type === "password");
+    let firstInvalid = this.isInvalid(passwordFields[0]);
+    if(firstInvalid) {
+      this.addInvalidClass(passwordFields[0]);
+      arePasswordsValid = false;
+    }
+    else {
+      this.removeInvalidClass(passwordFields[0]);
+    }
+    if(!firstInvalid &amp;&amp; this.passwords.length === 2) {
+      if(this.passwords[0].value !== this.passwords[1].value) {
+        this.addInvalidClass(passwordFields[1]);
+        arePasswordsValid = false;
+      }
+      else {
+        this.removeInvalidClass(passwordFields[1]);
+      }
+    }
+    return arePasswordsValid;
+  }
+  
+  isInvalid = field => {
+    if (field.disabled) {
+      return false;
+    }
+    const value = this.getValue(field.field);
+    return (
+      (((value instanceof Object &amp;&amp; !(value instanceof Date) &amp;&amp; !_.get(value, field.primaryField.split('.')))
+      || (!(value || value === 0 || value === false)) || (/^\s+$/gm.test(value))) &amp;&amp; field.required)
+      || (value &amp;&amp; field.type === "numeric" &amp;&amp; ((field.min &amp;&amp; (value &lt; field.min)) || ((field.max &amp;&amp; (value > field.max)))))
+      || (value &amp;&amp; (field.type === "string" || field.type === "password") &amp;&amp; ((field.minLength &amp;&amp; (value.length &lt; field.minLength)) || ((field.maxLength &amp;&amp; (value.length > field.maxLength)))))
+      || (value &amp;&amp; field.type === "date" &amp;&amp; ((field.min &amp;&amp; (value.getTime() &lt; field.min.getTime())) || (field.max &amp;&amp; (value.getTime() > field.max.getTime()))))
+      || (value &amp;&amp; field.pattern &amp;&amp; !new RegExp(field.pattern).test(value))
+    );
+  }
+
+  addInvalidClass = (field) => {
+    let element = document.getElementsByClassName(`form-field-${field.field}`)[0];
+    if (element) {
+      element.classList.add("validation-invalid");
+    }
+  }
+
+  removeInvalidClass = (field) => {
+    let element = document.getElementsByClassName(`form-field-${field.field}`)[0];
+    if (element) {
+      element.classList.remove("validation-invalid");
+    }
+  }
+
+  customValidation_ = async (field) => {
+    if(this.props.customValidation) {
+      return await this.props.customValidation(field);
+    }
+
+    return false;
+  }
+
+  handleBlur = async (field) => {
+    if(field.type === "password") {
+      this.passwordValidation(field);
+      return;
+    }
+    if (this.isInvalid(field) || await this.customValidation_(field)) {
+      this.addInvalidClass(field);
+    }
+    else {
+      this.removeInvalidClass(field);
+    }
+    if (this.props.onBlur &amp;&amp; field.type === 'numeric') {
+      this.props.onBlur(field.field, this.getValue(field.field));
+    }
+  }
+
+  getValue = field => {
+    return _.get(this.props.data, field.split('.'));
+  }
+
+  removeInvalidClasses = () => {
+    this.props.schema.forEach(field => {
+      this.removeInvalidClass(field);
+    });
+  }
+
+  componentDidMount() {
+    this.passwords = this.props.schema.filter(x => x.type === "password").map(x => ({ ...x, value: undefined}));
+  }
+
+  componentDidUpdate() {
+    if (this.props.data[this.props.primaryField] !== this.state.id) {
+      this.removeInvalidClasses();
+      this.setState({ id: this.props.data[this.props.primaryField] });
+    }
+  }
+
+  buildText = (id) => {
+    return this.props.discardText ? this.props.discardText : id ? `Máte rozpracovaný záznam ${id}. Chcete zahodiť zmeny?` : "Máte rozpracovaný nový záznam. Chcete zahodiť zmeny?"
+  }
+  render() {
+    const id = this.props.data[this.props.primaryField];
+
+    return (
+      &lt;React.Fragment>
+        &lt;Detail
+          onSubmit={this.onSubmit}
+          handleSubmit={this.handleSubmit}
+          schema={this.props.schema}
+          data={this.props.data}
+          onAdd={this.props.onAdd}
+          getValue={this.getValue}
+          onChange={this.props.onChange}
+          handleBlur={this.handleBlur}
+          onUpload={this.props.onUpload}
+          parentProps={this.props.parentProps}
+          disabled={this.props.disabled}
+          isLoading={this.props.isLoading}
+          ui={this.props.ui}
+          toolbarActions={this.props.toolbarActions}
+          primaryField={this.props.primaryField}
+          toolbarHidden={this.props.toolbarHidden}
+          previous={this.tryPrevious}
+          next={this.tryNext}
+          disabledNext={this.disabledNext()}
+          disabledPrevious={this.disabledPrevious()}
+          currentEl={this.props.currentEl}
+          pageTitle={this.props.pageTitle}
+          onBack={this.handleBack}
+          isPicker={this.props.isPicker}
+          hiddenBack={this.props.hiddenBack}
+          title={this.props.title}
+          pages={this.props.pages}
+          hiddenSave={this.props.hiddenSave}
+          dataInvalid={this.state.dataInvalid}
+          sidebarHorizontal={this.props.sidebarHorizontal}
+          children={this.props.children}
+        />
+        &lt;ConfirmDialog
+          isOpen={this.state.isOpenDiscard}
+          onClose={this.handleCloseDiscard}
+          onConfirm={this.handleConfirmDiscard}
+          text={this.buildText(id)}
+        />
+      &lt;/React.Fragment>
+    )
+  }
+}
+
+DetailWrapper.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  schema: PropTypes.array,
+  data: PropTypes.object,
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func,
+  parentProps: PropTypes.object,
+  disabled: PropTypes.bool,
+  isLoading: PropTypes.bool.isRequired,
+  ui: PropTypes.array,
+  toolbarActions: PropTypes.element,
+  primaryField: PropTypes.string.isRequired,
+  onAdd: PropTypes.func,
+  onCreate: PropTypes.func,
+  onUpdate: PropTypes.func.isRequired,
+  onUpload: PropTypes.func,
+  toolbarHidden: PropTypes.bool,
+  onGet: PropTypes.func.isRequired,
+  allData: PropTypes.array.isRequired,
+  currentEl: PropTypes.element,
+  next: PropTypes.func,
+  prev: PropTypes.func,
+  modified: PropTypes.bool,
+  discardText: PropTypes.string,
+  isPicker: PropTypes.bool,
+  hiddenBack: PropTypes.bool,
+  title: PropTypes.string,
+  pages: PropTypes.arrayOf(PropTypes.object),
+  hiddenSave: PropTypes.bool,
+  sidebarHorizontal: PropTypes.bool,
+}
+
+export default DetailWrapper;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Alert.html">Alert</a></li><li><a href="module-animation_Slide.html">animation/Slide</a></li><li><a href="module-buttons_Button.html">buttons/Button</a></li><li><a href="module-buttons_ButtonGroup.html">buttons/ButtonGroup</a></li><li><a href="module-buttons_DropDownButton.html">buttons/DropDownButton</a></li><li><a href="module-buttons_SplitButton.html">buttons/SplitButton</a></li><li><a href="module-ChangePassword.html">ChangePassword</a></li><li><a href="module-chart_ChartComponent.html">chart/ChartComponent</a></li><li><a href="module-chart_elements_ChartCategoryAxisComponent.html">chart/elements/ChartCategoryAxisComponent</a></li><li><a href="module-chart_elements_ChartLegendComponent.html">chart/elements/ChartLegendComponent</a></li><li><a href="module-chart_elements_ChartSeriesComponent.html">chart/elements/ChartSeriesComponent</a></li><li><a href="module-chart_elements_ChartTitleComponent.html">chart/elements/ChartTitleComponent</a></li><li><a href="module-Container.html">Container</a></li><li><a href="module-detail_Detail.html">detail/Detail</a></li><li><a href="module-detail_DetailWrapper.html">detail/DetailWrapper</a></li><li><a href="module-detail_Toolbar.html">detail/Toolbar</a></li><li><a href="module-detail_ValidationMessage.html">detail/ValidationMessage</a></li><li><a href="module-dialogs_ConfirmDialog.html">dialogs/ConfirmDialog</a></li><li><a href="module-dialogs_Dialog.html">dialogs/Dialog</a></li><li><a href="module-dialogs_DialogContent.html">dialogs/DialogContent</a></li><li><a href="module-dialogs_EmailPrompt.html">dialogs/EmailPrompt</a></li><li><a href="module-dialogs_FileContent.html">dialogs/FileContent</a></li><li><a href="module-dialogs_FileDialog.html">dialogs/FileDialog</a></li><li><a href="module-dialogs_ReportDialog.html">dialogs/ReportDialog</a></li><li><a href="module-Dropdown.html">Dropdown</a></li><li><a href="module-forms_Autocomplete.html">forms/Autocomplete</a></li><li><a href="module-forms_AutocompleteLocal.html">forms/AutocompleteLocal</a></li><li><a href="module-forms_Checkbox.html">forms/Checkbox</a></li><li><a href="module-forms_DatePicker.html">forms/DatePicker</a></li><li><a href="module-forms_DateRangePicker.html">forms/DateRangePicker</a></li><li><a href="module-forms_DateTimePicker.html">forms/DateTimePicker</a></li><li><a href="module-forms_DropDownList.html">forms/DropDownList</a></li><li><a href="module-forms_Input.html">forms/Input</a></li><li><a href="module-forms_MultiSelect.html">forms/MultiSelect</a></li><li><a href="module-forms_NumericTextBox.html">forms/NumericTextBox</a></li><li><a href="module-forms_Picker.html">forms/Picker</a></li><li><a href="module-forms_Switch.html">forms/Switch</a></li><li><a href="module-forms_Textarea.html">forms/Textarea</a></li><li><a href="module-forms_TimePicker.html">forms/TimePicker</a></li><li><a href="module-forms_Upload.html">forms/Upload</a></li><li><a href="module-graph_ArcGauage.html">graph/ArcGauage</a></li><li><a href="module-grid_Cell.html">grid/Cell</a></li><li><a href="module-grid_ColumnMenu.html">grid/ColumnMenu</a></li><li><a href="module-grid_DialogFilter.html">grid/DialogFilter</a></li><li><a href="module-grid_DialogFilterForm.html">grid/DialogFilterForm</a></li><li><a href="module-grid_DropdownFilterCell.html">grid/DropdownFilterCell</a></li><li><a href="module-grid_EditBooleanCell.html">grid/EditBooleanCell</a></li><li><a href="module-grid_EditCommandCell.html">grid/EditCommandCell</a></li><li><a href="module-grid_EditDateTimeCell.html">grid/EditDateTimeCell</a></li><li><a href="module-grid_EditDropdownCell.html">grid/EditDropdownCell</a></li><li><a href="module-grid_EditPickerCell.html">grid/EditPickerCell</a></li><li><a href="module-grid_EditTimeCell.html">grid/EditTimeCell</a></li><li><a href="module-grid_FileCell.html">grid/FileCell</a></li><li><a href="module-grid_Grid.html">grid/Grid</a></li><li><a href="module-grid_GridWrapper.html">grid/GridWrapper</a></li><li><a href="module-grid_RangeFilterCell.html">grid/RangeFilterCell</a></li><li><a href="module-grid_SaveFilterDialog.html">grid/SaveFilterDialog</a></li><li><a href="module-grid_SelectionMenu.html">grid/SelectionMenu</a></li><li><a href="module-grid_Toolbar.html">grid/Toolbar</a></li><li><a href="module-grid_TooltipCell.html">grid/TooltipCell</a></li><li><a href="module-LoadingPanel.html">LoadingPanel</a></li><li><a href="module-metabase_Dashboard.html">metabase/Dashboard</a></li><li><a href="module-navigation_Hamburger.html">navigation/Hamburger</a></li><li><a href="module-navigation_Manual.html">navigation/Manual</a></li><li><a href="module-navigation_ManualDialogList.html">navigation/ManualDialogList</a></li><li><a href="module-navigation_ManualList.html">navigation/ManualList</a></li><li><a href="module-navigation_ManualPDF.html">navigation/ManualPDF</a></li><li><a href="module-navigation_ManualWrapper.html">navigation/ManualWrapper</a></li><li><a href="module-navigation_Navigation.html">navigation/Navigation</a></li><li><a href="module-navigation_Search.html">navigation/Search</a></li><li><a href="module-navigation_User.html">navigation/User</a></li><li><a href="module-RefreshDialog.html">RefreshDialog</a></li><li><a href="module-sch_ApprovalProcessStep.html">sch/ApprovalProcessStep</a></li><li><a href="module-sch_ApprovalProcessTimeline.html">sch/ApprovalProcessTimeline</a></li><li><a href="module-scheduler_Scheduler.html">scheduler/Scheduler</a></li><li><a href="module-Settings.html">Settings</a></li><li><a href="module-sidebar_Appmenu.html">sidebar/Appmenu</a></li><li><a href="module-sidebar_Footer.html">sidebar/Footer</a></li><li><a href="module-sidebar_header_Appmenu.html">sidebar/header/Appmenu</a></li><li><a href="module-sidebar_header_Header.html">sidebar/header/Header</a></li><li><a href="module-sidebar_header_SidebarToggle.html">sidebar/header/SidebarToggle</a></li><li><a href="module-sidebar_menu_Menu.html">sidebar/menu/Menu</a></li><li><a href="module-sidebar_menu_Search.html">sidebar/menu/Search</a></li><li><a href="module-sidebar_Sidebar.html">sidebar/Sidebar</a></li><li><a href="module-sidebar_Stats.html">sidebar/Stats</a></li><li><a href="module-Tab.html">Tab</a></li><li><a href="module-Tabs.html">Tabs</a></li><li><a href="module-TabsWrapper.html">TabsWrapper</a></li><li><a href="module-TitlePanel.html">TitlePanel</a></li><li><a href="module-utils_convert.html">utils/convert</a></li><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter.html">utils/eventEmitter</a></li><li><a href="module-utils_flags.html">utils/flags</a></li><li><a href="module-utils_helper.html">utils/helper</a></li><li><a href="module-utils_logger.html">utils/logger</a></li><li><a href="module-utils_requests.html">utils/requests</a></li><li><a href="module-utils_storage.html">utils/storage</a></li><li><a href="module-ValidationAlert.html">ValidationAlert</a></li><li><a href="module-views_login_Login.html">views/login/Login</a></li><li><a href="module-views_registration_Registration.html">views/registration/Registration</a></li></ul><h3>Classes</h3><ul><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter-ExtendedEventEmitter.html">ExtendedEventEmitter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getPreprocessedMenuData-zkorenamenuvyrobinovudatovustrukturumenupouzitelnunavykreslenie">getPreprocessedMenuData - z korena menu vyrobi novu datovu strukturu menu pouzitelnu na vykreslenie</a></li><li><a href="global.html#isValidDateStr">isValidDateStr</a></li><li><a href="global.html#isValidEcv">isValidEcv</a></li><li><a href="global.html#isValidID">isValidID</a></li><li><a href="global.html#isValidMail">isValidMail</a></li><li><a href="global.html#isValidPasswordStrong">isValidPasswordStrong</a></li><li><a href="global.html#isValidPhone">isValidPhone</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Thu Jan 07 2021 13:35:30 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

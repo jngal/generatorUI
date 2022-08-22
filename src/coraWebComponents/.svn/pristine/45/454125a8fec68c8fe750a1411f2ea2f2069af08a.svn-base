@@ -1,0 +1,53 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import Dialog from '../dialogs/Dialog';
+import DialogFilterForm from './DialogFilterForm';
+import './DialogFilter.scss';
+import { buildFilter } from '../utils/helper';
+
+
+class DialogFilter extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.dialogRef = React.createRef();
+  }
+
+  handleConfirmFilter = () => {
+    const input = this.dialogRef.current.state.input;
+    const newFilter = buildFilter(input, this.props.schema);
+    this.props.handleConfirmFilter(newFilter)
+  }
+
+  render() {
+    return (
+      <Dialog
+        isOpen={this.props.isOpen}
+        onClose={this.props.handleCloseFilter}
+        onConfirm={this.handleConfirmFilter}
+        title="Filter"
+      >
+        <DialogFilterForm
+          ref={this.dialogRef}
+          schema={this.props.schema}
+          parentProps={this.props.parentProps}
+          filter={this.props.filter}
+          enumDefault={this.props.enumDefault}
+        />
+      </Dialog>
+    );
+  }
+}
+
+DialogFilter.propTypes = {
+  schema: PropTypes.array.isRequired,
+  parentProps: PropTypes.object,
+  isOpen: PropTypes.bool.isRequired,
+  handleOpenFilter: PropTypes.func.isRequired,
+  handleCloseFilter: PropTypes.func.isRequired,
+  handleConfirmFilter: PropTypes.func.isRequired,
+  filter: PropTypes.object.isRequired,
+  enumDefault: PropTypes.string.isRequired
+}
+
+export default DialogFilter;

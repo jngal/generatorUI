@@ -1,0 +1,33 @@
+@import "../variables";
+@import "../themes";
+
+.image-compress-container {
+  padding: 25px;
+  margin-top: 25px;
+  border-radius: 10px;
+  @include themed() {
+    border: 1px color($secondary) solid;
+  }
+
+  .k-slider-horizontal {
+    width: 100%;
+  }
+
+  .message {
+    font-size: small;
+    font-weight: bold;
+    
+  }
+
+  .error {
+    @include themed() {
+      color: color($validation-error) !important;
+    }
+  }
+
+  .valid {
+    @include themed() {
+      color: color($alert-ok-text) !important;
+    }
+  }
+}

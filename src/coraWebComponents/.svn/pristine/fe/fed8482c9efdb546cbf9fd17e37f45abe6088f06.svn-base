@@ -1,0 +1,8 @@
+@import "../variables";
+@import "../themes";
+
+.k-datetimepicker:hover {
+  @include themed() {
+    background-color: color($secondarylight);
+  }
+}

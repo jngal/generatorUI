@@ -1,0 +1,49 @@
+import './Sidebar.scss';
+
+import * as React from 'react';
+
+import Footer from './Footer';
+import Header from './header/Header';
+import Menu from './menu/Menu';
+import propTypes from 'prop-types';
+
+class Sidebar extends React.Component {
+  render() {
+    return (
+      <div className="sidebar">
+        <Header
+          sidebarType={this.props.type}
+          onClick={this.props.onClick}
+          sideBarToggleIcons={this.props.sideBarToggleIcons}
+        />
+        <div className="main">
+          <Menu
+            onClick={this.props.onClick}
+            onSelect={this.props.onMenuSelect}
+            menu={this.props.menu}
+            onMenuFilter={this.props.onMenuFilter}
+            sidebarType={this.props.type}
+          />
+          {this.props.stats && React.cloneElement(this.props.stats, { sidebarType: this.props.type }, this.props.stats.children)}
+        </div>
+        <Footer compact={this.props.type === 'compact'} />
+      </div>
+    );
+  }
+}
+
+Sidebar.propTypes = {
+  menu: propTypes.object.isRequired,
+  stats: propTypes.element,
+  type: propTypes.oneOf([
+    'normal',
+    'compact',
+    'fullscreen',
+  ]),
+  onClick: propTypes.func.isRequired,
+  onMenuSelect: propTypes.func.isRequired,
+  onMenuFilter: propTypes.func,
+  sideBarToggleIcons: propTypes.object,
+}
+
+export default Sidebar;

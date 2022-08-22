@@ -1,0 +1,52 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Button } from '@progress/kendo-react-buttons';
+import './ButtonGroup.scss';
+
+class ButtonGruopComponent extends React.Component {
+  onMouseOver = (e, x) => {
+    e.target.title = x[this.props.textField];
+  }
+
+  onClick = (e, x) => {
+    e.preventDefault();
+    this.props.onChange(this.props.name, x);
+  }
+ 
+  render() {
+    const { textField, value, disabled } = this.props;
+    
+    return (
+      <div className="button-group">
+        {this.props.data.map((x, index) => {
+          return (
+            <Button
+              className={this.props.className}
+              primary={x[textField] === value[textField]}
+              icon={x[this.props.iconField]}
+              onClick={e => this.onClick(e, x)}
+              onMouseOver={e => this.onMouseOver(e, x)}
+              disabled={disabled}
+              key={x[this.props.dataItemKey] || index}
+            >
+              {x[textField]}
+            </Button>
+          )
+        })}
+      </div>
+    );
+  }
+}
+
+ButtonGruopComponent.propTypes = {
+  data: PropTypes.array.isRequired,
+  textField: PropTypes.string.isRequired,
+  value: PropTypes.object,
+  onChange: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
+  iconField: PropTypes.string,
+  dataItemKey:  PropTypes.string
+}
+
+export default ButtonGruopComponent;

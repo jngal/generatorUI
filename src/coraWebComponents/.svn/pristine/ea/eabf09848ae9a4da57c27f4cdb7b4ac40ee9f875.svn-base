@@ -1,0 +1,100 @@
+import React from 'react';
+import Button from '../buttons/Button';
+import fileSaver from 'file-saver';
+import PropTypes from 'prop-types';
+
+
+/**
+ * Manual Component
+ * @module
+ * @param {func} getManual - Function to get manual
+ * @param {manualProps} manualProps - Props for manual
+ */
+
+let _createdUrl = null;
+class Manual extends React.Component {
+
+  componentDidMount() {
+    this.props.getManual();
+  }
+
+  handleConfirm = () => {
+    this.handleStatementPrint();
+  }
+
+  handleStatementPrint = () => {
+    if (this.iframePdf !== undefined) {
+      const iframePdfContent = this.iframePdf.contentWindow;
+      if (iframePdfContent) {
+        try {
+          iframePdfContent.focus();
+          iframePdfContent.print();
+        }
+        catch (e) {
+          var win = window.open(_createdUrl, '_blank');
+          win.focus();
+        }
+      }
+    }
+  }
+
+  handleDownload = () => {
+    if (this.props.manualProps.manualBlob) {
+      fileSaver.saveAs(this.props.manualProps.manualBlob, this.props.manualProps.manualFileName);
+    }
+  }
+
+  render() {
+    _createdUrl = null;
+    if (this.props.manualProps.manualBlob) {
+      _createdUrl = URL.createObjectURL(this.props.manualProps.manualBlob);
+    }
+
+    return (
+      _createdUrl && <React.Fragment>
+        <div style={{ width: '100%', height: '100%' }}>
+          <div className="report-buttons">
+            <Button
+              label="Tlačiť"
+              primary={true}
+              icon="print"
+              onClick={this.handleStatementPrint}
+            />
+
+            <Button
+              label="Stiahnúť dokument"
+              primary={true}
+              icon="download"
+              onClick={this.handleDownload}
+            />
+          </div>
+          <iframe
+            src={_createdUrl + '#toolbar=0&navpanes=0'}
+            width="100%"
+            height="100%"
+            title={this.props.manualProps.manualTitle}
+            ref={(frame) => { this.iframePdf = frame }}
+            >
+          </iframe>
+        </div>
+      </React.Fragment>
+    )
+  }
+}
+
+Manual.propTypes = {
+  getManual: PropTypes.func.isRequired,
+  manualProps: PropTypes.shape({
+    hasList: PropTypes.bool.isRequired,
+    listManual: PropTypes.object,
+    user: PropTypes.object,
+    manualBlob: PropTypes.object,
+    manualFileName: PropTypes.string,
+    manualTitle: PropTypes.string,
+    manualList: PropTypes.arrayOf(PropTypes.object),
+    manualListData: PropTypes.array,
+    manualListDataMap: PropTypes.object
+  }).isRequired
+}
+
+export default Manual;

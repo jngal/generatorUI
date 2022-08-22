@@ -1,0 +1,54 @@
+import './SidebarToggle.scss';
+
+import PropTypes from 'prop-types';
+import React from 'react';
+
+/**
+ * Sidebar toggle component
+ * @module
+ * @param {string} sidebarType - Sidebar type ('normal','compact','fullscreen')
+ * @param {func} onClick - Function invoked on click
+ * @param {object} [sideBarToggleIcons] - Sidebar toggle icons
+ */
+class SidebarToggle extends React.Component {
+  constructor(props) {
+    super(props);
+
+    const base = "sidebar-toggle k-icon";
+    this.compactSidebarClassNames = `${base} compact ${this.props.sideBarToggleIcons && this.props.sideBarToggleIcons.compactIcon ? this.props.sideBarToggleIcons.compactIcon : "k-i-arrow-chevron-right"}`;
+    this.normalSidebarClassNames = `${base} ${this.props.sideBarToggleIcons && this.props.sideBarToggleIcons.normalIcon ? this.props.sideBarToggleIcons.normalIcon : "k-i-arrow-chevron-left"}`;
+    this.fullscreenSidebarClassNames = `${base} fullscreen ${this.props.sideBarToggleIcons && this.props.sideBarToggleIcons.fullscreen ? this.props.sideBarToggleIcons.fullscreen : "k-i-arrow-chevron-left"}`;
+  }
+  
+  evaluateSidebarToggleClassNames = () => {
+    switch (this.props.sidebarType) {
+      case 'compact':
+        return this.compactSidebarClassNames;
+      case 'fullscreen':
+        return this.fullscreenSidebarClassNames;
+      default:
+        return this.normalSidebarClassNames;
+    }
+  }
+  
+  render() {
+    return (
+      <span
+        onClick={this.props.onClick}
+        className={this.evaluateSidebarToggleClassNames()}
+      />
+    );
+  }
+}
+
+SidebarToggle.propTypes = {
+  sidebarType: PropTypes.oneOf([
+    'normal',
+    'compact',
+    'fullscreen',
+  ]),
+  onClick: PropTypes.func.isRequired,
+  sideBarToggleIcons: PropTypes.object,
+}
+
+export default SidebarToggle;

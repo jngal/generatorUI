@@ -1,0 +1,107 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { DropDownButton } from '@progress/kendo-react-buttons';
+import { Tooltip } from '@progress/kendo-react-tooltip';
+import './DropDownButton.scss';
+
+/**
+ * @typedef {Object} items
+ * @property {string} text - Text
+ * @property {string} icon - Icon
+ */
+
+/**
+* Dropdown button
+* @module
+* @param {string} text - Button text
+* @param {items[]} items - Items to choose from
+* @param {string} [className] - ClassName of DropDownButton
+* @param {string} [buttonClassName] - ButtonClassName
+* @param {string} [icon] - Icon name
+* @param {func} onClick - Function invoked on button click
+* @param {bool} [disabled] - Disabled button
+* @param {object} [popupSettings] - Popup settings
+* @param {func} [itemRender] - itemRender function
+* @param {string} title - Button tooltip
+* @param {func} [customTooltipContent] - Custom tooltip content
+*/
+class DropDownButtonComponent extends React.Component {
+
+  onClick = (e) => {
+    if (e.itemIndex !== undefined) {
+
+      const div = document.body.querySelector('div.k-animation-container.k-animation-container-fixed.k-animation-container-shown');
+      if (div) { div.style.display = "none"; }
+
+      this.props.onClick(e.itemIndex, e.item.text);
+    } 
+  }
+
+  onMouseOver = (e) => {
+    const title = e.target.getAttribute("data-tooltip");
+  
+    if (this.props.title) { 
+      e.target.title = title ? title : this.props.title;
+    } 
+  }
+
+  itemRender = (props) => {
+    if (this.props.itemRender) {
+      return this.props.itemRender(props);
+    }
+
+    const title = props.item.title ? props.item.title : props.item.text;    
+    return (
+        <div data-tooltip={title}>
+          { 
+            (props.item.imageUrl ? <img className="k-image" role="presentation" src={props.item.imageUrl} alt=""  data-tooltip={title} />
+            : <span className={props.item.iconClass ? props.item.iconClass : `k-icon k-i-${props.item.icon}`} role="presentation" data-tooltip={title} />)
+          }
+          { props.item.text }
+        </div>      
+    );
+  };
+
+  render() {
+    
+
+    return (
+      <div className="split-button">
+        <Tooltip anchorElement="target" content={this.props.customTooltipContent ? () => this.props.customTooltipContent : null} position="top" openDelay={0}>
+          <div onMouseOver={this.props.title ? this.onMouseOver : null} >
+          <DropDownButton
+            text={this.props.text}
+            items={this.props.items}
+            className={this.props.className}
+            buttonClass={this.props.buttonClassName}
+            icon={this.props.icon}
+            onItemClick={e => this.onClick(e)}
+            disabled={this.props.disabled}
+            popupSettings={this.props.popupSettings}
+            itemRender={this.itemRender}
+          />
+          </div>
+        </Tooltip>
+      </div>
+    );
+  }
+}
+
+DropDownButtonComponent.propTypes = {
+  text: PropTypes.string.isRequired,
+  items: PropTypes.arrayOf(PropTypes.shape({
+    text: PropTypes.string.isRequired,
+    icon: PropTypes.string,
+  })).isRequired,
+  className: PropTypes.string,
+  buttonClassName: PropTypes.string,
+  icon: PropTypes.string,
+  onClick: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  popupSettings: PropTypes.object,
+  itemRender: PropTypes.func,
+  title: PropTypes.string,
+  customTooltipContent: PropTypes.object,
+}
+
+export default DropDownButtonComponent;

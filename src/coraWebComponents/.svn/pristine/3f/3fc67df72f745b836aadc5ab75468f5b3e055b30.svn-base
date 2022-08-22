@@ -1,0 +1,23 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+
+class ValidationMessage extends React.Component {
+  render() {
+    const { required, validationMessage } = this.props;
+    if(!required && !validationMessage) {
+      return null;
+    }
+    return (
+      <div className="validation">
+        {validationMessage ? validationMessage : 'Toto pole je povinné'}
+      </div>
+    )
+  }
+}
+
+ValidationMessage.propTypes = {
+  required: PropTypes.bool,
+  validationMessage: PropTypes.string
+}
+
+export default ValidationMessage;

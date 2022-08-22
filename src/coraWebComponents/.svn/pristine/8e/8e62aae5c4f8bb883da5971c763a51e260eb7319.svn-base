@@ -1,0 +1,31 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { ChartLegend } from '@progress/kendo-react-charts';
+
+/**
+ * @typedef {Object} legendProps
+ * @property {string} position - Position
+ */
+
+/**
+ * Chart legend component
+ * @module
+ * @param {legendProps} legendProps - Category axis props
+ */
+class ChartLegendComponent extends React.Component {
+  render() {
+    return (
+      <ChartLegend
+        position={this.props.legendProps.position}
+      />
+    )
+  }
+}
+
+ChartLegendComponent.propTypes = {
+  legendProps: PropTypes.shape({
+    position: PropTypes.string,
+  }),
+}
+
+export default ChartLegendComponent;

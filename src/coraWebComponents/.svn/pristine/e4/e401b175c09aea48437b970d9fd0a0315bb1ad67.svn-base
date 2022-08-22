@@ -1,0 +1,44 @@
+@import "../variables";
+@import "../themes";
+
+.stats {
+  position: absolute;
+  width: 100%;
+  height: $stats-height;
+  padding: 17px 10px 10px 10px;
+  font-size: 14px !important;
+  bottom: $footer-height;
+  @include themed() {
+    background-color: color($primary);
+    //color: color($primarylight) !important;
+  }
+  table {
+    margin: 0 auto;
+    cursor: default;
+  
+    td {
+      line-height: 9px;   
+      span.warning {
+        @include themed() {
+          color: #9b1f1f;
+        }
+      }
+
+      & + td {
+        padding-left: 70px;
+        text-align: center;
+      }
+    }
+  }
+}
+
+.w-sidebar-compact .stats table {
+  tr > td:first-child {
+    display: none;
+  }
+
+  tr > td + td {
+    padding-left: 4px;
+    text-align: center;
+  }
+}

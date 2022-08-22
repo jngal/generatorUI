@@ -1,0 +1,33 @@
+@import "../variables";
+@import "../themes";
+
+.timepicker {
+  flex: 1;
+  display: flex;
+
+  .k-dateinput-wrap {
+    flex: 1;
+    .k-state-focused {
+      @include themed() {
+        background-color: color($basicwhite) !important;
+        color: color($text-color) !important;
+      }
+    }
+  }
+  &.disabled-field:hover {
+    @include themed() {
+      background-color: color($secondarylight);
+    }
+  }
+}
+
+.k-form-field {
+  .k-timepicker {
+    .k-select{
+       @include themed() {
+         background-color: color($secondary);
+       }
+     }
+   }
+}
+

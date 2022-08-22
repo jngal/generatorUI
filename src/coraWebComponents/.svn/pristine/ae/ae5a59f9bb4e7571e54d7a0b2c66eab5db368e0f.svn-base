@@ -1,0 +1,118 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Upload } from '@progress/kendo-react-upload';
+import './Upload.scss';
+
+const USER_KEY = 'User';
+
+/**
+ * Upload component
+ * @module
+ * @param {bool} [disabled] - Is upload readonly?
+ * @param {string} url - Url
+ * @param {string} name - Name
+ * @param {array} [value] - Current value
+ * @param {object} [data] - Data
+ * @param {func} [onUpload] - Function invoked on file upload
+ * @param {number} [tabindex] - Upload tab index
+ * @param {func} [onBlur] - Function invoked on blur
+ * @param {object} [restrictions] - Upload restriction
+  */
+class UploadComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      files: []
+    };
+  }
+
+  onChange = (files) => {
+    this.props.onChange(this.props.name, files);
+  }
+
+  onAdd = (event) => {
+    // console.log('onAdd: ', event.affectedFiles);
+    this.onChange(event.newState);
+  }
+
+  onRemove = (event) => {
+    // console.log('onRemove: ', event.affectedFiles);
+    this.onChange(event.newState);
+  }
+
+  onProgress = (event) => {
+    // console.log('onProgress: ', event.affectedFiles, event.serverResponse);
+    this.onChange(event.newState);
+  }
+
+  onStatusChange = (event) => {
+    // console.log('onStatusChange: ', event.affectedFiles, event.serverResponse);
+    this.onChange(event.newState);
+    if(this.props.onUpload) {
+      this.props.onUpload(event.response.response);
+    }
+  }
+
+  handleBeforeSend = (event) => {
+    event.additionalData = this.props.data || {};
+    event.headers.Authorization = this.getAuthorizationHeader();
+  }
+
+  getAuthorizationHeader = () => {
+    const user = JSON.parse(sessionStorage.getItem(USER_KEY));
+
+    if(user) {
+      const token = user.RefreshToken || user.Token;
+      return `Bearer ${token}`;
+    }
+    
+    return null;
+  }
+
+  onBlur = () => {
+    if(this.props.onBlur) {
+      this.props.onBlur();
+    }
+  }
+
+  render() {
+    const saveUrl = `${window.config.url}/${this.props.url}`;
+
+    return (
+      <div className="upload">
+        <Upload
+          restrictions={this.props.restrictions}
+          batch={false}
+          multiple={false}
+          files={this.props.value}
+          onBeforeUpload={this.handleBeforeSend}
+          onBeforeRemove={this.handleBeforeSend}
+          onAdd={this.onAdd}
+          onRemove={this.onRemove}
+          onProgress={this.onProgress}
+          onStatusChange={this.onStatusChange}
+          withCredentials={false}
+          saveUrl={saveUrl}
+          disabled={this.props.disabled}
+          tabindex={this.props.tabindex}
+          onBlur={this.onBlur}
+        />
+      </div>
+    );
+  }
+}
+
+UploadComponent.propTypes = {
+  disabled: PropTypes.bool,
+  url: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.array,
+  data: PropTypes.object,
+  onUpload: PropTypes.func,
+  tabindex: PropTypes.number,
+  onBlur: PropTypes.func,
+  restrictions: PropTypes.object
+}
+
+export default UploadComponent;

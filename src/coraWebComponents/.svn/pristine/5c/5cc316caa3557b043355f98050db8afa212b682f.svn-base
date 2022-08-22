@@ -1,0 +1,346 @@
+import * as React from "react";
+import PropTypes from "prop-types";
+
+import Input from "../../forms/Input";
+import Tooltip from "../../forms/Tooltip";
+import Button from "../../buttons/Button";
+import LoadingPanel from "../../LoadingPanel";
+import { getClientVersion, getURLParamsByNames } from "../../utils/helper";
+import "./Registration.scss";
+
+/**
+ * Registration component
+ * @module
+ * @param {array} additionalElements - Additional elements
+ * @param {string} [emailLabel] - Email label, "Email" if not provided
+ * @param {element} header - Header element
+ * @param {bool} isLoading - Is loading?
+ * @param {string} [passwordLabel] - Password label, "Heslo" if not provided
+ * @param {string} [verifyPasswordLabel] - Verify password label, "Overenie hesla" if not provided
+ * @param {string} [userNameLabel] - User name label, "Prihlasovacie meno" if not provided
+ */
+class Registration extends React.Component {
+  constructor(props) {
+    super(props);
+
+    const { code, provider } = getURLParamsByNames(["code", "provider"]);
+    this.state = {
+      username: "",
+      email: "",
+      password: "",
+      verifyPassword: "",
+      code,
+      provider,
+    };
+  }
+
+  async componentDidMount() {
+    const { code, provider } = this.state;
+    const { oAuthRegister } = this.props;
+
+    if (code && provider) await oAuthRegister(code, provider);
+  }
+
+  handleChange = (name, value) => {
+    this.setState({ [name]: value });
+  };
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    this.props.onSubmit(this.state);
+  };
+
+  render() {
+    const { email, username, password, verifyPassword } = this.state;
+
+    const {
+      emailValue,
+      header,
+      userNameLabel,
+      emailLabel,
+      passwordLabel,
+      verifyPasswordLabel,
+      isLoading,
+      disabled,
+      children,
+      titles,
+      registerButtonLabel,
+      backButtonLabel,
+      showBackButton,
+      backButtonClick,
+      hide,
+    } = this.props;
+
+    if (emailValue && emailValue !== email)
+      this.setState({ email: emailValue });
+
+    return (
+      <div className="row m-0">
+        <div className="col-4 offset-4 p-0 registrationForWeb">
+          <div className="card registration">
+            <div className="card-body">
+              <div className="card-title">{header}</div>
+              <div style={{ float: "right", fontSize: 12, paddingRight: 16 }}>
+                {getClientVersion()}
+              </div>
+
+              <Tooltip>
+                <form className="k-form" onSubmit={this.handleSubmit}>
+                  {(hide === undefined ||
+                    hide.username === undefined ||
+                    hide.username === false) && (
+                    <div className="k-form-field">
+                      <span>{userNameLabel || "Prihlasovacie meno"}</span>
+                      <Input
+                        title={titles && titles.username}
+                        name="username"
+                        onChange={this.handleChange}
+                        value={username}
+                        disabled={disabled && disabled.username}
+                      />
+                    </div>
+                  )}
+                  {(hide === undefined ||
+                    hide.email === undefined ||
+                    hide.email === false) && (
+                    <div className="k-form-field">
+                      <span>{`*${emailLabel || "Email"}`}</span>
+                      <Input
+                        title={titles && titles.email}
+                        type="email"
+                        name="email"
+                        required={true}
+                        onChange={this.handleChange}
+                        value={email}
+                        disabled={disabled && disabled.email}
+                        validationMessage="Nesprávny format mailovej adresy"
+                      />
+                    </div>
+                  )}
+                  {(hide === undefined ||
+                    hide.password === undefined ||
+                    hide.password === false) && (
+                    <>
+                      <div className="k-form-field">
+                        <span>{`*${passwordLabel || "Heslo"}`}</span>
+                        <Input
+                          title={titles && titles.password}
+                          type="password"
+                          name="password"
+                          required={true}
+                          onChange={this.handleChange}
+                          value={password}
+                          disabled={disabled && disabled.password}
+                          pattern="(?=.*[a-zA-Z].*)(?=.*[0-9].*)(?=.*[@$!%*?#^+\-\/].*)^[a-zA-Z0-9@$!%*?#^+\-\/+*\/-]{8,}"
+                          validationMessage="Heslo musí pozostávať aspoň z 8 znakov a musí obsahovať aspoň 
+                                              jeden znak a-z, 
+                                              jeden znak A-Z, 
+                                              jeden znak 0-9 a 
+                                              jeden zo znakov: +-*/@?!%$#^."
+                        />
+                      </div>
+                      <div className="k-form-field">
+                        <span>{`*${
+                          verifyPasswordLabel || "Overenie hesla"
+                        }`}</span>
+                        <Input
+                          title={titles && titles.verifyPassword}
+                          type="password"
+                          name="verifyPassword"
+                          required={true}
+                          onChange={this.handleChange}
+                          value={verifyPassword}
+                          disabled={disabled && disabled.password}
+                          validationMessage="Hesla sa nezhodujú"
+                          valid={password === verifyPassword}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {showBackButton ? (
+                    <div className="k-form-field">
+                      <div className="footerContainer">
+                        {showBackButton && (
+                          <Button
+                            onClick={backButtonClick}
+                            className="backButton"
+                            primary={true}
+                            disabled={isLoading}
+                            label={backButtonLabel || "Späť"}
+                          />
+                        )}
+                        <Button
+                          className="registerButton"
+                          primary={true}
+                          disabled={isLoading}
+                          label={registerButtonLabel || "Registrovať"}
+                          type="submit"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      className="registerButton"
+                      primary={true}
+                      disabled={isLoading}
+                      label={registerButtonLabel || "Registrovať"}
+                      type="submit"
+                    />
+                  )}
+
+                  {children}
+                </form>
+              </Tooltip>
+
+              <LoadingPanel isLoading={isLoading} />
+            </div>
+          </div>
+        </div>
+        <div className="col p-0 registrationForMobile">
+          <div className="card registration">
+            <div className="card-body">
+              <div className="card-title">{header}</div>
+              <div style={{ float: "right", fontSize: 12, paddingRight: 16 }}>
+                {getClientVersion()}
+              </div>
+
+              <Tooltip>
+                <form className="k-form" onSubmit={this.handleSubmit}>
+                  {(hide === undefined ||
+                    hide.username === undefined ||
+                    hide.username === false) && (
+                    <div className="k-form-field">
+                      <span>{userNameLabel || "Prihlasovacie meno"}</span>
+                      <Input
+                        title={titles && titles.username}
+                        name="username"
+                        onChange={this.handleChange}
+                        value={username}
+                        disabled={disabled && disabled.username}
+                      />
+                    </div>
+                  )}
+                  {(hide === undefined ||
+                    hide.email === undefined ||
+                    hide.email === false) && (
+                    <div className="k-form-field">
+                      <span>{`*${emailLabel || "Email"}`}</span>
+                      <Input
+                        title={titles && titles.email}
+                        type="email"
+                        name="email"
+                        required={true}
+                        onChange={this.handleChange}
+                        value={email}
+                        disabled={disabled && disabled.email}
+                        validationMessage="Nesprávny format mailovej adresy"
+                      />
+                    </div>
+                  )}
+                  {(hide === undefined ||
+                    hide.password === undefined ||
+                    hide.password === false) && (
+                    <>
+                      <div className="k-form-field">
+                        <span>{`*${passwordLabel || "Heslo"}`}</span>
+                        <Input
+                          title={titles && titles.password}
+                          type="password"
+                          name="password"
+                          required={true}
+                          onChange={this.handleChange}
+                          value={password}
+                          disabled={disabled && disabled.password}
+                          pattern="(?=.*[a-zA-Z].*)(?=.*[0-9].*)(?=.*[@$!%*?#^+\-\/].*)^[a-zA-Z0-9@$!%*?#^+\-\/+*\/-]{8,}"
+                          validationMessage="Heslo musí pozostávať aspoň z 8 znakov a musí obsahovať aspoň 
+                                              jeden znak a-z, 
+                                              jeden znak A-Z, 
+                                              jeden znak 0-9 a 
+                                              jeden zo znakov: +-*/@?!%$#^."
+                        />
+                      </div>
+                      <div className="k-form-field">
+                        <span>{`*${
+                          verifyPasswordLabel || "Overenie hesla"
+                        }`}</span>
+                        <Input
+                          title={titles && titles.verifyPassword}
+                          type="password"
+                          name="verifyPassword"
+                          required={true}
+                          onChange={this.handleChange}
+                          value={verifyPassword}
+                          disabled={disabled && disabled.password}
+                          validationMessage="Hesla sa nezhodujú"
+                          valid={password === verifyPassword}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {showBackButton ? (
+                    <div className="k-form-field">
+                      <div className="footerContainer">
+                        {showBackButton && (
+                          <Button
+                            onClick={backButtonClick}
+                            className="backButton"
+                            primary={true}
+                            disabled={isLoading}
+                            label={backButtonLabel || "Späť"}
+                          />
+                        )}
+                        <Button
+                          className="registerButton"
+                          primary={true}
+                          disabled={isLoading}
+                          label={registerButtonLabel || "Registrovať"}
+                          type="submit"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      className="registerButton"
+                      primary={true}
+                      disabled={isLoading}
+                      label={registerButtonLabel || "Registrovať"}
+                      type="submit"
+                    />
+                  )}
+
+                  {children}
+                </form>
+              </Tooltip>
+
+              <LoadingPanel isLoading={isLoading} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+Registration.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  header: PropTypes.element.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  registerButtonLabel: PropTypes.string,
+  emailLabel: PropTypes.string,
+  emailValue: PropTypes.string,
+  passwordLabel: PropTypes.string,
+  showUsernameInput: PropTypes.bool,
+  verifyPasswordLabel: PropTypes.string,
+  userNameLabel: PropTypes.string,
+  disabled: PropTypes.object,
+  hide: PropTypes.object,
+  titles: PropTypes.object,
+  oAuthRegister: PropTypes.func,
+  backButtonClick: PropTypes.func,
+  backButtonLabel: PropTypes.string,
+  showBackButton: PropTypes.bool,
+};
+
+export default Registration;

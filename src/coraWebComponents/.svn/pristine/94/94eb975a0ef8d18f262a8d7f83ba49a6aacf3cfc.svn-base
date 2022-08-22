@@ -1,0 +1,31 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+
+import ApprovalProcessStep from './ApprovalProcessStep';
+
+import './ApprovalProcessTimeline.scss';
+
+/**
+ * Approval process timeline
+ * @module
+ * @param {array} schProc - Sch proc
+ */
+class ApprovalProcessTimeline extends React.Component {
+  render() {
+    return (      
+        <div className="approval-process-timeline d-flex flex-column">
+          {
+            this.props.schProc.map(stepData=> {
+              return <ApprovalProcessStep stepData={stepData}/>
+            })  
+          }
+        </div>    
+    );
+  }
+}
+
+ApprovalProcessTimeline.propTypes = {
+  schProc: PropTypes.array
+}
+
+export default ApprovalProcessTimeline;

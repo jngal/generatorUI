@@ -1,0 +1,134 @@
+import _ from 'lodash';
+
+export const stringIsNullOrEmpty = (string) => {
+    return (!string || string.length === 0 || !string.trim() || /^\s*$/.test(string));
+}
+
+export const buildUrl = (name) => {
+  const theme = document.body.className;
+  if(name){
+    switch(theme){
+      case 'theme-dark':
+        name = name.replace(".svg", "-dark.svg");
+        break;
+        case 'theme-pink':
+        name = name.replace(".svg", "-pink.svg");
+        break;
+        case 'theme-underwater':
+        name = name.replace(".svg", "-underwater.svg");
+        break;
+        case 'theme-army':
+        name = name.replace(".svg", "-army.svg");
+        break;
+        default:
+          return name;
+    }
+    return name;
+  }
+}
+
+export const buildGoogleOauthUrl = (redirectURI) => {
+  return `https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/userinfo.profile&response_type=code&redirect_uri=${redirectURI}&client_id=${window.config.google.id}`;
+}
+
+export const getClientVersion = () => {
+  return process.env.REACT_APP_VERSION.substring(0, 4) + '.' + process.env.REACT_APP_VERSION.substring(4);
+}
+
+export var eachDeep = (columns, parent, fn) => {
+  if (!_.isArray(columns)) return;
+  columns.forEach(item => {
+    eachDeep(item.schema, item, fn);
+    fn(item, parent);  
+  });
+}
+
+export var copyToClipboard = (data) => {
+  var actEl = document.activeElement;
+  var el = document.createElement("textarea");
+  el.value = data;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand("copy");
+  document.body.removeChild(el);
+  actEl.focus();
+}
+
+export var removeAccents = (str) => {
+  var accents = 'ÁÄáäÓÔóôÉéČčĎďÍíÚúŇňŠšÝýŽžĹĽĺľŕŤť';
+  var accentsOut = "AAaaOOooEeCcDdIiUuNnSsYyZzLLllrTt";
+  str = str.split('');
+  var strLen = str.length;
+  var i, x;
+  for (i = 0; i < strLen; i++) {
+      if ((x = accents.indexOf(str[i])) !== -1) {
+          str[i] = accentsOut[x];
+      }
+  }
+  return str.join('');
+}
+
+export const buildFilter = (input, schema) => {
+  let newFilter = []
+  for (let [key, value] of Object.entries(input)) {
+    if (value || value === false) {
+      let oldItem = newFilter.find(item => item.field + 'Value' === key || item.field + 'Operator' === key);
+      if (oldItem) {
+        oldItem.field + 'Operator' === key ? oldItem.operator = value : oldItem.value = value
+        newFilter = [...newFilter]
+      }
+      else {
+        let newFilterItem
+        if (key.search("Value") !== -1) {
+          newFilterItem = {
+            field: key.replace('Value', ''),
+            operator: schema.find(item => item.field === (key.replace('Value', '')).filter || 'text') ? 'eq' : 'contains',
+            value: value
+          }
+        }
+        else {
+          newFilterItem = {
+            field: key.replace('Operator', ''),
+            operator: value,
+            value: null
+          }
+        }
+        newFilter = [...newFilter, newFilterItem]
+      }
+    }
+  }
+  newFilter = {
+    logic: "and",
+    filters: [
+      ...newFilter,
+    ]
+  }
+  return newFilter;
+}
+
+export const validEmail = (email) => { return /\S+@\S+\.\S+/.test(email); }
+
+export const onMenuSelect = (targetRoute, currLocation, routeHistory) => {
+  if (targetRoute === undefined || currLocation === undefined)
+    return;
+
+  if (currLocation !== targetRoute)
+    routeHistory.push(targetRoute);
+}
+
+export const getURLParams = (params) => {
+  const urlParamsPart = window.location.href.split('?')[1];
+  if (urlParamsPart === undefined)
+      return [];
+
+  let URLParams = [];
+  params.forEach(param => {
+    if (urlParamsPart.includes(`${param}=`)) {
+      const urlParam = urlParamsPart.split('&').find(up => up.includes(`${param}=`));
+      if (urlParam !== null)
+        URLParams.push(urlParam);
+    }
+  });
+
+  return URLParams;
+}

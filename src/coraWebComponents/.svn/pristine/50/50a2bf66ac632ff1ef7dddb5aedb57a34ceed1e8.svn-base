@@ -1,0 +1,32 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+
+/**
+ * Dashboard component
+ * @module
+ * @param {string} id - Id
+ * @param {string} metabaseUrl - Metabase url
+ * @param {number} [width] - Width
+ * @param {number} [height] - Height
+ */
+class Dashboard extends React.Component {
+  
+  render() {
+    const width = this.props.width === undefined ? "100%" : this.props.width;
+    const height = this.props.height === undefined ? window.innerHeight - 105 : this.props.height;
+    return (
+      <div>
+        <iframe title={this.props.id} width={width} height={height} src={this.props.metabaseUrl} frameborder="0" allowtransparency></iframe>
+      </div>
+    );
+  }
+}
+
+Dashboard.propTypes = {
+  id: PropTypes.string.isRequired,
+  metabaseUrl: PropTypes.string.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number
+}
+
+export default Dashboard;

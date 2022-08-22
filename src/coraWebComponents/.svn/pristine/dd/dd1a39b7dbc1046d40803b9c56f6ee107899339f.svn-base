@@ -1,0 +1,46 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import { Slide } from '@progress/kendo-react-animation';
+
+class SlideComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.ref = React.createRef();
+  }
+
+  componentDidMount() {
+    document.addEventListener('mousedown', this.handleClickOutside, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.handleClickOutside, false);
+  }
+
+  handleClickOutside = (event) => {
+    if (this.props.isOpen && !this.ref.current.contains(event.target)) {
+      this.props.onClose();
+    }
+  }
+
+  render() {
+    return (
+      <Slide>
+        {this.props.isOpen ?
+          <div ref={this.ref}>
+            {this.props.children}
+          </div>
+          :
+          null
+        }
+      </Slide>
+    );
+  }
+}
+
+SlideComponent.propTypes = {
+  children: PropTypes.element.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired
+}
+
+export default SlideComponent;

@@ -1,0 +1,50 @@
+import * as React from 'react';
+import './Appmenu.scss';
+import propTypes from 'prop-types';
+import { Slide } from '@progress/kendo-react-animation';
+
+class Appmenu extends React.Component {
+    
+    constructor(props) {
+        super(props);
+
+        this.state = { show: false };
+    }
+
+    handleAppmenu = () => {
+        this.setState({
+            show: !this.state.show
+        });
+    }
+
+    render() {
+        
+        const { show } = this.state;
+
+        const appmenu = show ? (
+            <div className="info-okno" style={this.props.compact ? {display:"none"} : {display:"block"}}>
+                Appmenu Placeholder
+            </div>
+        ) : null;
+
+        return (
+            <div className={this.props.compact ? "brand compact" : "brand"}>
+                <nav className="navbar">
+                    <span
+                    onClick={this.props.onClick}
+                    className={`sidebar-toggle k-icon ${this.props.compact ? "compact k-i-arrow-chevron-right" : "k-i-arrow-chevron-left"}`}
+                    />
+                    <div className="k-i-grid" style={this.props.compact ? {display:"none"} : {display:"inline-block"}} onClick={this.handleAppmenu}></div>
+                    <Slide>{appmenu}</Slide>
+                </nav>
+            </div>
+        );
+    }
+}
+
+Appmenu.propTypes = {
+    compact: propTypes.bool.isRequired,
+    onClick: propTypes.func.isRequired
+}
+
+export default Appmenu;

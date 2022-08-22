@@ -1,0 +1,185 @@
+import './User.scss';
+
+import * as React from 'react';
+import * as storage from '../utils/storage';
+
+import PropTypes from 'prop-types';
+import { buildUrl } from '../utils/helper';
+import Slide from '../animation/Slide';
+import ManualWrapper from './ManualWrapper';
+
+
+/**
+ * User component
+ * @module
+ * @param {object} [uzivatel] - User object
+ * @param {element} [brand] - Brand element
+ * @param {func} onSignOut - Function invoked on sign out
+ * @param {element} [userInfo] - User info element
+ * @param {func} [getManual] - Function to get manual
+ * @param {func} [getListManual] - Function to get manual list
+ * @param {manualProps} [manualProps] - Props for manual
+ */
+
+class User extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      showInfo: false,
+      showNotifikacie: false,
+      isManualDialogOpen: false,
+      isManualListOpen: false,
+    };
+  }
+
+  handleInfo = () => {
+    this.setState({
+      showInfo: true
+    });
+  }
+
+  handleCloseInfo = () => {
+    this.setState({ showInfo: false });
+  }
+
+  handleManualDialogClose = () => {
+    this.setState({ isManualDialogOpen: false });
+  }
+
+  handleManualListClose = () => {
+    this.setState({ isManualListOpen: false });
+  }
+
+  //rozhodnutie ci sa pouzije dialog pre zobrazenie jedneho manualu alebo manualList pre viacero manualov
+  handleNapoveda = () => {
+    const manualProps = this.props.manualProps;
+    manualProps && manualProps.hasList ? this.setState({ isManualListOpen: true }) : this.setState({ isManualDialogOpen: true });
+    
+    if(!manualProps) 
+      alert("Nápoveda");
+  }
+
+  handleSpravy = () => {
+    alert("Spravy");
+  }
+
+  handleNotifikacie = () => {
+    this.setState({
+      showNotifikacie: true
+    });
+  }
+
+  handleCloseNotifikacie = () => {
+    this.setState({ showNotifikacie: false });
+  }
+
+  handleLogout = () => {
+    storage.removeUser();
+    this.props.onSignOut();
+  }
+
+  buildInicialy = () => {
+    const { uzivatel } = this.props;
+
+    if (uzivatel && uzivatel.Skratka) {
+      return uzivatel.Skratka;
+    }
+
+    if (!uzivatel || !uzivatel.Meno || !uzivatel.Priezvisko) {
+      return 'x';
+    }
+
+    return `${uzivatel.Meno.charAt(0)}${uzivatel.Priezvisko.charAt(0)}`;
+  }
+
+  render() {
+    const { showInfo, showNotifikacie } = this.state;
+    const { uzivatel } = this.props;
+
+
+    const infoOkno = (
+      <div className="info-okno">
+        <div className="example-1">
+          <div className="inicialization-icone">
+            {this.buildInicialy()}
+          </div>
+        </div>
+        <div className="example-2">
+          {uzivatel &&
+            <div className="meno-user">
+              {uzivatel.Meno} {uzivatel.Priezvisko}
+            </div>
+          }
+          {this.props.userInfo}
+        </div>
+        <div className="example-3">
+          <div className="logout" onClick={this.handleLogout}>
+            Odhlásiť sa
+        </div>
+        </div>
+      </div>
+    );
+
+    const notifikacieOkno = (
+      <div className="info-okno">
+        Notifikácie Placeholder
+      </div>
+    );
+
+    return (
+      <div className="nav-user">
+        <div className="k-i-gear" onClick={this.props.handleOpenSettings}>
+          <img alt="presentation" src={buildUrl('assets/nav_cg_setting.svg')}></img>
+        </div>
+        <div className="k-i-help" onClick={this.handleNapoveda}>
+          <img alt="presentation" src={buildUrl('assets/nav_cg_manual.svg')}></img>
+        </div>
+        <div className="k-i-email" onClick={this.handleSpravy}>
+          <img alt="presentation" src={buildUrl('assets/nav_cg_spravy.svg')}></img>
+        </div>
+        <div className="k-i-bell" onClick={this.handleNotifikacie}>
+          <img alt="presentation" src={buildUrl('assets/nav_cg_zvoncek.svg')}></img>
+        </div>
+        <div className="inicialy-user" onClick={this.handleInfo}>
+          {this.buildInicialy()}
+        </div>
+        <Slide isOpen={showNotifikacie} onClose={this.handleCloseNotifikacie}>{notifikacieOkno}</Slide>
+        <Slide isOpen={showInfo} onClose={this.handleCloseInfo}>{infoOkno}</Slide>
+        {this.props.manualProps && 
+          <ManualWrapper
+            manualProps={this.props.manualProps}
+            getManual={this.props.getManual}
+            getListManual={this.props.getListManual}
+            isManualOpen={this.state.isManualDialogOpen}
+            onManualClose={this.handleManualDialogClose}
+            isListOpen={this.state.isManualListOpen}
+            onListClose={this.handleManualListClose}
+          />
+        }
+      </div>
+    );
+  }
+}
+
+User.propTypes = {
+  uzivatel: PropTypes.object,
+  onSignOut: PropTypes.func.isRequired,
+  userInfo: PropTypes.element,
+  getManual: PropTypes.func,
+  getListManual: PropTypes.func,
+  manualList: PropTypes.element,
+  manualProps: PropTypes.shape({
+    hasList: PropTypes.bool.isRequired,
+    listManual: PropTypes.object,
+    user: PropTypes.object,
+    manualBlob: PropTypes.object,
+    manualFileName: PropTypes.string,
+    manualTitle: PropTypes.string,
+    manualList: PropTypes.arrayOf(PropTypes.object),
+    manualListData: PropTypes.array,
+    manualListDataMap: PropTypes.object
+  })
+}
+
+export default User;

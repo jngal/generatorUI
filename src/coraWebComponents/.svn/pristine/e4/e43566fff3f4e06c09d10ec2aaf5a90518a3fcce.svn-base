@@ -1,0 +1,189 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import Input from '../../forms/Input';
+import Switch from '../../forms/Switch';
+import Button from '../../buttons/Button';
+import withRouter from '../../utils/withRouter';
+import LoadingPanel from '../../LoadingPanel';
+import './Login.scss';
+import { getClientVersion } from '../../utils/helper';
+
+const USERNAME_KEY = 'username';
+
+/**
+ * Login component
+ * @module
+ * @param {object} [user] - User
+ * @param {bool} isLoading - Is loading?
+ * @param {element} header - Header element
+ * @param {bool} [rememberDisabled] - Remember disabled
+ * @param {func} signIn - Sign in function
+ * @param {func} [verifyCode] - Verify code function
+ * @param {func} [createCode] - Create code function
+ * @param {object} [afterLoginlocation] - After login location
+ * @param {string} [userNameLabel] - User name label, "Prihlasovacie meno" if not provided
+ * @param {string} [passwordLabel] - Password label, "Heslo" if not provided
+ * @param {string} [registrationLabel] - Registration label, "Registrácia" if not provided
+ * @param {bool} [showRegistrationLabel] - Should registration table show? 
+ * @param {string} [registrationPath] - Registration path, empty if not provided
+ */
+class Login extends React.Component {
+  constructor(props) {
+    super(props);
+
+    const username = props.rememberDisabled ? '' : localStorage.getItem(USERNAME_KEY);
+    const urlParams = new URLSearchParams(this.props.location.search);
+
+    this.state = {
+      username: username || '',
+      password: '',
+      remember: username !== null,
+      code: urlParams.get("code"),
+    };
+  }
+
+  handleChange = (name, value) => {
+    this.setState({ [name]: value });
+  };
+
+  async componentDidMount() {
+    const { code } = this.state;
+
+    if (code) {
+      await this.props.verifyCode(code);
+      if (this.props.user !== null) {
+        this.props.history.replace('/');
+      }
+    }
+  }
+
+  render() {
+    const { code } = this.state;
+
+    return (
+      <div className="row m-0">
+        <div className="col-4 offset-4 p-0">
+          <div className="card login">
+            <div className="card-body">
+              <div className="card-title">
+                <div>
+                  {this.props.header}
+                </div>
+                <div style={{float: 'right', fontSize: 12, paddingRight: 16}}>
+                  {getClientVersion()}
+                </div>
+              </div>
+              {!code &&
+                <form className="k-form" onSubmit={this.handleSubmit}>
+                  <div className="k-form-field">
+                  <span>{this.props.userNameLabel || "Prihlasovacie meno"}</span>
+                    <Input
+                      name="username"
+                      required={true}
+                      onChange={this.handleChange}
+                      value={this.state.username}
+                    />
+                  </div>
+                  <div className="k-form-field">
+                    <span>{this.props.passwordLabel || "Heslo"}</span>
+                    <Input
+                      type="password"
+                      name="password"
+                      onChange={this.handleChange}
+                      value={this.state.password}
+                    />
+                  </div>
+                  {!this.props.rememberDisabled &&
+                    <div className="k-form-field form-boolean">
+                      <span className="title">Zapamätaj si ma</span>
+                      <Switch
+                        name='remember'
+                        onChange={this.handleChange}
+                        value={this.state.remember}
+                      />
+                    </div>
+                  }
+                  <div className="k-form-field">
+                    <div className="footerContainer">
+                      {this.props.showRegistrationLabel &&     
+                        <a className="registration" href={`#${this.props.registrationPath || ''}`}>
+                          {this.props.registrationLabel || "Registrácia"}
+                        </a>
+                      }
+                      <Button
+                        primary={true}
+                        disabled={this.props.isLoading}
+                        label="Prihlásiť"
+                        type="submit"
+                      />
+                    </div>
+                  </div>
+                  {this.props.createCode &&
+                    <Button
+                      disabled={this.props.isLoading || (this.state.username === null || this.state.username === "")}
+                      label="Zabudnuté heslo"
+                      onClick={this.handleCreateCode}
+                    />
+                  }
+                </form>
+              }
+              <LoadingPanel isLoading={this.props.isLoading} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  handleCreateCode = async () => {
+    const username = this.state.username.trim();
+    this.props.createCode(username);
+    alert("Na Váš Email Vám bol odoslaný kód na jednorazové prihlásenie.");
+  }
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const username = this.state.username.trim();
+    const password = this.state.password;
+
+    await this.props.signIn(username, password);
+    if (this.props.user !== null) {
+      if (!this.props.rememberDisabled) {
+        if (this.state.remember) {
+          localStorage.setItem(USERNAME_KEY, username);
+        }
+        else {
+          localStorage.removeItem(USERNAME_KEY);
+        }
+      }
+
+      const afterLoginLocation = this.props.location.state && this.props.location.state.from && 
+        (this.props.location.state.from.pathname === "/" || this.props.location.state.from.pathname === "/prihlasenie" || this.props.location.state.from.pathname === "/login") 
+        ? this.props.afterLoginlocation : this.props.location.state;
+
+      const { from } = afterLoginLocation || { from: { pathname: `${this.props.pathAfterLogin || '/'}` } };
+
+      this.props.history.replace(from);
+    }
+  }
+}
+
+Login.propTypes = {
+  user: PropTypes.object,
+  isLoading: PropTypes.bool.isRequired,
+  header: PropTypes.element.isRequired,
+  rememberDisabled: PropTypes.bool,
+  signIn: PropTypes.func.isRequired,
+  verifyCode: PropTypes.func,
+  createCode: PropTypes.func,
+  afterLoginlocation: PropTypes.object,
+  userNameLabel: PropTypes.string,
+  passwordLabel: PropTypes.string,
+  registrationLabel: PropTypes.string,
+  showRegistrationLabel: PropTypes.bool,
+  registrationPath: PropTypes.string,
+  pathAfterLogin: PropTypes.string,
+}
+
+export default withRouter(Login);

@@ -1,0 +1,13 @@
+import React from 'react';
+
+class ValidationAlert extends React.Component {
+  render() {
+    return (
+      <div className={"grid-validation-alert " + (this.props.dataInvalid ? '' : 'd-none')} >
+        <p className="mb-0">Zadané údaje nie sú validné!</p>
+      </div>
+    )
+  }
+}
+
+export default ValidationAlert;

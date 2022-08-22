@@ -1,0 +1,48 @@
+import React from 'react';
+import _ from 'lodash';
+import { TimePicker } from '@progress/kendo-react-dateinputs';
+import { GridCell } from '@progress/kendo-react-grid';
+import * as Convert from '../../coraWebComponents/utils/convert';
+
+
+export function EditTimeCell() {
+  return class extends GridCell {
+    handleChange = (e) => {
+      this.props.onChange({
+        dataItem: this.props.dataItem,
+        field: this.props.field,
+        syntheticEvent: e.syntheticEvent,
+        value: e.target.value
+      });
+    }
+
+    render() {
+      const { dataItem, field } = this.props;
+      console.log(this.props);
+      const dataValue = _.get(dataItem, field.split('.'))      
+      const className = dataItem.inEdit ? "k-grid-edit-cell " : "" + this.props.className;
+
+      const td = (
+        <td colSpan={this.props.colSpan}
+          className={className}
+          style={this.props.style}
+          role="gridcell"
+          aria-colindex={(this.props.columnIndex || 0) - (this.props.level || 0) + 1}
+          aria-selected={false}
+          tabIndex="0">
+          {(dataItem.inEdit === true || dataItem.inEdit === this.props.field) ? (
+             <TimePicker
+             onChange={this.handleChange}
+             value={dataValue}
+           />
+         ) : (                          
+           Convert.dataToLocaleTimeStr(dataValue, { hour: '2-digit', minute: '2-digit' })
+           )}
+        </td>
+      );
+      return this.props.render ? this.props.render.call(undefined, td, this.props) : td;
+    }
+  }
+}
+
+

@@ -1,0 +1,62 @@
+import React from 'react';
+import * as requests from './requests';
+
+/**
+ * Returns wrapped component with payment gateway
+ * @module
+ * @param {element} WrappedComponent - Wrapped component
+ */
+export default (WrappedComponent) => {
+  class HOC extends React.Component {
+
+    sign = async (amnt, vs) => {
+      const url = `/api/payment-gateway/sign?amnt=${amnt}&vs=${vs}`;
+
+      try {
+        let res = await requests.get(url);
+        return res;
+      }
+      catch (error) {
+        throw error;
+      }
+    }
+
+    isReceived = async (url, vs) => {
+      const u = `${url}?vs=${vs}`;
+
+      try {
+        let res = await requests.get(u);
+        return res.Data;
+      }
+      catch (error) {
+        throw error;
+      }
+    }
+
+    render() {
+      return (
+        <WrappedComponent
+          {...this.props}
+          /**
+           * Asynchronously returns response from sign to payment gateway.
+           * @function sign
+           * @param {string} amnt The amount that the client transfers to the account payee
+           * @param {string} vs Variable symbol
+           * @returns {Object}
+           */
+          sign={this.sign}
+          /**
+           * Asynchronously returns response from received to payment gateway.
+           * @function isReceived
+           * @param {string} url url
+           * @param {string} vs Variable symbol
+           * @returns {Object}
+           */
+          isReceived={this.isReceived}
+        />
+      );
+    }
+  }
+  
+  return HOC;
+};

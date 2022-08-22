@@ -1,0 +1,124 @@
+@import "../../../coraWebComponents/variables";
+@import "../../../coraWebComponents/themes";
+
+.login {
+  //padding: 25px;
+  // margin-bottom: 200px;
+  &.card {
+    @include themed() {
+      background-color: color($basicwhite) !important;
+      border: 1px solid color($secondary);
+      //box-shadow: 0px 5px 10px color($secondary);
+    }
+  }
+  .card-body {
+    padding: 25px;
+    @include themed() {
+      background-color: color($basicwhite);
+    }
+    .button-wrapper {
+      width: 100%;
+      text-align: right;
+      padding-right: 3px;
+      button.k-button.k-primary {
+        margin-top: 8px;
+        padding: 8px 20px;
+        background-image: none;
+        box-shadow: none;
+        transition: 0.4s;
+        @include themed() {
+          background-color: color($primary);
+          border-color: color($primary);
+        }
+        &:hover {
+          @include themed() {
+            background-color: color($primarylight);
+            border-color: color($primarylight);
+          }
+        }
+      }
+      .k-button:not(.k-primary) {
+        @include themed() {
+          color: color($text-color);
+        }
+      }
+    }
+
+    .k-form-field {
+      @include themed() {
+        background-color: color($basicwhite);
+      }
+      input:required {
+        box-shadow: none;
+        @include themed() {
+          color: color($secondarydark);
+        }
+      }
+      & > span {
+        display: inline-block;
+        position: absolute;
+        z-index: 20;
+        margin-top: -7px;
+        margin-left: 6px;
+        font-size: 12px;
+        padding: 0 5px;
+        @include themed() {
+          color: color($text-color);
+          background-color: color($basicwhite);
+        }
+      }
+
+      &.form-boolean {
+        font-size: 14px;
+        position: relative;
+        > span:first-child {
+          position: relative;
+          top: 0;
+        }
+        .switch {
+          .k-switch-container {
+            display: block;
+          }
+        }
+      }
+      .forgotPassword {
+        display: block;
+        padding-right: 15px;
+        float: right;
+      }
+    }
+  }
+
+  .k-switch {
+    margin-top: 0px !important;
+  }
+
+  .card-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+    @include themed() {
+      color: color($primary);
+    }
+  }
+}
+
+.loginForMobile {
+  display: block;
+}
+
+.loginForWeb {
+  display: none;
+}
+
+@media only screen and (min-width: $breakpoint-md) {
+  .loginForMobile {
+    display: none;
+  }
+
+  .loginForWeb {
+    display: block;
+  }
+}

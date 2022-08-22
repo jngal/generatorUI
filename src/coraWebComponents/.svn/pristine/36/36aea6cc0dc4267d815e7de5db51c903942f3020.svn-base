@@ -1,0 +1,165 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import Input from '../../forms/Input';
+import Button from '../../buttons/Button';
+import LoadingPanel from '../../LoadingPanel';
+import './Registration.scss';
+import { getClientVersion, validEmail } from '../../utils/helper';
+
+
+class Registration extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      username: '',
+      email: '',
+      password: '',
+      verifyPassword: '',
+      errorMsg: {
+        email: "",
+        password: "",
+      },
+    };
+  }
+
+  handleChange = (name, value) => {
+    this.setState({ [name]: value });
+  };
+
+  onBlurEmail = () => {
+    const isEmailValid = validEmail(this.state.email);
+    if (this.state.email === "" || isEmailValid)
+      this.setState({ errorMsg: { ...this.state.errorMsg, email: "" } } );
+    else
+      this.setState({ errorMsg: { ...this.state.errorMsg, email: "Nevalidný formát emailu" } } );
+  };
+
+  onBlurPassword = () => {
+    if (this.state.password !== this.state.verifyPassword)
+      this.setState({ errorMsg: {...this.state.errorMsg, password: "Hesla sa nezhodujú" } } );
+    else
+      this.setState({ errorMsg: {...this.state.errorMsg, password: "" } } );
+  }
+
+  handleSubmit = () => {
+    this.props.handleSubmit(this.state);
+  }
+
+  render() {
+    const { code } = this.state;
+
+    return (
+      <div className="row m-0">
+        <div className="col-4 offset-4 p-0">
+          <div className="card registration">
+            <div className="card-body">
+              <div className="card-title">
+                <div>
+                  {this.props.header}
+                </div>
+                <div style={{float: 'right', fontSize: 12, paddingRight: 16}}>
+                  {getClientVersion()}
+                </div>
+              </div>
+              {!code &&
+                <form className="k-form" onSubmit={this.handleSubmit}>
+
+                  {/* Default elements */}
+                  <div className="k-form-field">
+                    <span>{this.props.userNameLabel || "Prihlasovacie meno"}</span>
+                    <Input
+                      name="username"
+                      onChange={this.handleChange}
+                      value={this.state.username}
+                    />
+                  </div>
+                  <div className="k-form-field">
+                    <span>{`*${this.props.emailLabel || "Email"}`}</span>
+                    <Input
+                      name="email"
+                      required={true}
+                      onChange={this.handleChange}
+                      value={this.state.email}
+                      onBlur={this.onBlurEmail}
+                    />
+                    {this.state.errorMsg.email &&
+                      <h6 className="errorMessage">{this.state.errorMsg.email}</h6>
+                    }
+                  </div>
+                  <div className="k-form-field">
+                    <span>{`*${this.props.passwordLabel || "Heslo"}`}</span>
+                    <Input
+                      type="password"
+                      name="password"
+                      onChange={this.handleChange}
+                      value={this.state.password}
+                      onBlur={this.onBlurPassword}
+                      required={true}
+                    />
+                  </div>
+                  <div className="k-form-field">
+                    <span>{`*${this.props.verifyPasswordLabel || "Overenie hesla"}`}</span>
+                    <Input
+                      type="password"
+                      name="verifyPassword"
+                      onChange={this.handleChange}
+                      value={this.state.verifyPassword}
+                      onBlur={this.onBlurPassword}
+                      required={true}
+                    />
+                    {this.state.errorMsg.password &&
+                      <h6 className="errorMessage">{this.state.errorMsg.password}</h6>
+                    }
+                  </div>
+                  
+                  {/* Render additonal elements */}
+                  {this.props.additionalElements &&
+                    this.props.additionalElements.map(e => e)
+                  }
+
+                  {/* Register button with Login hperLink */}
+                  <div className="k-form-field">
+                    <div className="footerContainer">
+                      {this.props.showLoginLabel &&
+                        <a className="login" href={`#${this.props.loginPath || ''}`}>
+                          {this.props.loginLabel || "Prihlásenie"}
+                        </a>
+                      }
+                      <Button
+                        primary={true}
+                        disabled={this.props.isLoading}
+                        label="Registrovať"
+                        type="submit"
+                      />
+                    </div>
+                  </div>
+                </form>
+              }
+              <LoadingPanel isLoading={this.props.isLoading} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+  }
+}
+
+Registration.propTypes = {
+  additionalElements: PropTypes.arrayOf(PropTypes.element),
+  emailLabel: PropTypes.string,
+  header: PropTypes.element.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  loginLabel: PropTypes.string,
+  loginPath: PropTypes.string,
+  passwordLabel: PropTypes.string,
+  showLoginLabel: PropTypes.bool,
+  verifyPasswordLabel: PropTypes.string,
+  userNameLabel: PropTypes.string,
+}
+
+export default Registration;

@@ -1,0 +1,18 @@
+@import "../variables";
+@import "../themes";
+
+.dropdown-button{
+  margin: 15px 5px;
+  >.k-dropdown-button{
+    > .k-button{
+      background-image: none;
+      @include themed() {
+        background-color: color($primary);
+        color: color($primary-light);
+      }
+    }
+    .k-button:hover, .k-button.k-state-hover{
+        opacity: 0.8;
+      }
+  }
+}

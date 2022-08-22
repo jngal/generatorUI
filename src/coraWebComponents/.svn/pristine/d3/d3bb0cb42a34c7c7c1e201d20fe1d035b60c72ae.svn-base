@@ -1,0 +1,72 @@
+import React from "react";
+import PropTypes from "prop-types";
+import { Badge, BadgeContainer } from "@progress/kendo-react-indicators";
+import "./BadgeContainer.scss";
+
+/**
+ * Alert compontetn
+ * @module
+ * @param {object} align - Set align to Badge { horizontal: start/end(default), vertical: top(default)/bottom }
+ * @param {any} content - Content of Badge (string/number/element)
+ * @param {string} className - Set class
+ * @param {boolean} cutoutBorder - Cut out Badge borders true/false(default)
+ * @param {string} dir - Direction RTL/LTR
+ * @param {string} fill - Fill solid(default)/outline
+ * @param {string} position - Postion edge(default)/outside/inside
+ * @param {string} shape - Shape circle(default)/rectangle/rounded/dot/pill
+ * @param {string} size - Size small/medium(default)/large
+ * @param {string} themeColor - Theme
+ */
+class BadgeContainerComponent extends React.Component {
+  render() {
+    const {
+      align,
+      content,
+      className,
+      cutoutBorder,
+      children,
+      dir,
+      fill,
+      position,
+      shape,
+      size,
+      themeColor,
+    } = this.props;
+
+    return (
+      <BadgeContainer>
+        {children}
+        <Badge
+          align={align}
+          children={content}
+          className={className}
+          cutoutBorder={cutoutBorder}
+          dir={dir}
+          fill={fill}
+          position={position}
+          shape={shape}
+          size={size}
+          themeColor={themeColor}
+        />
+      </BadgeContainer>
+    );
+  }
+}
+
+BadgeContainerComponent.propTypes = {
+  align: PropTypes.shape({
+    horizontal: PropTypes.string,
+    vertical: PropTypes.string,
+  }),
+  content: PropTypes.any,
+  className: PropTypes.string,
+  cutoutBorder: PropTypes.bool,
+  dir: PropTypes.string,
+  fill: PropTypes.string,
+  position: PropTypes.string,
+  shape: PropTypes.string,
+  size: PropTypes.string,
+  themeColor: PropTypes.string,
+};
+
+export default BadgeContainerComponent;

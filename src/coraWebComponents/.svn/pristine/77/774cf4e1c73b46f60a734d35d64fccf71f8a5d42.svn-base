@@ -1,0 +1,69 @@
+import React from 'react';
+import _ from 'lodash';
+import { GridCell } from '@progress/kendo-react-grid';
+import Picker from '../forms/Picker';
+
+export function EditPickerCell({ getProps, itemChange, getColumns }) {
+  return class extends GridCell {
+
+    handleChange = (name, selected) => {
+      itemChange({
+        dataItem: this.props.dataItem,
+        field: name,
+        value: selected
+      });
+    };
+
+    render() {
+      const getedProps = getProps();
+      const { dataItem, field } = this.props;
+      let splitField = field.split(".")[0];
+      const dataValue = dataItem[splitField] === null ? '' : dataItem[splitField];
+
+      let x = getColumns().filter(item =>
+        item.field === field.split(".")[0] && item.textField === field.split(".")[1]
+      )
+      const selected = this.props.dataItem[this.props.field.split(".")[0]];
+      const data = getedProps.parentProps[x[0].data];
+      const className = dataItem.inEdit ? "k-grid-edit-cell " : "" + this.props.className;
+      const td = 
+      (
+        <td colSpan={this.props.colSpan}
+            className={className} 
+            style={this.props.style} 
+            role="gridcell"
+            aria-colindex={(this.props.columnIndex || 0) - (this.props.level || 0) + 1} 
+            aria-selected={false}
+            tabIndex="0"
+        >
+          {(dataItem.inEdit === true || dataItem.inEdit === splitField) ? (
+            <Picker
+              textField={x[0].textField}
+              onChange={getedProps.parentProps[x[0].onChange]}
+              //onSubmit={this.props.parentProps[x.onSubmit]}
+              data={data ? data.data : []}
+              isLoading={data ? data.isLoading : false}
+              onSelect={this.handleChange}
+              selected={selected}
+              schema={x[0].schema}
+              total={data ? data.total : 0}
+              disabled={x[0].disabled}
+              name={x[0].field}
+              primaryField={x[0].primaryField}
+              title={x[0].title}
+              /*isOpen={this.state.isOpenPicker}*/
+              openPicker={this.handleOpenPicker}
+              closePicker={this.handleClosePicker}
+              placeholder={"Zvoľte hodnotu"}
+              currentDataItem={dataItem}
+            />
+          ) : (
+              _.get(dataValue, this.props.field.split('.').slice(1))
+            )}
+        </td>);
+
+      return this.props.render ? this.props.render.call(undefined, td, this.props): td;
+    }
+  }
+
+}

@@ -1,0 +1,62 @@
+import moment from 'moment';
+
+export const isValidDateStr = (str) => {
+  const date = moment(str, 'D.M.YYYY', true);
+  return date.isValid();
+}
+
+export const isValidRc = (rc) => {
+  return /^\d{1,10}$/.test(rc);
+}
+
+export const isValidID = (id) => {
+  let errorString = '';
+
+  if (id.length > 15)
+    errorString += 'Čislo OP nesmie obsahovať viac ako 15 znakov!\n';
+
+  return errorString;
+}
+
+export const isValidEcv = (ecv) => {
+  let errorString = '';
+
+  if (ecv.length < 3)
+    errorString += 'EČV musí obsahovať viac ako 3 znaky!\n';
+
+  if (ecv.length > 20)
+    errorString += 'EČV musí obsahovať menej ako 20 znakov!\n';
+
+  if ((/[^\w]|_/g).test(ecv))
+    errorString += 'EČV môže obsahovať len písmena od A-Z a čísla od 0-9\n';
+
+  return errorString;
+}
+
+export const isValidMail = (mail) => {
+  let errorString = '';
+
+  if (!(/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/g).test(mail))
+    errorString += 'Nesprávny format mailovej adresy!';
+
+  return errorString;
+}
+
+export const isValidPhone = (phone) => {
+  let errorString = '';
+
+  if (!(/([+]\d{3}\s\d{3}\s\d{3}\s\d{3}|[0]{2}\d{3}\s\d{3}\s\d{3}\s\d{3})|(^\d{4}\s\d{3}\s\d{3}$)|(^\d{10}$)|([+]\d{12}|[0]{2}\d{12})|([+]\d{2}\s\d{3}\s\d{3}\s\d{4}|[0]{2}\d{2}\s\d{3}\s\d{3}\s\d{4})|([+]\d{2}\s\d{2}\s\d{4}\s\d{4}|[0]{2}\d{2}\s\d{2}\s\d{4}\s\d{4})|([+]\d{3}\s\d{2}.\d{3}\s\d{2}\s\d{2}|[0]{2}\d{3}\s\d{2}.\d{3}\s\d{2}\s\d{2})|([0]\d{2}.\d{3}\s\d{2}\s\d{2})|([+]\d{3}\s\d{2}.\d{7}|[0]{2}\d{3}\s\d{2}.\d{7})|([0]\d{2}.\d{7}$)/g).test(phone))
+    errorString += 'Nesprávny format telefónu!';
+
+  return errorString;
+}
+
+
+export const isValidPasswordStrong = (psw) => {
+  let errorString = '';
+
+  if (!(/(?=.*[a-zA-Z].*)(?=.*[0-9].*)^[a-zA-Z0-9+*/-]{6,}$/g).test(psw))
+    errorString += 'Heslo musí mať aspoň 6 znakov a musí obsahovat písmená a číslice!\n';
+
+  return errorString;
+}

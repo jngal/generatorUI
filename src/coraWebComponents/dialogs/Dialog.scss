@@ -1,0 +1,343 @@
+@import "../variables";
+@import "../themes";
+
+//nastavenie velkosti dialogu pre zmazanie v prílohách
+.picker .k-dialog-wrapper {
+  z-index: 50 !important;
+  .card-header,
+  nav[aria-label="breadcrumb"] {
+    display: none;
+  }
+  .k-grid {
+    @include themed() {
+      background-color: color($basicwhite);
+    }
+    .k-button.k-button-icon {
+      top: 0;
+    }
+    #grid-toolbar {
+      .left {
+        div:not(:first-child) {
+          display: none;
+        }
+      }
+    }
+  }
+  .k-datepicker {
+    @include themed() {
+      border: 1px solid color($secondarymedium) !important;
+    }
+  }
+  .datepicker-reset {
+    right: 72px !important;
+  }
+
+  .confirm-dialog {
+    .k-dialog-wrapper {
+      width: 480px;
+      height: 160px;
+      position: absolute;
+      left: 50%;
+      margin-left: -240px;
+      top: 50%;
+      margin-top: -80px;
+      .k-widget.k-window.k-dialog {
+        height: 100%;
+      }
+
+      .k-overlay {
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        opacity: 0.5;
+        z-index: 2;
+        background-color: #000000;
+      }
+    }
+  }
+}
+
+.picker {
+  .k-grid-toolbar {
+    padding: 0 8px;
+  }
+  .right {
+    .button-wrapper {
+      .k-button {
+        @include themed() {
+          background-color: color($secondarylight) !important;
+        }
+      }
+    }
+  }
+}
+.k-dialog,
+.k-dialog:hover,
+.k-window,
+.k-window:hover {
+  // max-width: 640px;
+  // left: unset !important;
+  // top: unset !important;
+  // transform: translate(-50%, -50%);
+  max-width: 80%;
+  border: none !important;
+  @include themed() {
+    background-color: color($basicwhite) !important;
+    color: color($secondarydarker) !important;
+  }
+}
+
+.k-dialog,
+.k-window {
+  max-width: 80%;
+  max-height: 80%;
+  .k-button:hover {
+    &::before {
+      opacity: 0;
+    }
+  }
+}
+
+.k-animation-container.k-animation-container-relative.k-list-container.k-reset.k-animation-container-shown,
+.k-calendar-container {
+  z-index: 50;
+}
+
+.k-dialog-button-layout-stretched {
+  border: none !important;
+}
+// farba pre tlacidla
+.k-dialog-buttongroup {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  @include themed() {
+    border-top: 1px solid color($secondarymedium) !important;
+  }
+  .k-button:not(.k-primary) {
+    @include themed() {
+      background: color($secondarylight) !important;
+      color: color($text-color);
+    }
+    &:hover {
+      opacity: 1 !important;
+      filter: contrast(calc(0.8 / 1.2)) brightness(1.2);
+    }
+  }
+  .k-button.k-state-disabled {
+    opacity: 1 !important;
+    filter: contrast(calc(0.6 / 1.4)) brightness(1.4);
+  }
+  .k-button.k-primary:hover {
+    opacity: 1 !important;
+    filter: contrast(calc(0.8 / 1.2)) brightness(1.2);
+  }
+  &.k-dialog-button-layout-stretched .k-button.k-primary {
+    @include themed() {
+      background-color: color($primary) !important;
+      color: color($basicwhite) !important;
+    }
+  }
+}
+
+.k-window-content,
+.k-prompt-container {
+  padding: 0px;
+  .k-form-inline {
+    padding: 20px;
+  }
+}
+
+// farba pre title panel
+.k-window-titlebar.k-dialog-titlebar {
+  // height: 45px;
+  white-space: normal;
+  @include themed() {
+    background-color: color($primary);
+    color: color($basicwhite);
+  }
+}
+
+.fullscreen > .k-window {
+  position: absolute;
+  width: 80% !important;
+  height: 80% !important;
+  top: 10%;
+  left: 10%;
+
+  .k-dialog-content {
+    padding: 8px;
+    @include themed() {
+      background-color: color($basicwhite);
+    }
+  }
+
+  .breadcrumb {
+    display: none;
+  }
+}
+
+.k-dialog,
+.k-window {
+  .k-grid-header {
+    .k-header {
+      padding-top: 1px;
+    }
+  }
+  .k-numeric-wrap {
+    height: 27px;
+  }
+  .k-textbox {
+    top: 0 !important;
+    height: 28px !important;
+  }
+  .k-dropdown {
+    top: 0 !important;
+    .k-dropdown-wrap {
+      height: 27px;
+      .k-select {
+        height: 27px !important;
+        width: 27px !important;
+        line-height: 27px !important;
+        @include themed() {
+          border: 1px solid color($secondarymedium);
+        }
+        .k-icon {
+          font-size: 14px;
+          @include themed() {
+            color: color($secondarydark) !important;
+          }
+        }
+      }
+    }
+  }
+  .k-form-field.required {
+    .k-dialog,
+    .k-window {
+      // prefarbenie ikony filtra v pickri pod povinnym inputom
+      .k-select {
+        .k-icon {
+          @include themed() {
+            color: color($secondarydark) !important;
+          }
+        }
+      }
+
+      .k-dropdown-wrap {
+        @include themed() {
+          color: color($secondarydark) !important;
+        }
+      }
+    }
+  }
+  // prefarbenie inkrement / dekrement sipok v picker inpute
+  .k-dialog .k-numeric-wrap .k-select .k-link,
+  .k-window .k-numeric-wrap .k-select .k-link {
+    @include themed() {
+      background-color: color($secondarydarker) !important;
+      color: color($secondarylight);
+    }
+  }
+  .k-header.k-grid-toolbar {
+    @include themed() {
+      background: color($basicwhite);
+    }
+  }
+  .k-grid-content {
+    @include themed() {
+      background-color: color($basicwhite);
+    }
+  }
+  .k-grid-header,
+  .k-pager-wrap {
+    @include themed() {
+      border-top: 1px solid color($secondarymedium);
+      background-color: color($secondarylight);
+    }
+    .k-filtercell-operator {
+      margin: 0;
+    }
+    .k-numeric-wrap {
+      border: none !important;
+    }
+    input,
+    select {
+      border-radius: 0 !important;
+      height: 27px !important;
+      padding: 0.2em !important;
+      @include themed() {
+        border: 1px solid color($secondarymedium) !important;
+      }
+    }
+    select {
+      margin-right: 10px;
+      scrollbar-width: auto;
+    }
+    .k-dropdown,
+    .k-button {
+      padding: 0 !important;
+      height: 27px !important;
+      border-radius: 0 !important;
+      .k-select {
+        height: 100%;
+        width: 27px !important;
+        line-height: 27px !important;
+        height: 27px !important;
+        @include themed() {
+          background-color: color($basicwhite) !important;
+        }
+      }
+    }
+    .k-button {
+      top: 0 !important;
+      @include themed() {
+        background: color($secondarymedium);
+        width: 27px;
+        margin-right: 8px;
+        border: 1px solid color($secondarymedium);
+      }
+      .k-icon {
+        line-height: 27px;
+        font-size: 14px;
+      }
+    }
+  }
+  .k-numeric-wrap {
+    .k-select {
+      display: none;
+    }
+  }
+  .k-form-inline {
+    overflow-x: hidden;
+  }
+}
+
+.k-window.k-state-focused {
+  box-shadow: none;
+}
+
+.k-window-wrapper {
+  height: auto !important;
+  // width: auto !important;
+}
+
+.k-window {
+  .k-window-titlebar,
+  .k-window-title {
+    .k-button.k-bare.k-button-icon:not(:last-child) {
+      display: none;
+    }
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
+@media only screen and (min-width: $breakpoint-md) {
+  .k-dialog,
+  .k-dialog:hover,
+  .k-window,
+  .k-window:hover {
+    min-width: 640px;
+  }
+}

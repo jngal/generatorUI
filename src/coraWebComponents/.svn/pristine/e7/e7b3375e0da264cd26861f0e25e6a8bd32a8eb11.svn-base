@@ -1,0 +1,87 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Dialog from './Dialog';
+import Input from '../forms/Input';
+
+import './EmailPrompt.scss';
+
+/**
+ * Email Prompt
+ * @module
+ * @param {bool} isOpen - Is dialog open?
+ * @param {func} onConfirm - Function invoked on confirm
+ * @param {func} onClose - Function invoked on dialog close
+ * @param {string} [subject] - Email subject
+ * @param {bool} [disableSubject] - Is subject disabled?
+ */
+class EmailPrompt extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      mailDialogSubject: '',
+      mailDialogContent: '',
+    };
+  }
+
+  clearState = () => {
+    this.setState({
+      mailDialogSubject: '',
+      mailDialogContent: ''
+    })
+  }
+
+  onClose = () => {
+    this.clearState();
+    this.props.onClose();
+  }
+
+  onConfirm = ()=> {
+    this.props.onConfirm(this.state.mailDialogSubject, this.state.mailDialogContent);
+    this.clearState();
+  }
+
+  render() {
+    return (
+      <Dialog
+        isOpen={this.props.isOpen}
+        onClose={this.onClose}
+        onConfirm={this.onConfirm}
+        title={this.props.title}
+      >
+        <div className="mail-dialog">
+          { !this.props.disableSubject && <Input
+            placeholder={"Predmet"}
+            disabled={this.props.subject}
+            value={this.props.subject ? this.props.subject : this.state.mailDialogSubject}
+            name="mailSubject"
+            className="full-width"
+            onChange={(name, value) => this.setState({ mailDialogSubject: value })}
+          />
+          }
+
+          <div className="textarea">
+            <textarea
+              className="k-textarea"
+              placeholder={"Text..."}
+              value={this.state.mailDialogContent}
+              disabled={false}
+              onChange={e => this.setState({ mailDialogContent: e.target.value })}
+              rows="15"
+              cols="80"
+            />
+          </div>
+        </div>
+      </Dialog>
+    );
+  }
+}
+
+EmailPrompt.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  subject: PropTypes.string,
+  disableSubject: PropTypes.bool
+};
+
+export default EmailPrompt;

@@ -1,0 +1,276 @@
+@import "../../variables";
+@import "../../themes";
+
+#menu::-webkit-scrollbar {
+  width: 8px;
+  border: none;
+  
+}
+
+#menu::-webkit-scrollbar-track {  
+  @include themed() {
+    background-color: color($primary-light);
+  } 
+}
+
+.custom-tooltip {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+#menu .k-panelbar .k-item.indent-0 {
+  text-indent: 0 !important;
+}
+
+#menu::-webkit-scrollbar-thumb {  
+  @include themed() {
+    background-color: color($secondary);
+  }
+  border: none;
+  border-radius: 0px;
+}
+#menu::-webkit-scrollbar-thumb:hover {
+  @include themed() {
+    background-color: color($secondary);
+  }
+  border: none;
+  
+}
+#menu {
+  position: relative;
+  width: 100%;
+  min-width: $sidebar-width;
+  height: calc(100vh - #{$sidebar-header-height} - #{$stats-height} - #{$footer-height});
+  overflow-y: scroll;
+  
+  text-transform: uppercase;
+  padding: 0 8px 0 0;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  @include themed(){
+    scrollbar-color: color($secondary) color($menudark);
+    background-color: color($menudark);
+    color: color($secondary);
+  }
+  .search {
+    display: none;
+  }
+  &.compact {
+    .items {
+      display: none;
+    }
+  }
+
+  .k-panelbar {
+    .menuItemCount {
+      z-index: 1;
+      background-color: white;
+      font-size: 12px;
+      padding-top: 2px;
+      height: 20px;
+      border-radius: 50%;
+      width: 20px;
+      text-indent: 0;
+      position: absolute;
+    }
+    border: 0 !important;
+    font-size: 12px;
+    letter-spacing: -0.3px;
+    @include themed() {
+      background-color: color($menudark);
+    } 
+
+    // odstranenie ciary medzi polozkami menu
+    & > .k-item + .k-item {
+      border-top-width: 0px;
+    }
+
+    .k-link:active {
+      @include themed() {
+        background-color: color($menudark) !important;
+      } 
+    }
+
+    // podciarkovanie polozky menu s ukazovatelom
+    .k-link:hover {
+      cursor: pointer;
+      @include themed() {
+        color: color($secondary);
+      } 
+    }
+
+    .k-icon {
+      color: inherit;
+      position: absolute;
+      right: 0;
+    }
+
+    // odstranenie radiusu okolo poloziek menu
+    .k-animation-container.k-animation-container-relative {
+      border-radius: 0;
+      text-transform: none;
+      font-size: 13px;
+    }
+
+    // odstranenie tiena okolo polozky pri kliknuti na nu
+    .k-state-focused {
+      box-shadow: none;
+    }
+
+    // prefarbenie neaktivnych poloziek menu
+    div[class*="k-item"] > span[class*="k-link"] {
+      @include themed() {
+        color: color($secondary);
+      } 
+      width: 265px;
+      .k-image:not(*:root){
+        margin-right: 15px;
+      }
+    }
+
+    // prefarbenie rozbaleneho menu
+    div[class*="k-state-expanded"] {
+      // prefarbenie potomkov rozbaleneho menu
+      & .k-link {
+        @include themed() {
+          background-color: color($menubasic);
+        }
+      }
+    }
+
+    .k-item .k-link.k-state-selected:not(.k-header) {
+      @include themed() {
+        //color: color($tertiary);
+        color: color($basicwhite);
+        background-color: color($primary)
+      } 
+    }
+
+    .k-item {
+      &.indent-0 {
+        text-indent: 20px;
+
+        .k-icon {
+          display: none;
+        }
+      }
+      & > .k-link.k-header {
+        padding: 0px 16px;
+        .custom-tooltip {
+          padding: 13px 0px;
+        }
+      }
+      .k-item .k-item:last-child .k-link {
+        padding-bottom: 20px;
+      }
+      .k-item:last-child.indent-1:not(.k-state-expanded) .k-link {
+        padding-bottom: 20px;
+      }
+      .k-item .indent-2 .k-link {
+        padding-bottom: 4px;
+      }
+      &.indent-1 {
+        text-indent: 30px;
+
+        &.k-state-expanded {
+          @include themed() {
+            border-left: 2px solid color($primarylight);
+          }
+        }
+
+        .k-icon {
+          right: 35px;
+        }
+      }
+
+      &.indent-2 {
+        text-indent: 40px;
+
+        &.k-state-expanded {
+          @include themed() {
+            border-left: 2px solid color($primary);
+          }
+        }
+
+        .k-icon {
+          right: 45px;
+        }
+      }
+
+      &:not(.parent) {
+        &.indent-0 {
+          text-indent: 0px;
+        }
+
+        &.indent-1 {
+          text-indent: 30px;
+        }
+
+        &.indent-2 {
+          text-indent: 40px;
+        }
+      }
+      .k-link {
+        @include themed() {
+          background-color: color($menudark);
+          color: color($secondary);
+        }
+      }
+    }
+  }
+
+  &.fullscreen {
+    .k-link {
+      font-size: 1.5em;
+      letter-spacing: -0.5px;
+      height: 51px;
+    }
+
+    .k-image {
+      width: 25px;
+      margin-right: 8px;
+    }
+
+    .k-item {
+      &.indent-0 {
+        text-indent: 32px;
+
+        .k-icon {
+          right: 45px;
+        }
+      }
+
+      &.indent-1 {
+        text-indent: 42px;
+
+        .k-icon {
+          right: 55px;
+        }
+      }
+
+      &.indent-2 {
+        text-indent: 52px;
+
+        .k-icon {
+          right: 65px;
+        }
+      }
+
+      &:not(.parent) {
+        &.indent-0 {
+          text-indent: 32px;
+        }
+
+        &.indent-1 {
+          text-indent: 42px;
+        }
+
+        &.indent-2 {
+          text-indent: 52px;
+        }
+      }
+    }
+  }
+}

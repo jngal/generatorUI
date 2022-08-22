@@ -1,0 +1,68 @@
+import * as React from 'react';
+
+import Dialog from './dialogs/Dialog';
+import eventEmitter from './utils/eventEmitter';
+
+const UPDATE_KEY = 'UPDATE';
+
+/**
+ * Refresh dialog component
+ * @module
+ */
+class Settings extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpen: false
+    }
+  }
+
+  handleOpen = () => {
+    this.setState({isOpen: true});
+  }
+
+  handleClose = () => {
+    this.setState({isOpen: false});
+    localStorage.setItem(UPDATE_KEY, true);
+    setTimeout(this.handleOpen, 300000);
+  }
+
+  handleConfirm = () => {
+    localStorage.removeItem(UPDATE_KEY);
+    this.setState({isOpen: false});
+    window.location.reload(true);
+  }
+
+  componentWillMount() {
+    eventEmitter.on('ON_UPDATE', this.handleOpen);
+  }
+
+  componentDidMount() {
+    const update = localStorage.getItem(UPDATE_KEY);
+    if(update) {
+      this.handleOpen();
+    }
+  }
+
+  render() {
+    return (
+      <Dialog
+        isOpen={this.state.isOpen}
+        onClose={this.handleClose}
+        onConfirm={this.handleConfirm}
+        title="Aktualizácia"
+      >
+        <p style={{ margin: "15px", textAlign: "center" }}>
+          Je dostupná aktualizácia. Prajete si aktualizovať aplikáciu?
+        </p>
+      </Dialog>
+    );
+  }
+}
+
+Settings.propTypes = {
+
+}
+
+export default Settings;

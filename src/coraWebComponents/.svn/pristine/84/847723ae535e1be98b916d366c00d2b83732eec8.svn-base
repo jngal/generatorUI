@@ -1,0 +1,27 @@
+@import '../variables';
+@import '../themes';
+
+.popis {
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+  margin: 20px 0;
+  font-size: 17px;
+  cursor: pointer;
+  transition: 0.3s;
+  @include themed() {
+    //background: color($primary);
+    color: color($primary);
+  }
+  &:hover {
+    @include themed() {
+      color: color($secondarydarker);
+      background-color: color($secondarylight);
+    }
+  }
+}
+
+.popis-datum {
+  float:right;
+  padding-right: 20px;
+}

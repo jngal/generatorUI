@@ -1,0 +1,80 @@
+@import "../variables";
+@import "../themes";
+
+.k-switch {
+  font-size: 12px;
+  width: 4em;
+  &:not(.k-state-disabled) .k-switch-container{
+    @include themed(){
+      border: 1px solid color($primary);
+    }
+  }
+  &:focus {
+    .k-switch-container {
+      box-shadow: none;
+    }
+  }
+}
+.k-switch-handle {
+  width: 1.4em;
+  height: 1.4em;
+  margin: 0.2em;
+}
+
+.k-switch-on .k-switch-handle {
+  left: calc(100% - 1.9em);
+}
+
+.k-switch-label-off {
+  right: 12px;
+  .k-switch-handle {
+    left: 0.1em;
+  }
+}
+
+.k-switch-label-on {
+  color: transparent;
+}
+
+.k-switch-on .k-switch-container{
+  color: transparent;
+  @include themed() {
+    background-color: color($primary);
+  }
+  .k-switch-handle {
+    @include themed(){
+      background-color: color($basicwhite);
+    }
+  }
+}
+
+.k-switch-off .k-switch-container{
+  color: transparent;
+  @include themed() {
+    background-color: color($secondarymedium);
+  }
+  .k-switch-handle {
+    @include themed(){
+      background-color: color($secondarydark);
+    }
+  }
+}
+
+.switch {
+  .k-switch-container {
+    &:hover {
+      @include themed() {
+        background-color: color($primary);
+        color: color($secondarylight);
+      }
+      .k-switch-handle {
+        @include themed(){
+          background-color: color($basicwhite);
+        }
+      }
+    }
+    .k-switch-label-off {
+      color: transparent
+    }
+  }
+}

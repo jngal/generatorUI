@@ -1,0 +1,30 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Tooltip } from '@progress/kendo-react-tooltip';
+
+/**
+ * Tooltip cell component
+ * @module
+ * @param {string} tooltip - Tooltip content
+ * @param {string} text - Content of cell, if is different than tooltip content
+ */
+export default class TooltipCell extends React.Component {
+  render() {
+    const text = this.props.text ? this.props.text : this.props.tooltip;
+    return (
+        <div className="tooltip-cell" title={this.props.tooltip}>
+            <Tooltip parentTitle={true} openDelay={0} position="top" anchorElement="target">
+                {text}
+            </Tooltip>
+        </div>
+        );
+    }
+}
+
+TooltipCell.propTypes = {
+    //Obsah tooltipu
+    tooltip: PropTypes.string.isRequired,
+
+    //Obsah bunky v prípade ak je iný ako obsah tooltipu
+    text: PropTypes.string,
+}

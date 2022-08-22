@@ -1,0 +1,51 @@
+@import '../variables';
+@import '../themes';
+
+
+.dialogFilter {
+  width: 700px;
+  max-height: calc(100vh - 85px);
+  overflow: auto;
+
+  //odsadenie polí v dialog filtri
+  .k-form-field{
+    div:nth-child(2){
+      margin-right: 10px !important;
+    }
+    div:empty:not(.datepicker-reset){
+      margin-right: 0px !important;
+    }
+  } 
+  
+
+}
+
+.filter-toolbar{
+  display: flex;
+  flex-direction: row;
+  @include themed(){
+    background-color: color($secondarylight);
+  }
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  .left {
+    display: flex;
+    flex-direction: row;
+  }
+  .dropdownlist {
+    width: 200px !important;
+    flex: none;
+  }
+}
+
+.save-filter-dialog {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+
+  .input {
+    margin-left: 15px;
+  }
+}

@@ -1,0 +1,48 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+
+import './ApprovalProcessStep.scss';
+
+import moment from 'moment'
+
+/**
+ * Approval process Step
+ * @module
+ * @param {object} stepData - Step data
+ */
+class ApprovalProcessStep extends React.Component {
+
+  getClassByState = (state) => {
+    switch(state) {
+      case 1: return "started";
+      case 2: return "in-process";
+      case 3: return "approved";
+      case 4: return "denied";
+      case 5: return "returned";
+      default: return "";
+    }
+  }  
+
+  render() {
+    return (
+      <div className={"approval-process-step d-flex flex-column " + (this.getClassByState(this.props.stepData.stepState))}> 
+        <div className="d-flex w-100 align-items-center">
+          <div className="step-indicator"></div>
+          <div className="step-name">{this.props.stepData.stepName}</div>
+          <div className="step-state-label ml-auto">Schvaleny</div>
+        </div>
+        <div className="approver-date">
+          {
+            this.props.stepData.stepApprover + ", " + moment(this.props.stepData.date).format('DD.MM.YYYY h:mm:ss')
+          }
+        </div>
+      </div>
+    );
+  }
+}
+
+ApprovalProcessStep.propTypes = {
+  stepData: PropTypes.object
+}
+
+export default ApprovalProcessStep;

@@ -1,0 +1,43 @@
+import './Search.scss';
+
+import * as React from 'react';
+
+import Input from '../forms/Input';
+
+/**
+ * Search component
+ * @module
+ */
+
+class Search extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      search: ''
+    }
+  }
+
+  handleChange = (name, value) => {
+    this.setState({ [name]: value });
+  }
+
+  render() {
+    return (
+      <div className="nav-search">
+        <label className="k-form-field">
+          <Input
+            className="k-textbox"
+            name="search"
+            value={this.state.search}
+            onChange={this.handleChange}
+            placeholder="Vyhľadávanie"
+          />
+        </label>
+        <span className="k-icon k-i-zoom" />
+      </div>
+    );
+  }
+}
+
+export default Search;

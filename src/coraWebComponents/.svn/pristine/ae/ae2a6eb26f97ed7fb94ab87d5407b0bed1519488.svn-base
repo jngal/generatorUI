@@ -1,0 +1,54 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { DateTimePicker } from '@progress/kendo-react-dateinputs';
+import './DateTimePicker.scss';
+
+/**
+ * Date time picker
+ * @module
+ * @param {string} name - Name
+ * @param {func} onChange - Function invoked on value change
+ * @param {Date} [value] - Value
+ * @param {bool} [disabled] - Is input readonly?
+ * @param {bool} [required] - Is input required?
+ * @param {string} [validationMessage] - Validation message if field is invalid
+ * @param {Date} min - Minimum date
+ */
+class DateTimePickerComponent extends React.Component {
+  
+  handleReset = () => {
+    this.props.onChange(this.props.name, null)
+  }
+
+  handleToday = () => {
+    this.props.onChange(this.props.name, new Date())
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <DateTimePicker
+          className={`datetimepicker ${this.props.disabled ? 'disabled-field' : ''} `}
+          onChange={e => this.props.onChange(this.props.name, e.target.value)}
+          value={this.props.value}
+          required={this.props.required}
+          disabled={this.props.disabled}
+          validationMessage={this.props.validationMessage || 'Povinné'}
+          min={this.props.min}
+        />
+      </ React.Fragment>
+    );
+  }
+}
+
+DateTimePickerComponent.propTypes = {
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.instanceOf(Date),
+  disabled: PropTypes.bool,
+  required: PropTypes.bool,
+  validationMessage: PropTypes.string,
+  min: PropTypes.instanceOf(Date)
+}
+
+export default DateTimePickerComponent;

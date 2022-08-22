@@ -1,0 +1,40 @@
+@import "../variables";
+@import "../themes";
+
+.input{
+  flex: 1;
+  display: flex;
+
+  .k-input .k-formatted-value{
+    flex: 1;
+  }
+}
+
+// vyfarbenie neaktivnych formularovych prvkov
+input:disabled {
+  @include themed() {
+    color: color($secondarydarker) !important;
+    background-color: color($basicwhite) !important;
+  }
+}
+span[class*="disabled"] {
+  @include themed() {
+    color: color($secondarydarker) !important;
+  }
+}
+
+.k-form-inline {
+  .k-form-field.required {
+    input{
+      @include themed() {
+        background-color: color($basicwhite) !important;
+      }
+    }
+  }
+  .copyable, .hyperlink {
+    margin-left: -5px !important;
+  }
+  .copyable-button, .hyperlink-button {
+    display: inline-block !important;
+  }
+}

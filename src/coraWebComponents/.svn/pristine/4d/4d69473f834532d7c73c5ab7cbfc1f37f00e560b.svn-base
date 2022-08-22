@@ -1,0 +1,6 @@
+.navbar .k-animation-container {
+    position: absolute;
+    left: 10px;
+    top: 65px;
+    width: 245px;
+}

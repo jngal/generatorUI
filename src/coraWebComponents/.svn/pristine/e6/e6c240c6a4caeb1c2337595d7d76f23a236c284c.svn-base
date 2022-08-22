@@ -1,0 +1,6 @@
+.payment-gateway-container {
+  .besteron-iframe {
+    width: 100%;
+    min-height: 530px;
+  }
+}

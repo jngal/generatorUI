@@ -1,0 +1,198 @@
+import moment from 'moment';
+
+export const addOffset = date => {
+  if (!date) {
+    return null;
+  }
+
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset);
+}
+
+export const strToDate = str => {
+  if (!str) {
+    return null;
+  }
+
+  return new Date(str);
+}
+
+export const strToTime = (date, str) => {
+  if (!date) {
+    return new Date();
+  }
+  const time = str.split(':');
+  return new Date(date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    time[0],
+    time[1]);
+}
+
+export const dateToStr = (date, format) => {
+  if (!date) {
+    return '';
+  }
+  if (format) {
+    return date.toLocaleString('sk-SK', format);
+  } else {
+    return date.toLocaleString('sk-SK');
+  }
+}
+
+export const dataToLocaleStr = (date, format) => {
+  return dateToStr(date, format);
+}
+
+export const dataToLocaleDateStr = (date, format) => {
+  if (!date) {
+    return '';
+  }
+  if (format) {
+    return date.toLocaleDateString('sk-SK', format);
+  } else {
+    return date.toLocaleDateString('sk-SK');
+  }
+}
+
+export const dateToDateStr = date => {
+  if (!date) {
+    return '';
+  }
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  const day = `${date.getDate()}`.padStart(2, 0);
+  return `${day}.${month}.${year}`;
+}
+
+export const dateToDbStr = date => {
+  if (!date) {
+    return '';
+  }
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  const day = `${date.getDate()}`.padStart(2, 0);
+  return `${year}${month}${day}`;
+}
+
+export const dateToValidation = date => {
+  if (!date) {
+    return '';
+  }
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  const day = `${date.getDate()}`.padStart(2, 0);
+  return `${day}.${month}.${year}`;
+}
+
+export const dateToTimeStr = date => {
+  if (!date) {
+    return '';
+  }
+  const hours = `${date.getHours()}`.padStart(2, 0);
+  const minutes = `${date.getMinutes()}`.padStart(2, 0);
+  const seconds = `${date.getSeconds()}`.padStart(2, 0);
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+export const convertDate = (timestamp) => {
+  if (!timestamp) {
+    return '';
+  }
+
+  const datetime = timestamp.split('T');
+  const date = datetime[0].split('-');
+
+  return date[2] + '.' + date[1] + '.' + date[0];
+}
+
+export const convertDateTime = (timestamp) => {
+  if (!timestamp) {
+    return '';
+  }
+
+  const datetime = timestamp.split('T');
+  const date = datetime[0].split('-');
+  const time = datetime[1].split(':');
+
+  return date[2] + '.' + date[1] + '.' + date[0] + ' ' + time[0] + ':' + time[1];
+}
+
+const checkZero = (input) => {
+  return input < 10 ? '0' + input : input;
+}
+
+export const dateTimeToTimestamp = (date, time) => {
+  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + 'T'
+    + checkZero(time.getHours()) + ':' + checkZero(time.getMinutes());
+}
+
+export const dateToTimestamp = (date) => {
+  if (!date) {
+    return '';
+  }
+
+  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + 'T'
+    + checkZero(date.getHours()) + ':' + checkZero(date.getMinutes()) + ':' + checkZero(date.getSeconds());
+}
+
+export const escape = (input) => {
+  return input.replace(/"/g, '');
+}
+
+export const strToTimestamp = (str) => {
+  if (!str) {
+    return '';
+  }
+
+  const date = moment(str, 'D.M.YYYY', true);
+  return dateToTimestamp(date.toDate());
+}
+export const dateToDatestamp = (date) => {
+  if (!date) {
+    return '';
+  }
+
+  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+}
+
+
+
+export const toUpperCaseFirst = (word) => {
+  let Txt = word ? word : '';
+  Txt = Txt.substr(0, 1).toUpperCase() + Txt.substr(1);
+  return Txt;
+}
+
+export const dateTimeToDate = (date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+
+export const rcToDnar = (rc) => {
+  if (!rc)
+    return '';
+
+  let year = rc.substr(0, 2);
+  var d = new Date();
+  let yearAkt = d.getFullYear();
+
+  if (year > yearAkt - 2000)
+    year = `19${year}`;
+  else
+    year = `20${year}`;
+
+  let month = rc.substr(2, 2) - 1;
+  if (month >= 50)
+    month = month - 50;
+
+  if (month >= 20)
+    month = month - 20;
+
+  let day = rc.substr(4, 2);
+  var dNar = new Date(year, month, day);
+
+  return dNar;
+}

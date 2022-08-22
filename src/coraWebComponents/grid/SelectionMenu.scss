@@ -1,0 +1,69 @@
+@import "../variables";
+@import "../themes";
+
+
+.selection-popup {
+  .k-item.k-state-focused {
+    box-shadow: none;
+  }
+  .k-item:hover {
+    @include themed() {
+      background-color: color($secondarylight);
+      color: color($text-color);
+    }
+  }
+  li {
+    padding: 0 !important;
+  }
+  .k-button {
+    text-align: left !important;
+    padding-left: 20px;
+    width: 150px;
+    height: 100%;
+    @include themed() {
+      background-color: color($basicwhite);
+      color: color($text-color);
+    }
+  }
+  .k-button:hover{
+    @include themed() {
+      background-color: color($secondarymedium);
+      color: color($text-color);
+    }
+  }
+  .k-button:active {
+    @include themed() {
+      color: color($text-color);
+      background-color: color($secondarylight);
+    }
+  }
+  .button-wrapper {
+    margin: 0;
+  }
+}
+.selection-dropdown {
+  box-shadow: none;
+  .k-button {
+    width: 20px;
+    padding-left: 2px;
+    @include themed() {
+      background-image: none;
+      background-color: inherit;
+      box-shadow: none !important;
+      border: none;
+    }
+  }
+}
+.selection-cell {
+  width: 20px;
+  .k-widget {
+    background-color: inherit;
+  }
+  .k-checkbox-label {
+    margin-top: 1px;
+    margin-right: -2px;
+  }
+  .k-state-default {
+    width: 20px;
+  }
+}

@@ -1,0 +1,13 @@
+export default class CoraError extends Error {
+    constructor(coraResponse) {
+        super(coraResponse.UserMessage);
+        this.message = coraResponse.UserMessage;
+        this.code = coraResponse.Code;
+        this.developerMessage = coraResponse.DeveloperMessage;
+        this.coraResponse = coraResponse;
+    } 
+
+    get message() {
+      return this.message;
+    }
+}

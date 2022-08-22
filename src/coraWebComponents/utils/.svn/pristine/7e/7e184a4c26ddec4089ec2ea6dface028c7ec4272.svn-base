@@ -1,0 +1,34 @@
+import EventEmitter from 'events';
+
+class ExtendedEventEmitter extends EventEmitter {
+
+  changeTab(name, tab) {
+    this.emit('CHANGE_TAB', { name, tab });
+  }
+
+  changeTabsType(tabsType) {
+    this.emit('CHANGE_TABS_TYPE', tabsType)
+  }
+
+  changePage(page) {
+    this.emit('CHANGE_PAGE', page)
+  }
+
+  changeFilterable(filterable) {
+    this.emit('CHANGE_FILTERABLE', filterable)
+  }
+
+  changeSelected(selected, name) {
+    this.emit('CHANGE_SELECTED', { selected, name });
+  }
+
+  onUpdate() {
+    this.emit('ON_UPDATE');
+  }
+
+  changeSidebar(type) {
+    this.emit('CHANGE_SIDEBAR', type);
+  }
+}
+
+export default new ExtendedEventEmitter();

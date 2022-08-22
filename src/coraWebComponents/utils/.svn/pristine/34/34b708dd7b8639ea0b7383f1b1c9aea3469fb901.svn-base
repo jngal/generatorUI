@@ -1,0 +1,698 @@
+import * as convert from './convert';
+import * as storage from './storage';
+import CoraError from './coraError';
+import { getClientVersion } from './helper';
+
+/** @module utils/requests */
+
+/** @typedef {string} UNAUTHORIZED_MSG Unauthorized message*/
+export const UNAUTHORIZED_MSG = 'Vaše prihlásenie vypršalo.';
+
+
+const checkVersion = (versionServer) => {
+  const versionClient = getClientVersion();
+  return process.env.NODE_ENV === 'development' || !versionServer || versionServer === versionClient;
+}
+
+/**
+ * Asynchronously returns filename from response header content disposition.
+ * @function parseFilenameFromContentDisposition
+ * @param {string} contentDisposition 
+ * @returns {(string | null)}
+ */
+export const parseFilenameFromContentDisposition = (contentDisposition) => {
+  if (!contentDisposition) return null;
+  let matches = /filename=(.*)/.exec(contentDisposition);
+
+  return matches && matches.length > 1 ? matches[1] : null;
+}
+
+/**
+ * Asynchronously response from signing in.
+ * @function signIn
+ * @param {string} username username to sign in
+ * @param {string} password password to sign in
+ * @returns {Object}
+ */
+export const signIn = async (username, password) => {
+  const url = '/api/Login';
+  const data = {
+    username,
+    password
+  }
+
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  });
+
+
+  const res = await response.json();
+  if (response.status === 200) {
+    if (!checkVersion(res.Data.Version)) {
+      throw new CoraError({
+        UserMessage: 'Je potrebné aktualizovať aplikáciu.',
+        Code: '403.000'
+      });
+    }
+
+    storage.setUser(res.Data);
+    return res;
+  }
+  else if (response.status === 401) {
+    throw new CoraError({
+      UserMessage: res.UserMessage || 'Nesprávne meno alebo heslo.',
+      Code: '401.000'
+    });
+  }
+  else {
+    throw new CoraError(await response.json());
+  }
+}
+
+/**
+ * Asynchronously response from register.
+ * @function register
+ * @param {Object} registerData data to register
+ * @returns {Object}
+ */
+export const register = async (registerData) => {
+  const url = `/api/register`;
+  const data = registerData;
+
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: data ? JSON.stringify(data) : null,
+  });
+
+
+  if (response.status === 200) {
+    const res = await response.json();
+    return res;
+  }
+  else {
+    throw new CoraError(await response.json());
+  }
+}
+
+/**
+ * Asynchronously response from verify GUID.
+ * @function verifyGUID
+ * @param {string} guid default null
+ * @returns {Object}
+ */
+export const verifyGUID = async (guid) => {
+  const url = `/api/verify/guid/${guid}`;
+
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: null,
+  });
+
+
+  if (response.status === 200) {
+    const res = await response.json();
+    return res;
+  }
+  else {
+    throw new CoraError(await response.json());
+  }
+}
+
+/**
+ * Asynchronously response from oAuth.
+ * @function oAuthRegister
+ * @param {string} code generated code from oAuth response
+ * @param {string} redirect_uri redirect uri used in oAuth request
+ * @param {string} provider provider ID
+ * @param {string} oAuthFor what purpose e.g. register/login
+ * @returns {Object}
+ */
+export const oAuth = async (code, redirect_uri, provider, oAuthFor="") => {
+  const url = `/api/oauth/${oAuthFor}`;
+  const data = {
+    provider,
+    code: decodeURIComponent(code),
+    redirect_uri,
+  };
+
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: data ? JSON.stringify(data) : null,
+  });
+
+
+  if (response.status === 200) {
+    const res = await response.json();
+    return res;
+  }
+  else {
+    throw new CoraError(await response.json());
+  }
+}
+
+/**
+ * Asynchronously returns response from verifying code.
+ * @function verifyCode
+ * @param {string} code code to be verified
+ * @returns {Object}
+ */
+export const verifyCode = async (code) => {
+  const url = '/api/VerifyCode';
+  const data = {
+    code
+  }
+
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  });
+
+
+  if (response.status === 200) {
+    const res = await response.json();
+    storage.setUser(res.Data);
+    return res;
+  }
+  else {
+    throw new CoraError(await response.json());
+  }
+}
+
+/**
+ * Asynchronously returns response from creating code.
+ * @function createCode
+ * @param {string} username username
+ * @param {string} password password
+ * @returns {Object}
+ */
+export const createCode = async (username, password) => {
+  const url = '/api/CreateCode';
+  const data = {
+    username, password
+  }
+
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  });
+
+
+  if (response.status === 200) {
+    const res = await response.json();
+    return res;
+  }
+  else {
+    throw new CoraError(await response.json());
+  }
+}
+
+/**
+ * Asynchronously returns response from refresh token.
+ * @function refreshToken
+ * @returns {bool}
+ */
+export const refreshToken = async () => {
+  const url = '/api/Login/refresh';
+  const user = storage.getUser();
+  if (!user) {
+    return false;
+  }
+
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': user ? `Bearer ${user.RefreshToken}` : null
+    },
+  });
+
+  if (response.status === 200) {
+    const res = await response.json();
+    if (!checkVersion(res.Data.Version)) {
+      storage.removeUser();
+      return false;
+    }
+
+    storage.setUser(res.Data);
+    return true;
+  }
+  else {
+    storage.removeUser();
+    return false;
+  }
+}
+
+/**
+ * Asynchronously returns response from post data.
+ * @function post
+ * @param {string} url url
+ * @param {object} data data
+ * @returns {Object}
+ */
+export const post = async (url, data) => {
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': getAuthorizationHeader()
+    },
+    body: JSON.stringify(data)
+  });
+  if (response.status === 200 || response.status === 201) {
+    return await response.json();
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await post(url, data);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Asynchronously returns response from put data.
+ * @function put
+ * @param {string} url url
+ * @param {object} data data
+ * @returns {Object}
+ */
+export const put = async (url, data) => {
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'PUT',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': getAuthorizationHeader()
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (response.status === 200) {
+    return await response.json()
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await put(url, data);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Returns authorization header token or null.
+ * @function getAuthorizationHeader
+ * @returns {string}
+ */
+export const getAuthorizationHeader = () => {
+  const user = storage.getUser();
+  return user ? `Bearer ${user.Token}` : null;
+}
+
+/**
+ * Returns filter with offset(time zone) to given date.
+ * @function processFilter
+ * @param {object} filter filter
+ * @returns {Object}
+ */
+export const processFilter = filter => {
+  if (filter.value instanceof Date) {
+    filter.value = convert.addOffset(filter.value);
+  }
+  return filter;
+}
+
+/**
+ * Asynchronously returns response from get list of data.
+ * @function getList
+ * @param {string} url url
+ * @param {object} filter filter
+ * @param {object} sort sort
+ * @param {object} page page
+ * @returns {Object}
+ */
+export const getList = async (url, filter, sort, page) => {
+  filter.filters.map(x => processFilter(x));
+  let response = await fetch(`${window.config.url}${url}?filter=${JSON.stringify(filter)}&sort=${JSON.stringify({ sorts: sort })}&page=${(page.skip / page.take) + 1}&limit=${page.take}`, {
+    headers: {
+      'Authorization': getAuthorizationHeader()
+    }
+  });
+
+  if (response.status === 200) {
+    return await response.json();
+  }
+  else if (response.status === 404) {
+    return { Data: { Items: [], TotalRecords: page.skip } };
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await getList(url, filter, sort, page);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Asynchronously returns response get data.
+ * @function get
+ * @param {string} url url
+ * @returns {Object}
+ */
+export const get = async (url) => {
+  let response = await fetch(`${window.config.url}${url}`, {
+    headers: {
+      'Authorization': getAuthorizationHeader()
+    }
+  });
+
+  if (response.status === 200) {
+    return await response.json();
+  }
+  else if(response.status === 404) {
+    return { Data: null };
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await get(url);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Asynchronously deletes data.
+ * @function del
+ * @param {string} url url
+ * @returns {Object} 
+ */
+export const del = async (url) => {
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': getAuthorizationHeader()
+    }
+  });
+
+  if (response.status === 204 || response.status === 200) {
+    return;
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await del(url);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Asynchronously deletes data and return response.
+ * @function delWithResData
+ * @param {string} url url
+ * @returns {Object}
+ */
+export const delWithResData = async (url) => {
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'DELETE',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': getAuthorizationHeader()
+    }
+  });
+
+  if (response.status === 200) {
+    return await response.json();
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await delWithResData(url);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Asynchronously cancels data.
+ * @function cancel
+ * @param {string} url url
+ * @returns {Object}
+ */
+export const cancel = async (url) => {
+  let response = await fetch(`${window.config.url}${url}/zrus`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': getAuthorizationHeader()
+    }
+  });
+
+  if (response.status === 200) {
+    return;
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await cancel(url);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res); 
+  }
+}
+
+/**
+ * Asynchronously deletes data with data.
+ * @function delWithData
+ * @param {string} url url
+ * @param {object} data data
+ * @returns {Object}
+ */
+export const delWithData = async (url, data) => {
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'DELETE',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': getAuthorizationHeader()
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (response.status === 200 || response.status === 201) {
+    return await response.json();
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await delWithData(url, data);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Asynchronously posts print.
+ * @function postPrint
+ * @param {string} url url
+ * @param {object} filter filter
+ * @param {object} sort sort
+ * @param {object} fileType fileType
+ * @param {object} schema schema
+ * @returns {Object}
+ */
+export const postPrint = async (url, filter, sort, fileType, schema) => {
+  let response = await fetch(`${window.config.url}${url}?filter=${JSON.stringify(filter)}&sort=${JSON.stringify({ sorts: sort })}&fileType=${fileType}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': getAuthorizationHeader(),
+      'Access-Control-Expose-Headers': 'Content-Disposition'
+    },
+    body: JSON.stringify(schema)
+  });
+  let fileName = parseFilenameFromContentDisposition(response.headers.get("content-disposition"));
+
+  if (response.status === 200) {
+    return { blob: await response.blob(), fileName: fileName };
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await postPrint(url, filter, sort, fileType, schema);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = { blob: await response.blob(), fileName: fileName };
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Asynchronously returns blob.
+ * @function getBlob
+ * @param {string} url url
+ * @returns {Object}
+ */
+export const getBlob = async (url) => {
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': getAuthorizationHeader()
+    }
+  });
+  if (response.status === 200) {
+    return await response.blob();
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await getBlob(url);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}
+
+/**
+ * Asynchronously returns blob with file name.
+ * @function getBlobWithFileName
+ * @param {string} url url
+ * @returns {Object}
+ */
+export const getBlobWithFileName = async (url) => {
+  let response = await fetch(`${window.config.url}${url}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': getAuthorizationHeader()
+    }
+  });
+  if (response.status === 200) {
+    let contentDisposition = response.headers.get("content-disposition");
+    let filename = `doc${new Date().toISOString().replace(/[^0-9]/g, '')}.pdf`;
+    if(contentDisposition !== null){
+      filename = contentDisposition.split(';').find(n => n.includes('filename=')).replace('filename="', '').replace('"','').trim();
+    }
+    return { blob: await response.blob(), fileName: filename };
+  }
+  else if (response.status === 401) {
+    if (await refreshToken()) {
+      return await getBlob(url);
+    }
+    else {
+      throw new CoraError({
+        UserMessage: UNAUTHORIZED_MSG,
+        Code: '401.000'
+      });
+    }
+  }
+  else {
+    const res = await response.json();
+    throw new CoraError(res);
+  }
+}

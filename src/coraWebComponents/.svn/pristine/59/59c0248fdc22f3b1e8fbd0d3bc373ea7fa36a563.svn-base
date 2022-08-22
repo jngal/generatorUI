@@ -1,0 +1,47 @@
+import './Search.scss';
+
+import Input from '../../forms/Input';
+import PropTypes from 'prop-types';
+import React from 'react';
+
+/**
+ * Search component
+ * @module
+ * @param {func} onChange - Function invoked on search change
+ * @param {string} search - Search query
+ * @param {string} className - Class name for span
+ * @param {func} onClick - Function invoked on click
+ */
+class Search extends React.Component {
+  handleClick = () => {
+    if (this.props.search.length > 0) {
+      this.props.onClick();
+    }
+  }
+
+  render() {
+    return (
+      <div className={`search ${this.props.className}`}>
+        <Input
+          name="search"
+          value={this.props.search}
+          onChange={this.props.onChange}
+          placeholder="Vyhľadávanie"
+        />
+        <span
+          className={`action k-icon ${this.props.search.length > 0 ? 'k-i-close' : 'k-i-zoom'}`}
+          onClick={this.handleClick}
+        />
+      </div>
+    );
+  }
+}
+
+Search.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  search: PropTypes.string.isRequired,
+  className: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+}
+
+export default Search;

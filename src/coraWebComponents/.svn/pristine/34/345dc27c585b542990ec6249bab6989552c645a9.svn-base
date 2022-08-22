@@ -1,0 +1,213 @@
+import React from 'react';
+import Button from '../buttons/Button';
+import Input from '../forms/Input';
+import { Slider, SliderLabel } from '@progress/kendo-react-inputs';
+import PropTypes from 'prop-types';
+import './ImageCompression.scss';
+
+class ImageCompression extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      errorMessage: "",
+      validMessage: "",
+      currentCompressValue: 100.0,
+      file: null,
+      requiredMaximumSize: props.requiredMaximumSize ? this.stringToBytes(props.requiredMaximumSize) : null,
+      outputFile: null
+    };
+  }
+
+  resizeImageByCompressValue(image) {
+    const height = (this.state.currentCompressValue / 100) * image.height;
+    if (image.height > height) {
+      image.width *= height / image.height;
+      image.height = height;
+    }
+  }
+
+  resize = (src) => {
+    const image = new Image();
+    image.onload = () => {
+      this.resizeImageByCompressValue(image);
+
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.width = image.width;
+      canvas.height = image.height;
+      ctx.drawImage(image, 0, 0, image.width, image.height);
+
+      const data = canvas.toDataURL('image/jpeg');
+      this.setState({ outputFile: { ...this.state.file, data, size: data.length * 3 / 4 } });
+    }
+
+    image.src = src;
+  }
+
+  onInputFile = (file) => {
+    this.resize(file.data);
+    this.setState({ file, currentCompressValue: 100.0 });
+  }
+
+  onInputChange = (name, input) => {
+    this.setState({ errorMessage: "", validMessage: "" });
+
+    const { files } = input;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const f = {
+        name: file.name,
+        date: file.lastModifiedDate,
+        data: reader.result,
+        size: file.size,
+        type: file.type
+      };
+
+      this.onInputFile(f);
+    }
+
+    reader.readAsDataURL(file);
+  }
+
+  onChangeSlider = (e) => {
+    const { value } = e;
+    this.setState({ currentCompressValue: value });
+    this.resize(this.state.file.data);
+  }
+
+  stringToBytes = (string) => {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    for (let i = 0; i < sizes.length; i++) {
+      let cur = sizes[i];
+      if (string.indexOf(cur) > -1) {
+        const size = Number(string.split(sizes[i])[0]);
+        return size * Math.pow(1024, i);
+      }
+    }
+    return 0;
+  }
+
+  bytesToSize = (bytes) => {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 Byte';
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+  }
+
+  saveFile = () => {
+    let errorMessage = "";
+    if (this.props.requiredMaximumSize && this.state.outputFile) 
+      if (this.state.outputFile.size > this.state.requiredMaximumSize)
+        errorMessage = `Pre uloženie súboru je potrebná výsledná veľkosť menej ako ${this.bytesToSize(this.state.requiredMaximumSize)} !`;
+
+    this.setState({ errorMessage, validMessage: errorMessage === "" ? "Súbor uložený" : "" });
+
+    if (errorMessage !== "") return;
+    this.props.onChange(this.props.name, this.state.outputFile.data);
+  }
+
+  render() {
+    const {
+      file,
+      outputFile,
+      currentCompressValue,
+      errorMessage,
+      validMessage
+    } = this.state;
+
+    const {
+      errorText,
+      label,
+      required,
+      name,
+      sliderButtons
+    } = this.props;
+
+    if (errorText && (errorMessage !== errorText))
+      this.setState({ errorMessage: errorText });
+
+    return (
+      <div className="image-compress-container">
+        <div className="k-form-field">
+          <span>{label ? label : "Súbor:"}</span>
+          <Input
+            type="file"
+            name={name}
+            accept="image/png, image/jpeg"
+            onChange={this.onInputChange}
+            required={required}
+          />
+        </div>
+
+        <div className="k-form-field">
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Veľkosť pred:</th>
+                <th>Veľkosť po:</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {file && <td>{this.bytesToSize(file.size)}</td>}
+                {outputFile && <td>{this.bytesToSize(outputFile.size)}</td>}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="row">
+          <div className="col-6">
+            <canvas id="canvas" style={{ maxWidth: '100%' }} className="img-thumbnail"></canvas>
+          </div>
+          <div className="col-6">
+            <div className="k-form-field">
+              <span>Velkosť a kvalita</span>
+              <Slider
+                buttons={sliderButtons}
+                step={10}
+                defaultValue={currentCompressValue}
+                min={1}
+                max={100}
+                onChange={this.onChangeSlider}
+                disabled={!file}
+              >
+                <SliderLabel position={1}>1</SliderLabel>
+                <SliderLabel position={20}>20</SliderLabel>
+                <SliderLabel position={50}>50</SliderLabel>
+                <SliderLabel position={80}>80</SliderLabel>
+                <SliderLabel position={100}>100</SliderLabel>
+              </Slider>
+            </div>
+          </div>
+        </div>
+
+        <Button
+          disabled={!file || !outputFile}
+          onClick={this.saveFile}
+          label="Uložiť"
+          primary
+        />
+
+        {errorMessage && <span className="message error">{errorMessage}</span>}
+        {validMessage && <span className="message valid">{validMessage}</span>}
+
+      </div>
+    );
+  }
+}
+
+ImageCompression.propTypes = {
+  requiredMaximumSize: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+  label: PropTypes.string,
+  required: PropTypes.bool,
+  sliderButtons: PropTypes.bool,
+  errorText: PropTypes.string,
+};
+
+export default ImageCompression;

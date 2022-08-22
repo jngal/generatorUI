@@ -1,0 +1,31 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Checkbox } from '@progress/kendo-react-inputs';
+import './Checkbox.scss';
+
+class CheckboxComponent extends React.Component {
+  render() {
+    return (
+      <Checkbox 
+        className={`checkbox ${this.props.disabled ? 'disabled-field' : ''} `}
+        name={this.props.name} 
+        onChange={e => this.props.onChange(this.props.name, e.value)} 
+        value={this.props.value}
+        disabled={this.props.disabled}
+        label={this.props.label}
+        tabIndex={this.props.tabIndex}
+      />
+    );
+  }
+}
+
+CheckboxComponent.propTypes = {
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.bool,
+  disabled: PropTypes.bool,
+  label: PropTypes.string,
+  tabIndex: PropTypes.number
+}
+
+export default CheckboxComponent;

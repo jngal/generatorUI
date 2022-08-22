@@ -1,0 +1,279 @@
+import React from 'react';
+import * as requests from './requests';
+
+/**
+ * @function menuItemHasChildren - zisti, ci @param menuItem ma potomkov
+ * @param menuItem - polozka menu
+ * @returns @var bool - true alebo false
+ */
+const menuItemHasChildren = (menuItem) => {
+  return menuItem.children && menuItem.children.length > 0;
+}
+
+/**
+ * @function getPreprocessedMenuData - z korena menu vyrobi novu datovu strukturu menu pouzitelnu na vykreslenie
+ * @param rootMenuItem - koren menu
+ * @param menu - menu
+ * @returns @var menuItem - polozka menu s potomkami (ak su)
+ */
+const getPreprocessedMenuData = (rootMenuItem, menu) => {
+  let menuItem = { ...rootMenuItem };
+
+  menuItem.children = menu.filter(subMenuItem => subMenuItem.NadMenuID === menuItem.MenuID);
+  if (!menuItemHasChildren(menuItem)) {
+    return menuItem;
+  }
+
+  for (let i = 0; i < menuItem.children.length; i++) {
+    menuItem.children[i] = getPreprocessedMenuData(menuItem.children[i], menu);
+  }
+
+  menuItem.children = menuItem.children.sort((menuItem1, menuItem2) => menuItem1.Pozicia - menuItem2.Pozicia);
+  return menuItem;
+}
+
+export default (WrappedComponent) => {
+  class HOC extends React.Component {
+    state = {
+      menu: [],
+      menuTree: {
+        children: []
+      }
+    }
+
+    init = async (isPublic = false) => {
+      await this.initMenu(isPublic);
+    }
+
+    initMenu = async (isPublic = false) => {
+      const menu = await this.getMenu(isPublic);
+      const menuTree = getPreprocessedMenuData(menu.find(x => x.NadMenuID === null), menu.filter(x => x.Visible === true));
+      this.setState({ menu, menuTree });
+    }
+
+    getMenu = async (isPublic) => {
+      try {
+        const menu = await requests.get(isPublic ? "/api/meta/menuPublic" : "/api/meta/menu");
+        return menu.Data;
+      }
+      catch (error) {
+        return [];
+      }
+    }
+
+    getList = async (primaryField, filter, sort, page) => {
+      const url = `/api/meta/form/${primaryField}`;
+
+      try {
+        let res = await requests.getList(url, filter, sort, page);
+        return res;
+      }
+      catch (error) {
+        return {
+          Data: {
+            Items: [],
+            TotalRecords: 0
+          }
+        }
+      }
+    }
+
+    get = async (primaryField, id) => {
+      const url = `/api/meta/form/${primaryField}/${id}`;
+
+      try {
+        let res = await requests.get(url);
+        return res;
+      }
+      catch (error) {
+        throw error;
+      }
+    }
+
+    create = async (primaryField, data) => {
+      const url = `/api/meta/form/${primaryField}`;
+
+      try {
+        let res = await requests.post(url, data);
+        return res;
+      }
+      catch (error) {
+        throw error;
+      }
+    }
+
+    update = async (primaryField, id, data) => {
+      const url = `/api/meta/form/${primaryField}/${id}`;
+
+      try {
+        let res = await requests.put(url, data);
+        return res;
+      }
+      catch (error) {
+        throw error;
+      }
+    }
+
+    delete = async (primaryField, id) => {
+      const url = `/api/meta/form/${primaryField}/${id}`;
+
+      try {
+        await requests.del(url);
+      }
+      catch (error) {
+        throw error;
+      }
+    }
+
+    getSchema = async (primaryField) => {
+      const url = `/api/meta/schema/${primaryField}`;
+
+      try {
+        let res = await requests.get(url);
+
+        const schemaDet = res.Data.Detail.map(item => { item.format = item.format ? item.format.replace(/^\{0:/, "").replace(/\}$/, "") : null; return item; });
+        res.Data.Detail = schemaDet;
+
+        return res.Data;
+      }
+      catch (error) {
+        return null;
+      }
+    }
+
+    updateSchema = async (primaryField, schema) => {
+      const url = `/api/meta/schema/${primaryField}`;
+
+      try {
+        await requests.put(url, schema);
+      }
+      catch (error) {
+
+      }
+    }
+
+    getSort = async (primaryField) => {
+      const url = `/api/meta/sort/${primaryField}`;
+
+      try {
+        let res = await requests.get(url);
+        if (res && res.Data) {
+          return res.Data;
+        }
+        return [];
+      }
+      catch (error) {
+        return [];
+      }
+    }
+
+    updateSort = async (primaryField, sort) => {
+      const url = `/api/meta/sort/${primaryField}`;
+
+      try {
+        await requests.put(url, sort);
+      }
+      catch (error) {
+      }
+    }
+
+    getFilterList = async (primaryField) => {
+      const url = `/api/meta/user-filters/${primaryField}`;
+
+      try {
+        let res = await requests.get(url);
+        return res.Data;
+      }
+      catch (error) {
+        return [];
+      }
+    }
+
+    createFilter = async (primaryField, filter) => {
+      const url = `/api/meta/user-filters/${primaryField}`;
+
+      try {
+        await requests.post(url, filter);
+      }
+      catch (error) {
+      }
+    }
+
+    deleteFilter = async (primaryField, id) => {
+      const url = `/api/meta/user-filters/${primaryField}/${id}`;
+
+      try {
+        await requests.del(url);
+      }
+      catch (error) {
+        throw error;
+      }
+    }
+
+
+
+    deleteSchema = async (primaryField) => {
+      const url = `/api/meta/schema/${primaryField}`;
+
+      try {
+        await requests.del(url);
+      }
+      catch (error) {
+      }
+    }
+
+    postPrint = async (primaryField, filter, sort, fileType, schema) => {
+      const url = `/api/meta/print/${primaryField}`;
+
+      try {
+        let res = await requests.postPrint(url, filter, sort, fileType, schema);
+        return res;
+      }
+      catch (error) {
+      }
+    }
+
+    getAkc = async (primaryField) => {
+      const url = `/api/meta/akc/${primaryField}`;
+
+      try {
+        let res = await requests.get(url);
+        return res.Data;
+      }
+      catch (error) {
+        return null;
+      }
+    }
+
+    render() {
+      return (
+        <WrappedComponent
+          {...this.props}
+          meta={{
+            init: this.init,
+            initMenu: this.initMenu,
+            menu: this.state.menu,
+            menuTree: this.state.menuTree,
+            getList: this.getList,
+            get: this.get,
+            create: this.create,
+            update: this.update,
+            delete: this.delete,
+            getSchema: this.getSchema,
+            updateSchema: this.updateSchema,
+            getSort: this.getSort,
+            updateSort: this.updateSort,
+            postPrint: this.postPrint,
+            deleteSchema: this.deleteSchema,
+            getFilterList: this.getFilterList,
+            createFilter: this.createFilter,
+            deleteFilter: this.deleteFilter,
+            getAkc: this.getAkc
+          }}
+        />
+      );
+    }
+  }
+
+  return HOC;
+};

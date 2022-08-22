@@ -1,0 +1,40 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Dialog from './Dialog';
+import withRequests from '../utils/withRequests';
+import FileContent from './FileContent';
+
+class FileDialog extends React.Component {
+  render() {
+    const { dataItem, column } = this.props;
+
+    return (
+      <Dialog
+        title="Príloha"
+        onClose={this.props.onClose}
+        isOpen={this.props.isOpen}
+        fullscreen
+      >
+        {dataItem &&
+          <FileContent
+            style={{ margin: 20 }}
+            requests={this.props.requests}
+            name={column.name || dataItem[column.nameField]}
+            url={column.url.replace('{id}', dataItem[column.idField])}
+            mimeType={column.mimeType || dataItem[column.mimeTypeField]}
+            id={dataItem[column.idField]}
+          />
+        }
+      </Dialog>
+    );
+  }
+}
+
+FileDialog.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  column: PropTypes.object,
+  dataItem: PropTypes.object
+}
+
+export default withRequests(FileDialog);

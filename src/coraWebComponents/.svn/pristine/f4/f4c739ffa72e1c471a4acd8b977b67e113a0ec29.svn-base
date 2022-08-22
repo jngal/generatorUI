@@ -1,0 +1,314 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Grid from './Grid';
+import _ from 'lodash';
+import eventEmitter from '../utils/eventEmitter';
+import withRouter from '../utils/withRouter';
+import flags from '../utils/flags';
+
+/**
+ * Grid Component 
+ * @module
+ * @param {bool} [allColumns] - All colums
+ * @param {func} [cellRender] - Cell render function
+ * @param {bool} [cellSelect] - Cell select
+ * @param {string} [className] - Class name
+ * @param {array} [contextMenu] - Context menu
+ * @param {array} data - Data
+ * @param {any} [detail] - Detail
+ * @param {number} [disabled] - Disabled
+ * @param {string} [discardText] - Discard text
+ * @param {bool} [editable] - Editable
+ * @param {func} [enterEdit] - Enter edit function
+ * @param {object} [fixedFilter] - Fixed filter
+ * @param {number} [hidden] - Hidden
+ * @param {bool} [changeTabDisable] - Change tab disable
+ * @param {object} [initFilter] - Init filter
+ * @param {array} [initSort] - Init sort 
+ * @param {bool} isLoading - Is loading
+ * @param {bool} [modified] - Modified
+ * @param {bool} [multiple] - Multiple
+ * @param {func} [onAdd] - Function invoked on entry add
+ * @param {func} [onCancel] - Function invoked on entry cancel
+ * @param {func} [onContextMenuSelect] - On context menu select function
+ * @param {func} [onCopy] - Function invoked on entry copy
+ * @param {func} [onCopyAdditional] - On copy additional function
+ * @param {func} [onDelete] - Function invoked on entry delete
+ * @param {func} [onExpandChange] - On expand change function
+ * @param {func} onGet - On get function
+ * @param {func} onGetList - On get list function
+ * @param {func} [onGetSchema] - On get schema function
+ * @param {func} onChange - On change function
+ * @param {func} [onChangeField] - On chage field function
+ * @param {func} [onRowDoubleClick] - On row double click function
+ * @param {func} [onSelect] - On select function
+ * @param {func} [onUpdate] - On update function
+ * @param {object} [parentProps] - Parent props
+ * @param {string} primaryField - Primary field
+ * @param {bool} [printable] - Printable
+ * @param {bool} [rememberSelection] - Remember selection
+ * @param {func} [rowProps] - Row props function
+ * @param {array} schema - Grid schema
+ * @param {array} [selected] - Selected entries
+ * @param {bool} [sortDialog] - Sort dialog in grid
+ * @param {any} [toolbarActions] - Toolbar actions
+ * @param {bool} [toolbarHidden] - Toolbar hidden
+ * @param {number} total - Defines the total number of data items in all pages
+ * @param {bool} [userFilter] - User filter
+ * @param {string} [filterField] - Filter field
+ */
+class GridWrapper extends React.Component {
+  onGet = (id, fixedFilter = null) => {
+    const { allColumns, data, onGet, primaryField } = this.props;
+
+    if(allColumns) {
+      let val;
+      if(id === 0) {
+        val = null;
+      }
+      else {
+        val = { Data: data.find(x => x[primaryField] === id) }
+      }
+      onGet(val);
+    }
+    else {
+      onGet(id, fixedFilter);
+    }
+  }
+
+  initDetail = () => {
+    const { history } = this.props;
+
+    const urlParams = new URLSearchParams(history.location.search);
+    const id = urlParams.get('id');
+    if(id) {
+      this.onGet(id);
+      this.changeTab();
+    }
+  }
+
+  onAdd = (event) => {
+    this.onGet(0, this.props.fixedFilter);
+    if(!this.props.changeTabDisable){
+      this.changeTab();
+    }
+    if (_.isFunction(this.props.onSelect)) {
+      this.props.onSelect([]);
+    }
+  }
+
+  onCopy = async () => {
+    this.props.onChangeField(this.props.primaryField, 0);
+    if(this.props.onCopyAdditional){
+      await this.props.onCopyAdditional();
+    }
+    this.changeTab();
+  }
+
+  changeTab = () => {
+    eventEmitter.changeTab(this.props.primaryField, 1);
+  }
+
+  onSelect = (selected, isCopy = false) => {
+    const { onSelect, primaryField } = this.props;
+
+    if (selected.length === 1) {
+      this.onGet(selected[0][primaryField]);
+    }
+    else {
+      if(!isCopy) {
+        this.onGet(0);
+      }
+    }
+
+    if (_.isFunction(onSelect)) {
+      onSelect(selected);
+    }
+  }
+
+  onDelete = async (selected) => {
+    const { onGetList, onDelete, primaryField } = this.props;
+
+    await onDelete(selected[primaryField]);
+    this.onGet(0);
+    onGetList();
+  }
+
+  onCancel = async (selected) => {
+    const { onGetList, onCancel, primaryField } = this.props;
+
+    await onCancel(selected[primaryField]);
+    this.onGet(selected[primaryField]);
+    onGetList();
+  }
+
+  processFilter = (filter) => {
+    if(!this.props.fixedFilter) {
+      return filter;
+    }
+
+    return {filters: [...filter.filters, ...this.props.fixedFilter.filters]};
+  }
+
+  onChange = (filter, sort, page) => {
+    const { onGetList, onChange } = this.props;
+    onChange(this.processFilter(filter), sort, page);
+    onGetList();
+  }
+
+  componentDidMount() {
+    this.initDetail();
+  }
+
+  getHidden = () => {
+    let { hidden } = this.props;
+    
+    if(!this.props.printable) {
+      hidden |= flags.PRINT;
+    }
+
+    if(!this.props.sortDialog) {
+      hidden |= flags.SORT_DIALOG;
+    }
+
+    if(process.env.REACT_APP_NAME !== 'VISCO') {
+      hidden |= flags.RESET;
+      hidden |= flags.DELETEALL;
+    }
+    
+    if(!this.props.editable) {
+      hidden |= flags.EDIT;
+    }
+
+    if(!this.props.editableAll) {
+      hidden |= flags.EDITALL;
+    }
+
+    if(!this.props.editableCell) {
+      hidden |= flags.EDITCELL;
+    }
+
+    if(!this.props.userFilter){
+      hidden |= flags.USER_FILTER;
+    }
+
+    return hidden;
+  }
+
+  getDisabled = () => {
+    let { disabled } = this.props;
+
+    if(process.env.REACT_APP_NAME !== 'VISCO') {
+      disabled |= flags.DELETEALL;
+    }
+
+    return disabled;
+  }
+
+  render() {
+    const hidden = this.getHidden();
+    const disabled = this.getDisabled();
+
+    return (
+      <Grid
+        actions={this.props.actions}
+        cellRender={this.props.cellRender}
+        cellSelect={this.props.cellSelect}
+        className={this.props.className}
+        contextMenu={this.props.contextMenu}
+        data={this.props.data}
+        detail={this.props.detail}
+        disabled={disabled}
+        discardText={this.props.discardText}
+        enterEdit={this.props.enterEdit}
+        hidden={hidden}
+        filter={this.props.filter}
+        initFilter={this.props.initFilter}
+        initSort={this.props.initSort}
+        isLoading={this.props.isLoading}
+        modified={this.props.modified}
+        multiple={this.props.multiple}
+        onAdd={this.props.onAdd ? this.props.onAdd : this.onAdd}
+        onCancel={this.onCancel}
+        onConfirm={this.changeTab}
+        onContextMenuSelect={this.props.onContextMenuSelect}
+        onCopy={this.props.onCopy ? this.props.onCopy : this.onCopy}
+        onDelete={this.onDelete}
+        onExpandChange={this.props.onExpandChange}
+        onGetSchema={this.props.onGetSchema}
+        onChange={this.onChange}
+        onPrint={this.props.onPrint}
+        onRowDoubleClick={this.props.onRowDoubleClick}
+        onSelect={this.onSelect}
+        onUpdate={this.props.onUpdate}
+        parentProps={this.props.parentProps}
+        primaryField={this.props.primaryField}
+        printItems={this.props.printItems}
+        rememberSelection={this.props.rememberSelection}
+        rowProps={this.props.rowProps}
+        selected={this.props.selected}
+        schema={this.props.schema}
+        toolbarActions={this.props.toolbarActions}
+        toolbarHidden={this.props.toolbarHidden}
+        total={this.props.total}
+        filterField={this.props.filterField}
+      />
+    )
+  }
+
+}
+
+GridWrapper.propTypes = {
+  allColumns: PropTypes.bool,
+  cellRender: PropTypes.func,
+  cellSelect: PropTypes.bool,
+  className: PropTypes.string,
+  contextMenu: PropTypes.array,
+  data: PropTypes.array.isRequired,
+  detail: PropTypes.any,
+  disabled: PropTypes.number,
+  discardText: PropTypes.string,
+  editable: PropTypes.bool,
+  enterEdit: PropTypes.func,
+  filter: PropTypes.object,
+  fixedFilter: PropTypes.object,
+  hidden: PropTypes.number,
+  changeTabDisable: PropTypes.bool,
+  initFilter: PropTypes.object,
+  initSort: PropTypes.array,
+  isLoading: PropTypes.bool.isRequired,
+  modified: PropTypes.bool,
+  multiple: PropTypes.bool,
+  onAdd: PropTypes.func,
+  onCancel: PropTypes.func,
+  onContextMenuSelect: PropTypes.func,
+  onCopy: PropTypes.func,
+  onCopyAdditional: PropTypes.func,
+  onDelete: PropTypes.func,
+  onExpandChange: PropTypes.func,
+  onGet: PropTypes.func.isRequired,
+  onGetList: PropTypes.func.isRequired,
+  onGetSchema: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
+  onChangeField: PropTypes.func,
+  onPrint: PropTypes.func,
+  onRowDoubleClick: PropTypes.func,
+  onSelect: PropTypes.func,
+  onUpdate: PropTypes.func,
+  parentProps: PropTypes.object,
+  primaryField: PropTypes.string.isRequired,
+  printItems: PropTypes.array,
+  printable: PropTypes.bool,
+  rememberSelection: PropTypes.bool,
+  rowProps: PropTypes.func,
+  selected: PropTypes.array,
+  schema: PropTypes.array.isRequired,
+  sortDialog: PropTypes.bool,
+  toolbarActions: PropTypes.any,
+  toolbarHidden: PropTypes.bool,
+  total: PropTypes.number.isRequired,
+  userFilter: PropTypes.bool,
+  filterField: PropTypes.string
+}
+
+export default withRouter(GridWrapper);

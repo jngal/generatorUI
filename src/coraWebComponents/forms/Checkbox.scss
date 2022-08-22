@@ -1,0 +1,12 @@
+@import "../variables";
+@import "../themes";
+
+.checkbox {
+  >.k-checkbox:checked+.k-checkbox-label::before {
+    border: none;
+  }
+
+  >.k-checkbox:checked:focus+.k-checkbox-label::before {
+    box-shadow: none;
+  }
+}

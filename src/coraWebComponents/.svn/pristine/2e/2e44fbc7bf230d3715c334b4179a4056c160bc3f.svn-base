@@ -1,0 +1,183 @@
+import React from 'react';
+import Button from '../buttons/Button';
+import { Slider, SliderLabel } from '@progress/kendo-react-inputs';
+import PropTypes from 'prop-types';
+import './ImageCompression.scss';
+
+class ImageCompression extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      errorMessage: null,
+      currentCompressValue: 100.0,
+      file: null, 
+      requiredMaximumSize: props.requiredMaximumSize ? this.stringToBytes(props.requiredMaximumSize) : null
+    };
+  }
+
+  resize = (src) => {
+    const image = new Image();
+    image.onload = () => {
+      const height = (this.state.currentCompressValue / 100) * image.height;
+      var canvas = document.getElementById('canvas');
+      if (image.height > height) {
+        image.width *= height / image.height;
+        image.height = height;
+      }
+
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.width = image.width;
+      canvas.height = image.height;
+      ctx.drawImage(image, 0, 0, image.width, image.height);
+
+      const data = canvas.toDataURL('image/jpeg');
+      const currentFile = this.state.file;
+      this.setState({ outputFile: { ...currentFile, data, size: data.length * 3 / 4 } });
+    }
+
+    image.src = src;
+  }
+
+  onInputFile = (file) => {
+    this.resize(file.data);
+    this.setState({ file, currentCompressValue: 100.0 });
+  }
+
+  onInputChange = (e) => {
+    const { files } = e.target;
+    if (files.length < 0) {
+      this.setState({ errorMessage: 'Musíte zvoliť súbor !' });
+      return;
+    }
+
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const f = {
+        name: file.name,
+        date: file.lastModifiedDate,
+        data: reader.result,
+        size: file.size,
+        type: file.type
+      };
+
+      this.onInputFile(f);
+    }
+
+    reader.readAsDataURL(file);
+  }
+
+  onChangeSlider = (e) => {
+    const { value } = e;
+    this.setState({ currentCompressValue: value });
+    this.resize(this.state.file.data);
+  }
+
+  stringToBytes = (string) => {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    for(let i = 0; i < sizes.length; i++) {
+      let cur = sizes[i];
+      if(string.indexOf(cur) > -1) {
+        const size = Number(string.split(sizes[i])[0]);
+        return size * Math.pow(1024, i);
+      }
+    }
+    return 0;
+  }
+
+  bytesToSize = (bytes) => {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 Byte';
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+  }
+
+  saveFile = () => {
+    if(this.props.requiredMaximumSize !== null && this.state.outputFile) {
+      console.log(this.state.outputFile.size, this.state.requiredMaximumSize);
+      if(this.state.outputFile.size > this.state.requiredMaximumSize) {
+        this.setState({errorMessage: `Pre uloženie súboru je potrebná výsledná veľkosť menej ako ${this.bytesToSize(this.state.requiredMaximumSize)} !`});
+        return;
+      }
+    }
+
+    this.setState({errorMessage: null});
+    this.props.onChange(this.props.name, this.state.outputFile.data);
+  }
+
+  render() {
+    return (
+      <div className="container">
+        <table className="table table-bordered">
+          <thead>
+            <tr>
+              <th>Veľkosť pred</th>
+              <th>Veľkosť po</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {this.state.file && <td>{this.bytesToSize(this.state.file.size)}</td>}
+              {this.state.outputFile && <td>{this.bytesToSize(this.state.outputFile.size)}</td>}
+            </tr>
+          </tbody>
+        </table>
+
+        <form>
+          <div className="form-group row">
+            <label className="col-sm-2 col-form-label">Súbor</label>
+            <div className="col-sm-10">
+              <input
+                className="form-control-file"
+                id="staticFile"
+                type={"file"}
+                accept={"image/png, image/jpeg"}
+                onChange={this.onInputChange}
+              />
+            </div>
+          </div>
+
+          <div className="form-group row">
+            <label  className="col-sm-2 col-form-label">Velkosť a kvalita</label>
+            <div className="col-sm-10">
+              <Slider
+                id="fileCompression"
+                buttons={true}
+                step={10}
+                defaultValue={this.state.currentCompressValue}
+                min={1}
+                max={100}
+                onChange={this.onChangeSlider}
+                disabled={!this.state.file}
+              >
+                <SliderLabel position={1}>1</SliderLabel>
+                <SliderLabel position={20}>20</SliderLabel>
+                <SliderLabel position={50}>50</SliderLabel>
+                <SliderLabel position={80}>80</SliderLabel>
+                <SliderLabel position={100}>100</SliderLabel>
+              </Slider>
+            </div>
+          </div>
+        </form>
+        { this.state.errorMessage && <span>{this.state.errorMessage}</span>}
+        <Button
+          onClick={this.saveFile}
+          label="Uložiť"
+          primary
+          disabled={!this.state.file || !this.state.outputFile}
+        />
+        <br/>
+        <canvas id="canvas" style={{ maxWidth: '100%' }} className="img-thumbnail"></canvas>
+      </div>
+    );
+  }
+}
+
+ImageCompression.propTypes = { 
+  requiredMaximumSize: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired
+};
+
+export default ImageCompression;

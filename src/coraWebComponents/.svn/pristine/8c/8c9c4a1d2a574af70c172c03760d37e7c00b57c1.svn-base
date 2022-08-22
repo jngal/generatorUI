@@ -1,0 +1,9 @@
+.textarea {
+  flex: 1;
+  display: flex;
+
+  .k-textarea {
+    flex: 1;
+  }
+}
+

@@ -1,0 +1,42 @@
+@import "../variables";
+@import "../themes";
+
+.button-wrapper {
+    margin: 15px 4px;
+    display: inline-block;
+    .k-button-icon {
+        height: 30px;
+        margin: 0px !important;
+    }
+    .k-button{
+      @include themed() {
+        background-image: none;
+        background-color: color($secondarylight);
+        border-color: color($secondarymedium);;
+      }
+    }
+}
+
+.k-form-inline{
+  .k-button.k-button-icon {
+    padding: 0;
+    border-radius: 0;
+    position: relative;
+    width: 2em;
+    height: 2em;
+    right: -1px;
+    // top: 0.8em;
+    overflow: hidden;
+    bottom: 0;
+    span {
+      height: 100%;
+      line-height: 1.7em;
+    }
+  }
+}
+
+.k-dialog-wrapper {
+  .k-button.k-button-icon {
+    position:relative;
+  }  
+}

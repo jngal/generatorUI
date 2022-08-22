@@ -1,0 +1,64 @@
+import React from 'react';
+import './ManualList.scss';
+import ManualDialogList from './ManualDialogList';
+
+/**
+ * ManualList Component
+ * @module
+ * @param {func} getManual - Function to get manual
+ * @param {func} getListManual - Function to get manual list
+ * @param {manualProps} manualProps - Props for manual
+ */
+
+class ManualList extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpenManualDialogList: false,
+      manualType: '',
+      manualTitle: '',
+    }
+  }
+
+  handleOpen = async (manualType, title) => {
+    await this.props.getListManual(manualType);
+      this.setState({
+        isOpenManualDialogList: true,
+        manualTitle: title,
+      });
+  }
+
+  handleCloseList = () => {
+    this.setState({
+      isOpenManualDialogList: false
+    });    
+  }  
+
+  render() {
+
+    const { manualProps } = this.props;
+    return (
+      <>     
+        <div>
+          {manualProps.manualList.map((x) => 
+            <div key={x.manualType} className="popis" onClick={() => this.handleOpen(x.manualType, x.title)}>
+              {x.title}
+            </div>
+          )}
+        </div>
+
+        <ManualDialogList
+          manualProps={manualProps}
+          isOpenManualDialogList={this.state.isOpenManualDialogList}
+          manualTitle={this.state.manualTitle}
+          handleClose={this.handleCloseList}
+          getManual={this.props.getManual}
+        />
+      </> 
+      
+    )
+  }
+}
+
+export default ManualList;

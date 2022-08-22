@@ -1,0 +1,36 @@
+import React from 'react';
+import { Checkbox } from '@progress/kendo-react-inputs';
+import { DropDownButton, DropDownButtonItem } from '@progress/kendo-react-buttons';
+import Button from '../../coraWebComponents/buttons/Button';
+import './SelectionMenu.scss';
+import PropTypes from 'prop-types';
+
+class SelectionMenu extends React.Component {
+  render() {
+    return (
+      <div className="selection-cell">
+        <Checkbox label={""} value={this.props.checked} onChange={this.props.onHeaderSelectionChange}/>
+        <DropDownButton
+          icon="arrow-60-down"
+          className="selection-dropdown"
+          popupSettings={{ popupClass: 'selection-popup'}}>
+            <DropDownButtonItem render={props => <Button {...props} label="Všetko" onClick={() => this.props.buttonSelection(0)}/>} />
+            <DropDownButtonItem render={props => <Button {...props} label="Žiadne" onClick={() => this.props.buttonSelection(1)}/>} />
+            {this.props.actions && this.props.actions.map((item, idx) => 
+                <DropDownButtonItem key={idx} render={props => <Button {...props} label={item.label} onClick={item.action}/> } />
+              )}
+        </DropDownButton>
+      </div>
+    )
+  }
+}
+
+SelectionMenu.propTypes = {
+  actions: PropTypes.array,
+  onHeaderSelectionChange: PropTypes.func.isRequired,
+  checked: PropTypes.bool,
+  buttonSelection: PropTypes.func.isRequired,
+  onActionSelect: PropTypes.func
+}
+
+export default SelectionMenu;

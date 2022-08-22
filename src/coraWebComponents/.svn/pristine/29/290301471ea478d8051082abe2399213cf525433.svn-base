@@ -1,0 +1,98 @@
+import React from 'react';
+import ManualPDF from './ManualPDF';
+import ManualList from './ManualList';
+import Dialog from '../dialogs/Dialog';
+import PropTypes from 'prop-types';
+
+/**
+ * @typedef {Array} manualList
+ * @property {string} manualType - Type of manual
+ * @property {string} title - Title of manual
+ */
+
+/**
+ * @typedef {Object} manualProps
+ * @property {bool} hasList - If you need more manuals
+ * @property {object} listManual - List of manuals from redux
+ * @property {object} user - User object from redux
+ * @property {object} manualBlob - Manual blob from redux
+ * @property {string} manualFileName - Name of file
+ * @property {string} manualTitle - Title for manual
+ * @property {manualList[]} manualList - Manual list
+ * @property {array} manualListData - Manual blob from redux
+ * @property {object} manualListDataMap - Manual blob from redux
+ */
+
+/**
+ * ManualWrapper Component
+ * @module
+ * @param {func} getManual - Function to get manual
+ * @param {func} [getListManual] - Function to get manual list
+ * @param {manualProps} manualProps - Props for manual
+ */
+
+class ManualWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isManualDialogOpen: false,
+      isManualListOpen: false,
+    };
+  }
+
+  render() {
+    const { manualProps } = this.props;
+    return (
+      <>
+        {manualProps.hasList ?
+          <Dialog
+            isOpen={this.props.isListOpen}
+            title={'Používateľské príručky'}
+            onClose={this.props.onListClose}
+            onConfirm={this.props.onListClose}
+            hideButtons={true}
+          >
+            <ManualList
+              manualProps={manualProps}
+              getManual={this.props.getManual}
+              getListManual={this.props.getListManual}
+            />
+          </Dialog>
+          :
+          <Dialog
+            isOpen={this.props.isManualOpen}
+            title={'Používateľská príručka'}
+            onClose={this.props.onManualClose}
+            onConfirm={this.props.onManualClose}
+            fullscreen={true}
+            className={"fullscreen-report"}
+          >
+            <ManualPDF
+              manualProps={manualProps}
+              getManual={this.props.getManual}
+            />
+          </Dialog>
+        }
+      </>
+    )
+  }
+}
+
+ManualWrapper.propTypes = {
+  getManual: PropTypes.func.isRequired,
+  getListManual: PropTypes.func,
+  manualProps: PropTypes.shape({
+    hasList: PropTypes.bool.isRequired,
+    listManual: PropTypes.object,
+    user: PropTypes.object,
+    manualBlob: PropTypes.object,
+    manualFileName: PropTypes.string,
+    manualTitle: PropTypes.string,
+    manualList: PropTypes.arrayOf(PropTypes.object),
+    manualListData: PropTypes.array,
+    manualListDataMap: PropTypes.object
+  }).isRequired
+}
+
+export default ManualWrapper;

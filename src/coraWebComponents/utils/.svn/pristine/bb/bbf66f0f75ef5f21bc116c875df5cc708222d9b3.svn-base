@@ -1,0 +1,17 @@
+import React from 'react';
+import { withRouter } from "react-router";
+
+export default (WrappedComponent) => {
+  class HOC extends React.Component {
+
+    render() {
+      return (
+        <WrappedComponent
+          {...this.props}
+        />
+      );
+    }
+  }
+  
+  return withRouter(HOC);
+};

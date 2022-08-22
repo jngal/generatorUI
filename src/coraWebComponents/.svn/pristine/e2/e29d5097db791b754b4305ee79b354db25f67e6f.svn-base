@@ -1,0 +1,33 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { ChartValueAxis, ChartValueAxisItem } from '@progress/kendo-react-charts';
+
+/**
+ * @typedef {Object} valueAxisProps
+ * @property {object} title - Title
+ */
+
+/**
+ * Chart value axis component
+ * @module
+ * @param {valueAxisProps} valueAxisProps - Value axis props
+ */
+class ChartValueAxisComponent extends React.Component {
+  render() {
+    return (
+      <ChartValueAxis>
+        <ChartValueAxisItem 
+          title={this.props.valueAxisProps.title}
+        />
+      </ChartValueAxis>
+    )
+  }
+}
+
+ChartValueAxisComponent.propTypes = {
+  valueAxisProps: PropTypes.shape({
+    title: PropTypes.object,
+  }),
+}
+
+export default ChartValueAxisComponent;

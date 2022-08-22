@@ -1,0 +1,237 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Button } from '@progress/kendo-react-buttons';
+import DropDownList from './forms/DropDownList';
+
+import eventEmitter from './utils/eventEmitter';
+import withRouter from './utils/withRouter';
+import withStorage from './utils/withStorage';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+
+import './Tabs.scss';
+import withMeta from './utils/withMeta2';
+
+const DATA = [
+  { name: 'štandardný', id: 0, icon: "columns" },
+  { name: 'zoznam a detail', id: 1 , icon: "rows"},
+  { name: 'detail a zoznam', id: 2, icon: "layout-stacked" },
+  { name: 'vedľa seba', id: 3 }
+];
+
+const getPath = (route, menu) => {
+  if (menu.Route === route) {
+    return [menu];
+  } else {
+    if (menu.children)
+      for (let child of menu.children) {
+        let tmp = getPath(route, child);
+        if (tmp.length) {
+          return [menu, ...tmp];
+        }
+      }
+    return [];
+  }
+}
+
+/**
+ * Tabs wrapper component
+ * @module
+ * @param {array} children - Children
+ * @param {string} [name] - Tab Name
+ * @param {object} history - Tab History 
+ */
+class TabsComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      type: { name: 'štandardný', id: 0 },
+      tab: 0
+    }
+  }
+
+  handleChangeTab = ({ name, tab }) => {
+    if (!this.props.name || name === this.props.name) {
+      this.setState({ tab: tab })
+    }
+  }
+
+  handleChange = (name, value) => {
+    this.setState({ [name]: value });
+  }
+
+  getTabsType = async () => {
+    const type = await this.props.storage.getTabsType();
+    if (type) {
+      this.setState({ type });
+    }
+  }
+
+  handleChangeTabsType = (type) => {
+    this.setState({ type });
+  }
+
+  handleDropDownChange = (type) => {
+    this.setState({ type });
+    this.props.storage.setTabsType(type);
+  }
+
+  componentWillMount() {
+    eventEmitter.on('CHANGE_TAB', this.handleChangeTab);
+    eventEmitter.on('CHANGE_TABS_TYPE', this.handleChangeTabsType);
+  }
+
+  async componentDidMount() {
+    await this.getTabsType();
+  }
+
+  componentWillUnmount() {
+    eventEmitter.removeListener('CHANGE_TAB', this.handleChangeTab);
+    eventEmitter.removeListener('CHANGE_TABS_TYPE', this.handleChangeTabsType);
+  }
+
+  render() {
+    let tabs;
+    if(this.props.children.length)  {
+      tabs = [...this.props.children];
+    } else {
+      tabs = [this.props.children];
+    }
+    
+    if (this.state.type.id === 2) {
+      tabs = tabs.reverse();
+    }
+
+    return (
+      <div className="card">
+        {this.props.header}
+        <div className="card-header">
+          <span className="switch">
+            {/* <ButtonGroup
+              name="type"
+              data={DATA}
+              textField="name"
+              onChange={(name, value) => this.handleDropDownChange(value)}
+              value={this.state.type}
+              required={true}
+              iconField="icon"
+            /> */}
+            <DropDownList
+              name="type"
+              data={DATA}
+              textField="name"
+              onChange={(name, value) => this.handleDropDownChange(value)}
+              value={this.state.type}
+              required={true}
+            />
+          </span>
+          {this.state.type.id === 0 &&
+            tabs.map((tab, index) =>
+              <span key={index}>
+                <Button
+                  primary={index === this.state.tab}
+                  onClick={e => this.handleChange('tab', index)}
+                >
+                  {tab.props.title}
+                </Button>
+              </span>
+            )
+          }
+        </div>
+        <div className={`card-body ${this.state.type.id === 3 ? 'card-column' : ''}` + (this.state.type.id !== 0 ? " compact" : "")}>
+          {tabs.map((tab, index) =>
+            <div
+              key={index}
+              className={index === this.state.tab || this.state.type.id !== 0 ? `tab visible mt-3 ${this.state.type.id === 3 ? 'tab-column' : ''} ` : 'tab hidden'}
+            >
+              {tab}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+}
+
+const Tabs = withStorage(TabsComponent);
+
+class TabsWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      path: []
+    }
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    let menu = null;
+    if(props.menu.children.length) {
+      menu = props.menu.children;
+    }
+    else if(props.meta && props.meta.menuTree.children.length) {
+      menu = props.meta.menuTree;
+    }
+    else {
+      return null;
+    }
+
+    if (!state.path.length) {
+      let path = getPath(props.history.location.pathname, menu);
+      return { path };
+    }
+    else {
+      return null;
+    }
+  }
+
+  render() {
+    const header = (
+      <nav aria-label="breadcrumb">
+        <ol className="breadcrumb">
+          {this.state.path.map((x, index) =>
+            index === 0 ? null : (
+              <li key={x.MenuID} className="breadcrumb-item" aria-current="page">
+                <Button
+                  onClick={() => this.props.history.push(x.Route)}
+                  look="bare"
+                >
+                  {x.Title}
+                </Button>
+              </li>
+            ))}
+        </ol>
+      </nav>
+    );
+
+    return (
+      <div className="tabs">
+        <Tabs
+          children={this.props.children}
+          name={this.props.name}
+          history={this.props.history}
+          header={header}
+        />
+      </div>
+    )
+  }
+
+}
+
+TabsWrapper.propTypes = {
+  children: PropTypes.array.isRequired,
+  name: PropTypes.string,
+  history: PropTypes.object.isRequired,
+}
+
+
+const mapStateToProps = (state, props) => ({
+  menu: state.menu.data
+})
+
+export default compose(
+  connect(mapStateToProps),
+  withRouter,
+  withMeta
+)(TabsWrapper);

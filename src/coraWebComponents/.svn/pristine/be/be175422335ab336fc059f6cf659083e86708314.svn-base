@@ -1,0 +1,182 @@
+import './User.scss';
+
+import * as React from 'react';
+import * as storage from '../utils/storage';
+
+import PropTypes from 'prop-types';
+import { buildUrl } from '../utils/helper';
+import Dialog from '../dialogs/Dialog';
+import Slide from '../animation/Slide';
+
+
+class User extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      showInfo: false,
+      showNotifikacie: false,
+      isManualDialogOpen: false,
+      isManualListOpen: false,
+    };
+  }
+
+
+  handleInfo = () => {
+    this.setState({
+      showInfo: true
+    });
+  }
+
+  handleCloseInfo = () => {
+    this.setState({ showInfo: false });
+  }
+
+  handleManualDialogClose = () => {
+    this.setState({
+      isManualDialogOpen: false,
+    });
+  }
+  handleManualListClose = () => {
+    this.setState({
+      isManualListOpen: false,
+    });
+  }
+
+//rozhodnutie ci sa pouzije dialog pre zobrazenie jedneho manualu alebo manualList pre viacero manualov
+  handleNapoveda = () => {
+    if(this.props.manual){
+      this.setState({
+        isManualDialogOpen: true,
+      });
+    }
+    if(this.props.manualList){
+      this.setState({
+        isManualListOpen: true,
+      });    
+    }else{
+      alert("Napoveda");
+    }
+  }
+
+  handleSpravy = () => {
+    alert("Spravy");
+  }
+
+  handleNotifikacie = () => {
+    this.setState({
+      showNotifikacie: true
+    });
+  }
+
+  handleCloseNotifikacie = () => {
+    this.setState({ showNotifikacie: false });
+  }
+
+  handleLogout = () => {
+    storage.removeUser();
+    this.props.onSignOut();
+  }
+
+  buildInicialy = () => {
+    const { uzivatel } = this.props;
+
+    if(uzivatel && uzivatel.Skratka){
+      return uzivatel.Skratka;
+    }
+
+    if (!uzivatel || !uzivatel.Meno || !uzivatel.Priezvisko) {
+      return 'x';
+    }
+
+    return `${uzivatel.Meno.charAt(0)}${uzivatel.Priezvisko.charAt(0)}`;
+  }
+
+  render() {
+    const { showInfo, showNotifikacie } = this.state;
+    const { uzivatel, manual, manualList } = this.props;
+
+
+    const infoOkno = (
+      <div className="info-okno">
+        <div className="example-1">
+          <div className="inicialization-icone">
+            {this.buildInicialy()}
+          </div>
+        </div>
+          <div className="example-2">
+            {uzivatel && 
+              <div className="meno-user">
+                {uzivatel.Meno} {uzivatel.Priezvisko}
+              </div>
+            }
+            {this.props.userInfo}
+          </div>
+        <div className="example-3">
+          <div className="logout" onClick={this.handleLogout}>
+            Odhlásiť sa
+        </div>
+        </div>
+      </div>
+    );
+
+    const notifikacieOkno = (
+      <div className="info-okno">
+        Notifikácie Placeholder
+      </div>
+    );
+
+    return (
+      <div className="nav-user">
+        <div className="k-i-gear" onClick={this.props.handleOpenSettings}>
+          <img alt="presentation" src={buildUrl('assets/nav_cg_setting.svg')}></img>
+        </div>
+        <div className="k-i-help" onClick={this.handleNapoveda}>
+          <img alt="presentation" src={buildUrl('assets/nav_cg_manual.svg')}></img>
+        </div>
+        <div className="k-i-email" onClick={this.handleSpravy}>
+          <img alt="presentation" src={buildUrl('assets/nav_cg_spravy.svg')}></img>
+        </div>
+        <div className="k-i-bell" onClick={this.handleNotifikacie}>
+          <img alt="presentation" src={buildUrl('assets/nav_cg_zvoncek.svg')}></img>
+        </div>
+        <div className="inicialy-user" onClick={this.handleInfo}>
+          {this.buildInicialy()}
+        </div>
+        <Slide isOpen={showNotifikacie} onClose={this.handleCloseNotifikacie}>{notifikacieOkno}</Slide>
+        <Slide isOpen={showInfo} onClose={this.handleCloseInfo}>{infoOkno}</Slide>
+        {manual && <Dialog
+          isOpen={this.state.isManualDialogOpen}
+          title={'Používateľská príručka'}
+          onClose={this.handleManualDialogClose}
+          onConfirm={this.handleManualDialogClose}
+          fullscreen={true}
+          className={"fullscreen-report"}>
+          {manual}
+        </Dialog>
+        }
+        {manualList && <Dialog
+          isOpen={this.state.isManualListOpen}
+          title={'Používateľské príručky'}
+          onClose={this.handleManualListClose}
+          onConfirm={this.handleManualListClose}
+          hideButtons={true}          
+          >
+          {manualList}
+        </Dialog>
+        }
+      </div>
+    );
+  }
+}
+
+User.propTypes = {
+  uzivatel: PropTypes.object,
+  onSignOut: PropTypes.func.isRequired,
+  userInfo: PropTypes.element,
+  manual: PropTypes.element,
+  manualList: PropTypes.element,
+}
+
+export default User;

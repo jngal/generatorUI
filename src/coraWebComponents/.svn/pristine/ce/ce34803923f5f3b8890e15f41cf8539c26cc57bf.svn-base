@@ -1,0 +1,40 @@
+import React from 'react';
+import _ from 'lodash';
+import { DateTimePicker } from '@progress/kendo-react-dateinputs';
+import { GridCell } from '@progress/kendo-react-grid';
+import * as Convert from '../../coraWebComponents/utils/convert';
+
+
+export function EditDateTimeCell() {
+  return class extends GridCell {
+
+    handleChange = (e) => {
+      this.props.onChange({
+        dataItem: this.props.dataItem,
+        field: this.props.field.split(".")[0],
+        syntheticEvent: e.syntheticEvent,
+        value: e.target.value
+      });
+    }
+
+    render() {
+      const { dataItem, field } = this.props;
+      const dataValue = _.get(dataItem, field.split('.'))     
+      return (
+        <td>
+          {(dataItem.inEdit === true) ? (
+            <DateTimePicker
+              style={{ width: "100px" }}
+              onChange={this.handleChange}
+              value={dataValue}
+            />
+          ) : (              
+               Convert.dataToLocaleDateStr(dataValue, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'})
+            )}
+        </td>
+      );
+    }
+  }
+}
+
+

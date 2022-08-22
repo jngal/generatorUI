@@ -1,0 +1,78 @@
+//
+//  paleta farieb
+//
+
+$basicwhite: basicwhite;
+$secondarylight: secondarylight;
+$secondarymedium: secondarymedium;
+$secondarydarker: secondarydarker;
+$secondarydark: secondarydark;
+$secondary: secondary;
+$primary: primary;
+$primarydark: primarydark;
+$primarylight: primarylight;
+$basicred: basicred;
+$menubasic: menubasic;
+$menudark: menudark;
+$required: required;
+$navbar: navbar;
+$navbardark: navbardark;
+$navbarlight: navbarlight;
+$navbartext: navbartext;
+$primary-light: primary-light;
+$primary-dark: primary-dark;
+$primary-nav: primary-nav;
+$primary-sticky: primary-sticky;
+$primary-sticky-light: primary-sticky-light;
+$secondary-light: secondary-light;
+$secondary-dark: secondary-dark;
+$tertiary-light: tertiary-light;
+$tertiary: tertiary;
+$tertiary-dark: tertiary-dark;
+$alert-ok: alert-ok;
+$alert-error: alert-error;
+$alert-ok-text: alert-ok-text;
+$alert-error-text: alert-error-text;
+$alert-warning: alert-warning;
+$alert-warning-text: alert-warning-text;
+$validation-error: validation-error;
+
+// pridane do palety, aby boli všetky farby ako premenné
+$zaznamy-nevybaveny-po-lehote-background: zaznamy-nevybaveny-po-lehote-background;
+$zaznamy-interne: zaznamy-interne;
+$zaznamy-nevybaveny-po-lehote: zaznamy-nevybaveny-po-lehote;
+$zaznamy-vybaveny-po-lehote: zaznamy-vybaveny-po-lehote;
+$zaznamy-selected: zaznamy-selected;
+$background-color: background-color;
+$background-light: background-light;
+$icon-color: icon-color;
+$text-color: text-color;
+
+//
+//  relativne rozmery
+//
+$content-padding: 1rem;
+$sidebar-width: 265px;
+$sidebar-compact-width: 65px;
+$sidebar-header-height: $sidebar-compact-width;
+$stats-height: calc(2 * #{$sidebar-header-height});
+$stats-additional: 27px;
+$tabs-height: calc(#{$sidebar-header-height});
+$toolbar-height: $sidebar-header-height;
+$nav-height: $sidebar-header-height;
+$nav-user-width: 180px;
+$grid-thead-height: 84px;
+$grid-pager-height: 63px;
+$footer-height: 38px;
+
+//
+// breakpoints
+//
+// Small devices (landscape phones, 576px and up)
+$breakpoint-sm: 576px;
+// Medium devices (tablets, 768px and up)
+$breakpoint-md: 768px;
+// Large devices (desktops, 992px and up)
+$breakpoint-lg: 992px;
+// Extra large devices (large desktops, 1200px and up)
+$breakpoint-xl: 1200px;

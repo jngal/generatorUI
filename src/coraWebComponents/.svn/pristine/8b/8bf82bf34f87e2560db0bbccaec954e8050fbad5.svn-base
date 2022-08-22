@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: forms/Autocomplete.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: forms/Autocomplete.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from 'react';
+import PropTypes from 'prop-types';
+import { AutoComplete } from '@progress/kendo-react-dropdowns';
+import './Autocomplete.scss'
+
+import _ from 'lodash';
+
+const SORT = [];
+const PAGE = {
+  skip: 0,
+  take: 10
+};
+
+let _timer;
+
+/**
+ * Autocomplete input
+ * @module
+ * @param {string} textField - Text field
+ * @param {string} [valueField] - Value field, used for regex
+ * @param {object} [selected] - Selected item
+ * @param {func} onChange - Function invoked on field change
+ * @param {array} data - All data
+ * @param {bool} isLoading - Loading
+ * @param {func} onSelect - Function invoked on item select
+ * @param {object} [filter] - Filter
+ * @param {func} [onFilter] - On filter Function
+ * @param {bool} [required] - Field is required
+ * @param {bool} [disabled] - Field is disabled
+ * @param {string} [validationMessage] - Validation message if field is invalid
+ * @param {bool} [autofocus] - Should input be focused?
+ * @param {string} [textFilter] - Text filter
+ * @param {string} [placeholder] - Placeholder for input
+ * @param {number} [tabIndex] - Tabindex for input
+ */
+class AutocompleteComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      filter: {
+        filters: []
+      }
+    };
+    this.autoComplete = React.createRef();
+  }
+
+  buildFilter = value => {
+    return {
+      logic: 'and',
+      filters: [
+        {
+          field: this.props.textField,
+          operator: "contains",
+          value,
+          ignoreCase: true
+        }
+      ]
+    }
+  }
+
+  onClose = async event => {
+    await this.props.onBlur;
+    const value = this.refs.autoComplete._input.value;
+    
+    if(value) {
+      this.props.data.forEach(object => {
+        if(object[this.props.textField] === value){
+          this.props.onSelect(object);
+        }
+      });
+    }
+    if(this.props.onBlur) {
+      this.props.onBlur();
+    }
+  }
+  
+  onChange = event => {
+    const filter = this.buildFilter(event.target.value);
+    // this.setState({ filter });
+    if (this.props.onFilter) {
+      this.props.onFilter(filter);
+    }
+
+    const eventType = event.nativeEvent.type;
+    if (eventType === 'click' || (eventType === 'keydown' &amp;&amp; event.nativeEvent.keyCode === 13)) {
+      const value = this.props.data.find(x => x[this.props.textField] === event.target.value);
+      this.props.onSelect(value);
+    }
+    else {
+      if(this.props.selected !== null) {
+        this.props.onSelect(null);
+      }
+
+      if (_timer) {
+        clearTimeout(_timer);
+      }
+      _timer = setTimeout(async () => {
+        this.props.onChange(filter, SORT, PAGE);
+      }, 500);
+    }
+  }
+
+  buildValue = () => {
+    if (this.props.textFilter !== undefined) {
+      return this.props.textFilter;
+    }
+    if(this.props.selected === undefined) {
+      return '';
+    }
+
+    if(this.props.selected) {
+      if(this.props.valueField) {
+        let toReplace = this.props.valueField.match(/{([^}]+)}/g);        
+        let finalString = this.props.valueField;
+        toReplace.forEach((element) => {
+          let propName = element.replace(/[{}]/g, "");
+          const replaceWith = _.get(this.props.selected, propName);
+          finalString = finalString.replace(element,  replaceWith != null ? replaceWith : '');
+        });       
+        return finalString;
+      }
+      else {
+        return this.props.selected[this.props.textField];
+      }
+    }
+
+    const filter = this.props.filter;
+    if(!filter) {
+      return undefined;
+    } 
+    const f = filter.filters.find(x => x.field === this.props.textField);    
+    return f &amp;&amp; f.value ? f.value.toString() : '';
+  }
+
+  componentDidMount = () => {
+    if (this.props.autofocus) {
+      this.refs.autoComplete._input.focus();
+    }
+  }
+
+  render() {
+    return (
+      &lt;AutoComplete
+        className={`autocomplete ${this.props.disabled ? 'disabled-field' : ''} `}
+        validationMessage={this.props.validationMessage || 'Povinné'}
+        data={this.props.data}
+        onChange={this.onChange}
+        onBlur={this.onClose}
+        textField={this.props.textField}
+        loading={this.props.isLoading}
+        value={this.buildValue()}
+        required={this.props.required}
+        disabled={this.props.disabled}
+        placeholder={this.props.placeholder}
+        ref="autoComplete"
+        tabIndex={this.props.tabIndex}
+      />
+    );
+  }
+}
+
+AutocompleteComponent.propTypes = {
+  textField: PropTypes.string.isRequired,
+  valueField: PropTypes.string,
+  primaryField: PropTypes.string.isRequired,
+  selected: PropTypes.object,
+  onChange: PropTypes.func.isRequired,
+  data: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  filter: PropTypes.object,
+  onFilter: PropTypes.func,
+  required: PropTypes.bool,
+  disabled: PropTypes.bool,
+  validationMessage: PropTypes.string,
+  autofocus: PropTypes.bool,
+  textFilter: PropTypes.string,
+  placeholder: PropTypes.string,
+  tabIndex: PropTypes.number,
+}
+
+export default AutocompleteComponent;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Alert.html">Alert</a></li><li><a href="module-animation_Slide.html">animation/Slide</a></li><li><a href="module-buttons_Button.html">buttons/Button</a></li><li><a href="module-buttons_ButtonGroup.html">buttons/ButtonGroup</a></li><li><a href="module-buttons_DropDownButton.html">buttons/DropDownButton</a></li><li><a href="module-buttons_SplitButton.html">buttons/SplitButton</a></li><li><a href="module-ChangePassword.html">ChangePassword</a></li><li><a href="module-chart_ChartComponent.html">chart/ChartComponent</a></li><li><a href="module-chart_elements_ChartCategoryAxisComponent.html">chart/elements/ChartCategoryAxisComponent</a></li><li><a href="module-chart_elements_ChartLegendComponent.html">chart/elements/ChartLegendComponent</a></li><li><a href="module-chart_elements_ChartSeriesComponent.html">chart/elements/ChartSeriesComponent</a></li><li><a href="module-chart_elements_ChartTitleComponent.html">chart/elements/ChartTitleComponent</a></li><li><a href="module-Container.html">Container</a></li><li><a href="module-detail_Detail.html">detail/Detail</a></li><li><a href="module-detail_DetailWrapper.html">detail/DetailWrapper</a></li><li><a href="module-detail_Toolbar.html">detail/Toolbar</a></li><li><a href="module-detail_ValidationMessage.html">detail/ValidationMessage</a></li><li><a href="module-dialogs_ConfirmDialog.html">dialogs/ConfirmDialog</a></li><li><a href="module-dialogs_Dialog.html">dialogs/Dialog</a></li><li><a href="module-dialogs_DialogContent.html">dialogs/DialogContent</a></li><li><a href="module-dialogs_EmailPrompt.html">dialogs/EmailPrompt</a></li><li><a href="module-dialogs_FileContent.html">dialogs/FileContent</a></li><li><a href="module-dialogs_FileDialog.html">dialogs/FileDialog</a></li><li><a href="module-dialogs_ReportDialog.html">dialogs/ReportDialog</a></li><li><a href="module-Dropdown.html">Dropdown</a></li><li><a href="module-forms_Autocomplete.html">forms/Autocomplete</a></li><li><a href="module-forms_AutocompleteLocal.html">forms/AutocompleteLocal</a></li><li><a href="module-forms_Checkbox.html">forms/Checkbox</a></li><li><a href="module-forms_DatePicker.html">forms/DatePicker</a></li><li><a href="module-forms_DateRangePicker.html">forms/DateRangePicker</a></li><li><a href="module-forms_DateTimePicker.html">forms/DateTimePicker</a></li><li><a href="module-forms_DropDownList.html">forms/DropDownList</a></li><li><a href="module-forms_Input.html">forms/Input</a></li><li><a href="module-forms_MultiSelect.html">forms/MultiSelect</a></li><li><a href="module-forms_NumericTextBox.html">forms/NumericTextBox</a></li><li><a href="module-forms_Picker.html">forms/Picker</a></li><li><a href="module-forms_Switch.html">forms/Switch</a></li><li><a href="module-forms_Textarea.html">forms/Textarea</a></li><li><a href="module-forms_TimePicker.html">forms/TimePicker</a></li><li><a href="module-forms_Upload.html">forms/Upload</a></li><li><a href="module-graph_ArcGauage.html">graph/ArcGauage</a></li><li><a href="module-grid_Cell.html">grid/Cell</a></li><li><a href="module-grid_ColumnMenu.html">grid/ColumnMenu</a></li><li><a href="module-grid_DialogFilter.html">grid/DialogFilter</a></li><li><a href="module-grid_DialogFilterForm.html">grid/DialogFilterForm</a></li><li><a href="module-grid_DropdownFilterCell.html">grid/DropdownFilterCell</a></li><li><a href="module-grid_EditBooleanCell.html">grid/EditBooleanCell</a></li><li><a href="module-grid_EditCommandCell.html">grid/EditCommandCell</a></li><li><a href="module-grid_EditDateTimeCell.html">grid/EditDateTimeCell</a></li><li><a href="module-grid_EditDropdownCell.html">grid/EditDropdownCell</a></li><li><a href="module-grid_EditPickerCell.html">grid/EditPickerCell</a></li><li><a href="module-grid_EditTimeCell.html">grid/EditTimeCell</a></li><li><a href="module-grid_FileCell.html">grid/FileCell</a></li><li><a href="module-grid_Grid.html">grid/Grid</a></li><li><a href="module-grid_GridWrapper.html">grid/GridWrapper</a></li><li><a href="module-grid_RangeFilterCell.html">grid/RangeFilterCell</a></li><li><a href="module-grid_SaveFilterDialog.html">grid/SaveFilterDialog</a></li><li><a href="module-grid_SelectionMenu.html">grid/SelectionMenu</a></li><li><a href="module-grid_Toolbar.html">grid/Toolbar</a></li><li><a href="module-grid_TooltipCell.html">grid/TooltipCell</a></li><li><a href="module-LoadingPanel.html">LoadingPanel</a></li><li><a href="module-metabase_Dashboard.html">metabase/Dashboard</a></li><li><a href="module-navigation_Hamburger.html">navigation/Hamburger</a></li><li><a href="module-navigation_Manual.html">navigation/Manual</a></li><li><a href="module-navigation_ManualDialogList.html">navigation/ManualDialogList</a></li><li><a href="module-navigation_ManualList.html">navigation/ManualList</a></li><li><a href="module-navigation_ManualPDF.html">navigation/ManualPDF</a></li><li><a href="module-navigation_ManualWrapper.html">navigation/ManualWrapper</a></li><li><a href="module-navigation_Navigation.html">navigation/Navigation</a></li><li><a href="module-navigation_Search.html">navigation/Search</a></li><li><a href="module-navigation_User.html">navigation/User</a></li><li><a href="module-RefreshDialog.html">RefreshDialog</a></li><li><a href="module-sch_ApprovalProcessStep.html">sch/ApprovalProcessStep</a></li><li><a href="module-sch_ApprovalProcessTimeline.html">sch/ApprovalProcessTimeline</a></li><li><a href="module-scheduler_Scheduler.html">scheduler/Scheduler</a></li><li><a href="module-Settings.html">Settings</a></li><li><a href="module-sidebar_Appmenu.html">sidebar/Appmenu</a></li><li><a href="module-sidebar_Footer.html">sidebar/Footer</a></li><li><a href="module-sidebar_header_Appmenu.html">sidebar/header/Appmenu</a></li><li><a href="module-sidebar_header_Header.html">sidebar/header/Header</a></li><li><a href="module-sidebar_header_SidebarToggle.html">sidebar/header/SidebarToggle</a></li><li><a href="module-sidebar_menu_Menu.html">sidebar/menu/Menu</a></li><li><a href="module-sidebar_menu_Search.html">sidebar/menu/Search</a></li><li><a href="module-sidebar_Sidebar.html">sidebar/Sidebar</a></li><li><a href="module-sidebar_Stats.html">sidebar/Stats</a></li><li><a href="module-Tab.html">Tab</a></li><li><a href="module-Tabs.html">Tabs</a></li><li><a href="module-TabsWrapper.html">TabsWrapper</a></li><li><a href="module-TitlePanel.html">TitlePanel</a></li><li><a href="module-utils_convert.html">utils/convert</a></li><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter.html">utils/eventEmitter</a></li><li><a href="module-utils_flags.html">utils/flags</a></li><li><a href="module-utils_helper.html">utils/helper</a></li><li><a href="module-utils_logger.html">utils/logger</a></li><li><a href="module-utils_requests.html">utils/requests</a></li><li><a href="module-utils_storage.html">utils/storage</a></li><li><a href="module-ValidationAlert.html">ValidationAlert</a></li><li><a href="module-views_login_Login.html">views/login/Login</a></li><li><a href="module-views_registration_Registration.html">views/registration/Registration</a></li></ul><h3>Classes</h3><ul><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter-ExtendedEventEmitter.html">ExtendedEventEmitter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getPreprocessedMenuData-zkorenamenuvyrobinovudatovustrukturumenupouzitelnunavykreslenie">getPreprocessedMenuData - z korena menu vyrobi novu datovu strukturu menu pouzitelnu na vykreslenie</a></li><li><a href="global.html#isValidDateStr">isValidDateStr</a></li><li><a href="global.html#isValidEcv">isValidEcv</a></li><li><a href="global.html#isValidID">isValidID</a></li><li><a href="global.html#isValidMail">isValidMail</a></li><li><a href="global.html#isValidPasswordStrong">isValidPasswordStrong</a></li><li><a href="global.html#isValidPhone">isValidPhone</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Thu Jan 07 2021 13:35:30 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

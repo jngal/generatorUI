@@ -1,0 +1,14 @@
+@import "../variables";
+@import "../themes";
+
+.button-group{
+    margin: 5px 15px;
+    display: inline-block;
+    .k-button{
+      @include themed() {
+        background-image: none;
+        background-color: color($secondarylight);
+        border-color: color($secondarymedium);;
+      }
+    }
+}

@@ -1,0 +1,159 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Input from './Input';
+import Dialog from '../dialogs/Dialog';
+import Button from '../buttons/Button';
+import "./Textarea.scss"
+
+let _lastClick;
+
+/**
+ * Text area component
+ * @module
+ * @param {string} name - Name
+ * @param {func} onChange - Function invoked on value change
+ * @param {bool} [disabled] - Is textarea readonly?
+ * @param {string} [value] - Current value
+ * @param {bool} [required] - Required
+ * @param {string} title - Textarea title
+ * @param {number} [tabIndex] - Textarea tab index
+ * @param {bool} [readOnly] - Read only
+ * @param {number} [minLength] - Minimum length
+ * @param {number} [maxLength] - Maximum length
+ * @param {bool} [defaultExpanded] - Expands the textarea
+ */
+class TextareaComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpen: false,
+      value: ''
+    }
+  }
+
+  handleOpen = () => {
+    this.setState({ isOpen: true, value: this.props.value });
+  }
+
+  handleClose = () => {
+    this.setState({ isOpen: false });
+  }
+
+  handleConfirm = () => {
+    this.handleClose();
+    this.props.onChange(this.props.name, this.state.value);
+  }
+
+  handleClick = () => {
+    const lastClick = Date.now();
+    if (lastClick - _lastClick < 500) {
+      this.handleOpen();
+    }
+    _lastClick = lastClick;
+  }
+
+  handleInsertClick = () => {
+    let _value = "";
+    if(this.props.value){
+      if(this.props.value.indexOf(this.props.insertValue) !== -1){
+        _value = this.props.value;
+      } 
+      else {
+        _value = `${this.props.insertValue} - ${this.props.value}`;
+      }
+    }
+    else{
+      _value = this.props.insertValue; 
+    }
+    this.props.onChange(this.props.name,_value);
+  }
+
+  onBlur = () => {
+    if (this.props.onBlur) {
+      this.props.onBlur();
+    }
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        {this.props.defaultExpanded ?
+          <div className="textarea">
+            <textarea className="k-textarea"
+              value={this.state.value || this.props.value || ''}
+              disabled={this.props.disabled}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (this.props.readOnly || (this.props.maxLength && value.length >= this.props.maxLength))
+                  return;
+
+                this.setState({ value });
+                this.props.onChange(this.props.name, value);
+              }}
+            />
+          </div>
+          :
+          <React.Fragment>
+            <Input
+              name={this.props.name}
+              value={!!this.props.value ? this.props.value.replace(/[\n]/g, " ") : this.props.value}
+              disabled={this.props.disabled}
+              onChange={this.props.onChange}
+              onClick={this.handleClick}
+              required={this.props.required}
+              tabIndex={this.props.tabIndex}
+              minLength={this.props.minLength}
+              maxLength={this.props.maxLength}
+              onBlur={this.onBlur}
+              placeholder={this.props.placeholder}
+              readOnly={this.props.readOnly}
+            />
+            {this.props.enableInsertValue && <Button
+              icon={"paste"}
+              onClick={this.handleInsertClick}
+              title={"Vložiť opis CG HD"}
+            />}
+            <Dialog
+              isOpen={this.state.isOpen}
+              onClose={this.handleClose}
+              onConfirm={this.handleConfirm}
+              title={this.props.title}
+            >
+              <div className="textarea">
+                <textarea className="k-textarea"
+                  value={this.state.value || ''}
+                  disabled={this.props.disabled}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (this.props.readOnly || (this.props.maxLength && value.length >= this.props.maxLength))
+                      return;
+                    this.setState({ value });
+                  }}
+                />
+              </div>
+            </Dialog>
+          </React.Fragment>
+        }
+      </React.Fragment>
+    );
+  }
+}
+
+TextareaComponent.propTypes = {
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  defaultExpanded: PropTypes.bool,
+  readOnly: PropTypes.bool,
+  value: PropTypes.string,
+  required: PropTypes.bool,
+  title: PropTypes.string.isRequired,
+  tabIndex: PropTypes.number,
+  minLength: PropTypes.number,
+  maxLength: PropTypes.number,
+  enableInsertValue: PropTypes.bool,
+  insertValue: PropTypes.string,
+}
+
+export default TextareaComponent;

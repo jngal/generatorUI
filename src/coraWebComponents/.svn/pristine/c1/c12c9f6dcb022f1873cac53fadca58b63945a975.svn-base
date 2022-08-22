@@ -1,0 +1,54 @@
+import React from 'react';
+import ManualPDF from './ManualPDF';
+import ManualList from './ManualList';
+import Dialog from '../dialogs/Dialog';
+
+class ManualWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isManualDialogOpen: false,
+      isManualListOpen: false,
+    };
+  }
+
+  render() {
+    const { manualProps } = this.props;
+    return (
+      <>
+        {manualProps.hasList ?
+          <Dialog
+            isOpen={this.props.isListOpen}
+            title={'Používateľské príručky'}
+            onClose={this.props.onListClose}
+            onConfirm={this.props.onListClose}
+            hideButtons={true}
+          >
+            <ManualList
+              manualProps={manualProps}
+              getManual={this.props.getManual}
+              getListManual={this.props.getListManual}
+            />
+          </Dialog>
+          :
+          <Dialog
+            isOpen={this.props.isManualOpen}
+            title={'Používateľská príručka'}
+            onClose={this.props.onManualClose}
+            onConfirm={this.props.onManualClose}
+            fullscreen={true}
+            className={"fullscreen-report"}
+          >
+            <ManualPDF
+              manualProps={manualProps}
+              getManual={this.props.getManual}
+            />
+          </Dialog>
+        }
+      </>
+    )
+  }
+}
+
+export default ManualWrapper;

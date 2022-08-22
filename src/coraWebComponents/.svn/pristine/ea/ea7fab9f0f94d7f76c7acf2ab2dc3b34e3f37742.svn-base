@@ -1,0 +1,21 @@
+@import '../variables';
+@import '../themes';
+
+.footer {
+  font-size: 12px;
+  padding: 10px;
+  position: absolute;
+  text-align: center;
+  bottom: 0px;
+  width: 100%;
+  height: $footer-height;
+  @include themed() {
+    background: color($menubasic);
+    color: color($secondary);
+  }
+  &:not(.compact) {
+    &::before {
+      content: 'Copyright ';
+    }
+  }
+}

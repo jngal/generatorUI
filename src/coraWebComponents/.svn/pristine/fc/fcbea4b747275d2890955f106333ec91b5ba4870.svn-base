@@ -1,0 +1,114 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Input from './Input';
+import Dialog from '../dialogs/Dialog';
+import "./Textarea.scss"
+
+let _lastClick;
+class TextareaComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpen: false,
+      value: ''
+    }
+  }
+
+  handleOpen = () => {
+    this.setState({ isOpen: true, value: this.props.value });
+  }
+
+  handleClose = () => {
+    this.setState({ isOpen: false });
+  }
+
+  handleConfirm = () => {
+    this.handleClose();
+    this.props.onChange(this.props.name, this.state.value);
+  }
+
+  handleClick = () => {
+    const lastClick = Date.now();
+    if (lastClick - _lastClick < 500) {
+      this.handleOpen();
+    }
+    _lastClick = lastClick;
+  }
+
+  onBlur = () => {
+    if (this.props.onBlur) {
+      this.props.onBlur();
+    }
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        {this.props.defaultExpanded ?
+          <div className="textarea">
+            <textarea className="k-textarea"
+              value={this.state.value || this.props.value || ''}
+              disabled={this.props.disabled}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (this.props.maxLength && value.length >= this.props.maxLength)
+                  return;
+                this.setState({ value });
+              }}
+            />
+          </div>
+          :
+          <React.Fragment>
+            <Input
+              name={this.props.name}
+              value={!!this.props.value ? this.props.value.replace(/[\n]/g, " ") : this.props.value}
+              disabled={this.props.disabled}
+              onChange={this.props.onChange}
+              onClick={this.handleClick}
+              required={this.props.required}
+              tabIndex={this.props.tabIndex}
+              minLength={this.props.minLength}
+              maxLength={this.props.maxLength}
+              onBlur={this.onBlur}
+              placeholder={this.props.placeholder}
+            />
+            <Dialog
+              isOpen={this.state.isOpen}
+              onClose={this.handleClose}
+              onConfirm={this.handleConfirm}
+              title={this.props.title}
+            >
+              <div className="textarea">
+                <textarea className="k-textarea"
+                  value={this.state.value || ''}
+                  disabled={this.props.disabled}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (this.props.maxLength && value.length >= this.props.maxLength)
+                      return;
+                    this.setState({ value });
+                  }}
+                />
+              </div>
+            </Dialog>
+          </React.Fragment>
+        }
+      </React.Fragment>
+    );
+  }
+}
+
+TextareaComponent.propTypes = {
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  value: PropTypes.string,
+  required: PropTypes.bool,
+  title: PropTypes.string.isRequired,
+  tabIndex: PropTypes.number,
+  minLength: PropTypes.number,
+  maxLength: PropTypes.number
+}
+
+export default TextareaComponent;

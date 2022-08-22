@@ -1,0 +1,26 @@
+@import "../variables";
+@import "../themes";
+
+.upload {
+  flex: 1;
+
+  .k-action-buttons .k-primary {
+    @include themed(){
+      color: color($basicwhite);
+    }
+  }
+}
+
+.upload-dropzone-hint {
+  .k-upload .k-dropzone .k-dropzone-hint {
+    opacity: 1;
+    display: block;
+    visibility: visible;
+  }
+}
+
+.upload-hide-k-action-buttons {
+  .k-action-buttons {
+    display: none !important;
+  }
+}

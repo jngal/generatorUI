@@ -1,0 +1,30 @@
+@import '../variables';
+@import '../themes';
+
+.hamburger {
+  display: none;
+  width: $sidebar-header-height;
+  text-align: center;
+  
+  .k-icon.k-i-menu {
+    margin: 0 auto;
+    line-height: calc(#{$sidebar-header-height + 3px});
+    font-size: 30px;
+    @include themed(){
+      color: color($primarylight);
+    }
+  }
+
+  &:hover {
+    cursor: pointer;
+    @include themed() {
+      background-color: color($secondarydarker);
+    }
+  }
+}
+
+@media only screen and (max-width: $breakpoint-lg) {
+  .hamburger {
+    display: inherit;
+  }
+}

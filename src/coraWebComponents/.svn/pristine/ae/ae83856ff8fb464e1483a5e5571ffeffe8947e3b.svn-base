@@ -1,0 +1,228 @@
+@import "../variables";
+@import "../themes";
+
+.nav-user {
+  position: absolute;
+  right: 0;
+  width: 200px;
+  height: 100%;
+  padding-left: 15px;
+  text-align: center;
+  @include themed() {
+    background-color: color($navbardark);
+  }
+}
+
+.nav-user .k-i-gear,
+.nav-user .k-i-help,
+.nav-user .k-i-email,
+.nav-user .k-i-bell {
+  width: 1em;
+  height: 1em;
+  margin-right: 4px;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-size: 18px;
+  font-family: "WebComponentsIcons";
+  font-style: normal;
+  -webkit-font-feature-settings: normal;
+  font-feature-settings: normal;
+  font-variant: normal;
+  font-weight: normal;
+  line-height: 1;
+  // speak: none;
+  text-transform: none;
+  text-decoration: none;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+  @include themed() {
+    color: color($navbartext);
+  }
+  margin-right: 10px;
+}
+.nav-user .k-i-gear::before,
+.nav-user .k-i-help::before,
+.nav-user .k-i-bell::before,
+.nav-user .k-i-email::before,
+.k-i-grid::before{
+  content: '';
+}
+.nav-user .k-i-gear img,
+.nav-user .k-i-help img,
+.nav-user .k-i-bell img,
+.nav-user .k-i-email img{
+  width: 18px;
+  margin-top: -10px;
+}
+.k-i-grid img{
+  width: 30px;
+  margin-top: -11px;
+}
+.inicialy-user {
+  margin-top: 12px;
+  margin-left: 3px;
+  display: inline-block;
+  background: transparent;
+  font-weight: bold;
+  border-radius: 100%;
+  width: 40px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 38px;
+  height: 40px;
+  box-sizing: border-box;
+  cursor: pointer;
+  @include themed() {
+    color: color($navbartext);
+    border: 1px solid color($navbartext);
+  }
+  
+}
+
+.info-okno {
+  padding-top: 0px !important;
+  //padding: 10px;
+  text-align: center;
+  //cursor: pointer;
+  width: 300px;
+  overflow: hidden;
+  @include themed() {
+    background-color: color($basicwhite);
+    color: color($primarylight);
+    border-left: 1px solid color($secondary);
+  }
+   
+  .example-1 {
+    float: left;
+    width: 40%;
+    padding: 21px 10px;
+    text-align: right;
+    padding-right: 4px;
+
+    .inicialization-icone {
+      //margin-top: 12px;
+      margin-left: 3px;
+      display: inline-block;
+      font-weight: bold;
+      border-radius: 100%;
+      width: 80px;
+      text-align: center;
+      font-size: 30px;
+      line-height: 84px;
+      height: 80px;
+      box-sizing: border-box;
+      @include themed() {
+        background: color($primary);
+        color: color($secondarylight);
+      }
+    }
+  }
+
+  .example-2 {
+    float: left;
+    width: 60%;
+    text-align: left;
+    padding: 10px;
+
+      .signzn{ 
+      @include themed() {
+        color: color($secondarydark);
+        background-color: color($secondarylight)
+      }
+    }
+    
+    .meno-user{
+      font-weight: bold;
+      font-size: 14px;
+      margin-top: 10px;
+      margin-right: 10px;
+      margin-bottom:2px;
+      @include themed() {
+        color: color($secondarydarker);
+      }
+      //background-color: red;
+      //width: 100%;
+    }
+  }
+
+  .example-3 {
+    width: 100%;
+    float: left;
+    text-align: right;
+
+    
+    @include themed() {
+      //border-top: 1px solid color($secondary);
+      background-color: color($primarydark);
+    }
+  }
+  .logout {
+    font-weight: bold;
+    //text-decoration: underline;
+    cursor: pointer;
+    font-size: 12px;
+    //box-shadow: 1px 2px 2px rgba($grey-color, 0.3);
+    padding: 5px;
+    margin: 10px;
+    width: 40%;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: 0.3s;
+    @include themed() {
+      //background-color: color($secondarylight);
+      background-color: color($primarylight);
+      color: color($secondarylight);
+      //border: 1px solid color($secondary);
+    }
+    &:hover {
+      @include themed(){
+        background-color: color($secondarydarker);
+      }
+    }
+    &::before {
+      content: "\e131";
+      font-family: 'WebComponentsIcons';
+      display:inline-block;
+      margin-right: 5px;
+      position: relative;
+      top: 1px;
+      font-size: 14px;
+    }
+  }
+}
+
+.nav-user .k-animation-container {
+  position: absolute;
+  right: -1px;
+  top: 65px;
+}
+
+.settings{
+  .title{
+    //width: 13rem !important;
+  }
+}
+
+@media only screen and (max-width: $breakpoint-md) {
+  .nav-user {
+    .k-i-gear,
+    .k-i-email,
+    .k-i-help {
+      display: none;
+    }
+    
+    .k-i-bell {
+      margin-right: 0;
+    }
+  }
+
+  .nav-user {
+    width: 109px;
+
+    .inicialy-user {
+      margin: 12px;
+    }
+  }
+}

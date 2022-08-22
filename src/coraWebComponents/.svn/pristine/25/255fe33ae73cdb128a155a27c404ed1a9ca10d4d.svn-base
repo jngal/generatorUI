@@ -1,0 +1,95 @@
+import './forms/Input.scss';
+import './ChangePassword.scss';
+import * as React from 'react';
+
+import Dialog from './dialogs/Dialog';
+// import withStorage from './utils/withStorage';
+import PropTypes from 'prop-types';
+import Input from './forms/Input';
+
+class ChangePassword extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {      
+      newPassword: '',
+      matchNewPassword: '',
+      error: null,
+    };
+  }
+  handleChange = (field, value) => {
+    this.setState({ [field]: value });       
+  }
+
+  handleClose = () => {    
+    this.props.handleClose();
+    this.setState({newPassword: '', matchNewPassword: '', error: ''});    
+  }
+
+  handleConfirm = () => {  
+    if(this.state.newPassword.length > 0 &&
+       this.state.newPassword === this.state.matchNewPassword){
+        this.props.handleConfirmChangePassword(this.state.newPassword);
+        this.handleClose();            
+        
+    }else if(this.state.newPassword.length === 0){
+      this.setState({error: 'Zadajte nové heslo!'})
+    }else if(this.state.matchNewPassword.length === 0){
+      this.setState({error: 'Zopakujte novozadané heslo!'})
+    }else if(this.state.newPassword !== this.state.matchNewPassword){
+      this.setState({error: 'Potvrdenie hesla sa nezhoduje s novým heslom'})
+    } else {
+      this.setState({error: 'Neočakávaná chyba'});
+    }        
+  }
+
+  render() {
+    return (
+      <Dialog
+        isOpen={this.props.isOpenChangePassword}
+        onClose={this.handleClose}
+        onConfirm={this.handleConfirm}
+        title="Zmena hesla"
+      >
+        <div className="k-content k-window-content k-dialog-content settings">
+          <div className="k-form-inline">
+            <div className="error-password">
+              { this.state.error && <span>{this.state.error}</span> }            
+            </div>
+            <div className="k-form-field">
+              <span className="title">Nové heslo</span>
+              <Input
+                type="password"
+                name="newPassword"
+                onChange={this.handleChange}
+                value={this.state.newPassword}
+              />
+            </div>
+            <div className="k-form-field">
+              <span className="title">Potvrdenie nového hesla</span>
+              <Input
+                type="password"
+                name="matchNewPassword"
+                onChange={this.handleChange}
+                value={this.state.matchNewPassword}
+              />
+            </div>
+          </div>
+        </div>
+        
+      </Dialog>
+    );
+  }
+}
+
+ChangePassword.propTypes = {
+  isOpenChangePassword: PropTypes.bool.isRequired,
+  handleConfirmChangePassword: PropTypes.func.isRequired,
+  handleClose:  PropTypes.func.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+}
+
+export default ChangePassword;

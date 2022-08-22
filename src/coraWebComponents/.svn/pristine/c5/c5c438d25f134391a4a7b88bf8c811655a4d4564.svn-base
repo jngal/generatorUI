@@ -1,0 +1,55 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import Button from './Button';
+import { buildUrl, buildGoogleOauthUrl } from '../utils/helper';
+import './GoogleButton.scss';
+
+
+class GoogleButtonComponent extends React.Component {
+  onClick = (e) => {
+    if(!this.props.form && !this.props.type) {
+      e.preventDefault();
+      
+      const uri = buildGoogleOauthUrl(this.props.redirectURI);
+      window.location.replace(uri);
+    }
+  }
+ 
+  render() {
+    return (
+      <Button
+        className={this.props.className}
+        type={this.props.form ? 'submit' : this.props.type}
+        primary={this.props.primary ? this.props.primary : true}
+        disabled={this.props.disabled}
+        icon={this.props.icon}
+        onClick={this.onClick}
+        iconClass="googleIcon"
+        form={this.props.form}
+        imageUrl={buildUrl("assets/google_G_logo.svg")}
+        title={this.props.title}
+        buttonWrapperClassName={this.props.buttonWrapperClassName}
+        customTooltipContent={this.props.customTooltipContent}
+        label={this.props.label ? this.props.label : "Google registrácia"}
+      />
+    );
+  }
+}
+
+GoogleButtonComponent.propTypes = {
+  primary: PropTypes.bool,
+  disabled: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  label: PropTypes.string,
+  icon: PropTypes.string,
+  iconClass: PropTypes.string,
+  title: PropTypes.string,
+  form: PropTypes.string,
+  imageUrl: PropTypes.string,
+  type: PropTypes.string,
+  className: PropTypes.string,
+  buttonWrapperClassName: PropTypes.string,
+  customTooltipContent: PropTypes.object,
+  redirectURI: PropTypes.string.isRequired,
+}
+
+export default GoogleButtonComponent;

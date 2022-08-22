@@ -1,0 +1,18 @@
+@import "../variables";
+@import "../themes";
+
+.split-button{
+  margin: 15px 5px;
+  >.k-split-button{
+    > .k-button{
+      background-image: none;
+      @include themed() {
+        background-color: color($primary);
+        color: color($navbartext);
+      }
+    }
+    .k-button:hover, .k-button.k-state-hover{
+        opacity: 0.8;
+      }
+  }
+}

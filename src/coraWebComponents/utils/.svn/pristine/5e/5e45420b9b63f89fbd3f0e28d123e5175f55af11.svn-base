@@ -1,0 +1,20 @@
+import React from 'react';
+import * as requests from './requests';
+
+export default (WrappedComponent) => {
+  class HOC extends React.Component {
+
+    render() {
+      return (
+        <WrappedComponent
+          {...this.props}
+          requests={{
+            getList: requests.getList
+          }}
+        />
+      );
+    }
+  }
+  
+  return HOC;
+};

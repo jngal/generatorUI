@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: scheduler/Scheduler.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: scheduler/Scheduler.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from 'react';
+import PropTypes from 'prop-types';
+
+import Button from '../buttons/Button';
+import LoadingPanel from '../LoadingPanel';
+import { EditItem } from './SchedulerEditItem';
+import SchedulerViewSlot from './SchedulerViewSlot';
+import { buildUrl } from '../utils/helper';
+import { IntlProvider, load, LocalizationProvider, loadMessages } from '@progress/kendo-react-intl';
+import { Scheduler, TimelineView, DayView, WeekView, MonthView, AgendaView } from '@progress/kendo-react-scheduler';
+
+import weekData from 'cldr-core/supplemental/weekData.json';
+import currencyData from 'cldr-core/supplemental/currencyData.json';
+import likelySubtags from 'cldr-core/supplemental/likelySubtags.json';
+
+import numbers from 'cldr-data/main/sk/numbers.json';
+import currencies from 'cldr-data/main/sk/currencies.json';
+import caGregorian from 'cldr-data/main/sk/ca-gregorian.json';
+import dateFields from 'cldr-data/main/sk/dateFields.json';
+import { timezoneNames } from '@progress/kendo-date-math';
+
+import './Scheduler.scss';
+
+import '@progress/kendo-date-math/tz/regions/Europe';
+import '@progress/kendo-date-math/tz/Europe/Bratislava';
+import '@progress/kendo-date-math/tz/Etc/UTC';
+
+import skMessages from '../res/sk.json';
+
+load(
+  likelySubtags, currencyData, weekData, numbers,
+  currencies, caGregorian, dateFields, timezoneNames
+);
+loadMessages(skMessages, 'sk-SK');
+
+/**
+ * Scheduler component
+ * @module
+ * @param {bool} isLoading - Is loading?
+ * @param {Date} [date] - Date
+ * @param {(bool | object)} [editable] - Is scheduler editable?
+ * @param {array} data - Data
+ * @param {func} [onDataChange] - Function invoked on data change
+ * @param {func} onDateChange - Function invoked on date change
+ * @param {func} onUpdate - Function invoked on update
+ * @param {func} [onDelete] - Function invoked on delete
+ * @param {func} onAdd - Function invoked on entry add
+ * @param {func} onEdit - Function invoked on entry edit
+ * @param {func} onRefresh - Function invoked on entry refresh
+ * @param {func} [onExport] - Function invoked on entries export
+ * @param {array} [resources] - Resources
+ * @param {string} [orientation] - Orientation
+ * @param {object} [modelFields] - The names of the model fields from which the Scheduler will read its data
+ * @param {func} [editItem] - Overrides the default editItem
+ * @param {func} [viewSlot] - Overrides the default viewSlot component
+ */
+
+class SchedulerComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      view: 'week',
+      date: this.props.date,
+      locale: { language: 'sk-SK', locale: 'sk' },
+      timezone: "Europe/Bratislava",
+      orientation: 'vertical',
+      data: [],
+    };
+
+    this.EditItem = EditItem({
+      onEditClick: this.handleEditItemClick,
+      onDeleteClick: this.handleDeleteItemClick,
+      getScrollOffset: this.getScrollOffset
+    });
+
+    this.ref = React.createRef();
+  }
+
+  handleEditItemClick = (event) => {
+    
+    this.props.onEdit(event.target.props.dataItem.TaskID);
+  }
+
+  handleDeleteItemClick = (event) => {
+    this.props.onDelete([event.target.props.dataItem]);
+  }
+
+  getScrollOffset = () => {
+    return this.ref.current &amp;&amp; this.ref.current.element &amp;&amp; this.ref.current.element.children &amp;&amp; this.ref.current.element.children[1].scrollTop;
+  }
+
+  handleViewChange = (value) => {
+    if (this.props.onViewChange) {
+      this.props.onViewChange(value.value);
+    }
+    else {
+      this.handleChange('view', value.value);
+    }
+  }
+
+  handleChange = (name, value) => {
+    this.setState((state) => {
+      return {
+        [name]: value
+      }
+    });
+  }
+
+  recalcDay = (date) => {
+    const month = this.props.date.getMonth();
+    let newdate = new Date(this.props.date);
+    return date.getTime() > this.props.date.getTime() ? new Date(newdate.setMonth(month + 2,0)) : new Date(this.props.date.setMonth(month,0));
+  }
+
+  onDateChange = (value) => {
+    let _new = new Date(new Date(value).setHours(0, 0, 0));
+    if(!(value instanceof Date)){
+        _new = new Date(new Date(value._localDate).setHours(0, 0, 0));
+    }
+    let _old = new Date(new Date(this.props.date).setHours(0, 0, 0));
+    const dateDiff = Math.abs((_old.getTime() - _new.getTime()) / (24 * 60 * 60 * 1000));
+    const newDate = dateDiff === 31 ? this.recalcDay(_new) : _new;
+    this.props.onDateChange(newDate);
+  }
+
+  render() {
+    const handleDataChange = ({ created, updated, deleted }) => {
+      this.props.onUpdate(updated);
+      this.props.onDelete(deleted);
+    }
+
+    const { locale, view, timezone } = this.state;
+    return (
+      &lt;div className="k-scheduler-overlay">
+        &lt;div className="k-scheduler-toolbar">
+          &lt;div className="k-scheduler-toolbar-buttons">
+            &lt;div className="k-scheduler-toolbar-buttons-left">
+              &lt;Button
+                onClick={(event) => this.props.onAdd(event)}
+                title="Nová udalosť"
+                icon="novy-zaznam"
+                imageUrl={buildUrl('assets/toolbar_cg_new.svg')}
+              />
+              {typeof this.props.toolbarActions === 'function' ? this.props.toolbarActions() : this.props.toolbarActions}
+            &lt;/div>
+            &lt;div className="k-scheduler-toolbar-buttons-right">
+              &lt;Button
+                onClick={(event) => this.props.onRefresh(event)}
+                icon="refresh"
+                title="Obnovenie"
+                imageUrl={buildUrl('assets/toolbar_cg_refresh.svg')}
+              />
+              {this.props.onExport &amp;&amp; &lt;Button
+                onClick={(event) => this.props.onExport(event)}
+                icon="export"
+                title="Exportovať .ics"
+                imageUrl={buildUrl('assets/toolbar_cg_export.svg')}
+              />}
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;LocalizationProvider language={locale.language}>
+          &lt;IntlProvider locale={locale.locale} >
+            &lt;Scheduler
+              data={this.props.data}
+              ref={this.props.setRef || this.ref}
+              onDataChange={handleDataChange}
+              view={this.props.view ? this.props.view : view}
+              onViewChange={this.handleViewChange}
+              date={this.props.date}
+              onDateChange={e => this.onDateChange(e.value)}
+              editable={this.props.editable}
+              timezone={timezone}
+              modelFields={this.props.modelFields}
+              resources={this.props.resources}
+              group={this.props.group}
+              editItem={this.props.editItem || this.EditItem}
+              height={""}
+              viewSlot={this.props.viewSlot || SchedulerViewSlot}
+            >
+              &lt;TimelineView />
+              &lt;DayView
+                slotDuration={120}
+                slotDivisions={4}
+                workDayStart={"06:00"}
+                workDayEnd={"20:00"}
+              />
+              &lt;WeekView
+                slotDuration={120}
+                slotDivisions={2}
+                workDayStart={"06:00"}
+                workDayEnd={"20:00"}
+              />
+              &lt;MonthView />
+              &lt;AgendaView />
+            &lt;/Scheduler>
+          &lt;/IntlProvider>
+        &lt;/LocalizationProvider>
+        &lt;LoadingPanel isLoading={this.props.isLoading} />
+      &lt;/div>
+    )
+  }
+}
+
+SchedulerComponent.propTypes = {
+  isLoading: PropTypes.bool.isRequired,
+  date: PropTypes.instanceOf(Date),
+  editable: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+  data: PropTypes.array.isRequired,
+  onDataChange: PropTypes.func,
+  onDateChange: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
+  onAdd: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  onExport: PropTypes.func,
+  resources: PropTypes.arrayOf(PropTypes.object),
+  orientation: PropTypes.string,
+  modelFields: PropTypes.object,
+  editItem: PropTypes.func,
+  viewSlot: PropTypes.func,
+}
+
+export default SchedulerComponent;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Alert.html">Alert</a></li><li><a href="module-animation_Slide.html">animation/Slide</a></li><li><a href="module-buttons_Button.html">buttons/Button</a></li><li><a href="module-buttons_ButtonGroup.html">buttons/ButtonGroup</a></li><li><a href="module-buttons_DropDownButton.html">buttons/DropDownButton</a></li><li><a href="module-buttons_SplitButton.html">buttons/SplitButton</a></li><li><a href="module-ChangePassword.html">ChangePassword</a></li><li><a href="module-chart_ChartComponent.html">chart/ChartComponent</a></li><li><a href="module-chart_elements_ChartCategoryAxisComponent.html">chart/elements/ChartCategoryAxisComponent</a></li><li><a href="module-chart_elements_ChartLegendComponent.html">chart/elements/ChartLegendComponent</a></li><li><a href="module-chart_elements_ChartSeriesComponent.html">chart/elements/ChartSeriesComponent</a></li><li><a href="module-chart_elements_ChartTitleComponent.html">chart/elements/ChartTitleComponent</a></li><li><a href="module-Container.html">Container</a></li><li><a href="module-detail_Detail.html">detail/Detail</a></li><li><a href="module-detail_DetailWrapper.html">detail/DetailWrapper</a></li><li><a href="module-detail_Toolbar.html">detail/Toolbar</a></li><li><a href="module-detail_ValidationMessage.html">detail/ValidationMessage</a></li><li><a href="module-dialogs_ConfirmDialog.html">dialogs/ConfirmDialog</a></li><li><a href="module-dialogs_Dialog.html">dialogs/Dialog</a></li><li><a href="module-dialogs_DialogContent.html">dialogs/DialogContent</a></li><li><a href="module-dialogs_EmailPrompt.html">dialogs/EmailPrompt</a></li><li><a href="module-dialogs_FileContent.html">dialogs/FileContent</a></li><li><a href="module-dialogs_FileDialog.html">dialogs/FileDialog</a></li><li><a href="module-dialogs_ReportDialog.html">dialogs/ReportDialog</a></li><li><a href="module-Dropdown.html">Dropdown</a></li><li><a href="module-forms_Autocomplete.html">forms/Autocomplete</a></li><li><a href="module-forms_AutocompleteLocal.html">forms/AutocompleteLocal</a></li><li><a href="module-forms_Checkbox.html">forms/Checkbox</a></li><li><a href="module-forms_DatePicker.html">forms/DatePicker</a></li><li><a href="module-forms_DateRangePicker.html">forms/DateRangePicker</a></li><li><a href="module-forms_DateTimePicker.html">forms/DateTimePicker</a></li><li><a href="module-forms_DropDownList.html">forms/DropDownList</a></li><li><a href="module-forms_Input.html">forms/Input</a></li><li><a href="module-forms_MultiSelect.html">forms/MultiSelect</a></li><li><a href="module-forms_NumericTextBox.html">forms/NumericTextBox</a></li><li><a href="module-forms_Picker.html">forms/Picker</a></li><li><a href="module-forms_Switch.html">forms/Switch</a></li><li><a href="module-forms_Textarea.html">forms/Textarea</a></li><li><a href="module-forms_TimePicker.html">forms/TimePicker</a></li><li><a href="module-forms_Upload.html">forms/Upload</a></li><li><a href="module-graph_ArcGauage.html">graph/ArcGauage</a></li><li><a href="module-grid_Cell.html">grid/Cell</a></li><li><a href="module-grid_ColumnMenu.html">grid/ColumnMenu</a></li><li><a href="module-grid_DialogFilter.html">grid/DialogFilter</a></li><li><a href="module-grid_DialogFilterForm.html">grid/DialogFilterForm</a></li><li><a href="module-grid_DropdownFilterCell.html">grid/DropdownFilterCell</a></li><li><a href="module-grid_EditBooleanCell.html">grid/EditBooleanCell</a></li><li><a href="module-grid_EditCommandCell.html">grid/EditCommandCell</a></li><li><a href="module-grid_EditDateTimeCell.html">grid/EditDateTimeCell</a></li><li><a href="module-grid_EditDropdownCell.html">grid/EditDropdownCell</a></li><li><a href="module-grid_EditPickerCell.html">grid/EditPickerCell</a></li><li><a href="module-grid_EditTimeCell.html">grid/EditTimeCell</a></li><li><a href="module-grid_FileCell.html">grid/FileCell</a></li><li><a href="module-grid_Grid.html">grid/Grid</a></li><li><a href="module-grid_GridWrapper.html">grid/GridWrapper</a></li><li><a href="module-grid_RangeFilterCell.html">grid/RangeFilterCell</a></li><li><a href="module-grid_SaveFilterDialog.html">grid/SaveFilterDialog</a></li><li><a href="module-grid_SelectionMenu.html">grid/SelectionMenu</a></li><li><a href="module-grid_Toolbar.html">grid/Toolbar</a></li><li><a href="module-grid_TooltipCell.html">grid/TooltipCell</a></li><li><a href="module-LoadingPanel.html">LoadingPanel</a></li><li><a href="module-metabase_Dashboard.html">metabase/Dashboard</a></li><li><a href="module-navigation_Hamburger.html">navigation/Hamburger</a></li><li><a href="module-navigation_Manual.html">navigation/Manual</a></li><li><a href="module-navigation_ManualDialogList.html">navigation/ManualDialogList</a></li><li><a href="module-navigation_ManualList.html">navigation/ManualList</a></li><li><a href="module-navigation_ManualPDF.html">navigation/ManualPDF</a></li><li><a href="module-navigation_ManualWrapper.html">navigation/ManualWrapper</a></li><li><a href="module-navigation_Navigation.html">navigation/Navigation</a></li><li><a href="module-navigation_Search.html">navigation/Search</a></li><li><a href="module-navigation_User.html">navigation/User</a></li><li><a href="module-RefreshDialog.html">RefreshDialog</a></li><li><a href="module-sch_ApprovalProcessStep.html">sch/ApprovalProcessStep</a></li><li><a href="module-sch_ApprovalProcessTimeline.html">sch/ApprovalProcessTimeline</a></li><li><a href="module-scheduler_Scheduler.html">scheduler/Scheduler</a></li><li><a href="module-Settings.html">Settings</a></li><li><a href="module-sidebar_Appmenu.html">sidebar/Appmenu</a></li><li><a href="module-sidebar_Footer.html">sidebar/Footer</a></li><li><a href="module-sidebar_header_Appmenu.html">sidebar/header/Appmenu</a></li><li><a href="module-sidebar_header_Header.html">sidebar/header/Header</a></li><li><a href="module-sidebar_header_SidebarToggle.html">sidebar/header/SidebarToggle</a></li><li><a href="module-sidebar_menu_Menu.html">sidebar/menu/Menu</a></li><li><a href="module-sidebar_menu_Search.html">sidebar/menu/Search</a></li><li><a href="module-sidebar_Sidebar.html">sidebar/Sidebar</a></li><li><a href="module-sidebar_Stats.html">sidebar/Stats</a></li><li><a href="module-Tab.html">Tab</a></li><li><a href="module-Tabs.html">Tabs</a></li><li><a href="module-TabsWrapper.html">TabsWrapper</a></li><li><a href="module-TitlePanel.html">TitlePanel</a></li><li><a href="module-utils_convert.html">utils/convert</a></li><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter.html">utils/eventEmitter</a></li><li><a href="module-utils_flags.html">utils/flags</a></li><li><a href="module-utils_helper.html">utils/helper</a></li><li><a href="module-utils_logger.html">utils/logger</a></li><li><a href="module-utils_requests.html">utils/requests</a></li><li><a href="module-utils_storage.html">utils/storage</a></li><li><a href="module-ValidationAlert.html">ValidationAlert</a></li><li><a href="module-views_login_Login.html">views/login/Login</a></li><li><a href="module-views_registration_Registration.html">views/registration/Registration</a></li></ul><h3>Classes</h3><ul><li><a href="module-utils_coraError.html">utils/coraError</a></li><li><a href="module-utils_eventEmitter-ExtendedEventEmitter.html">ExtendedEventEmitter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getPreprocessedMenuData-zkorenamenuvyrobinovudatovustrukturumenupouzitelnunavykreslenie">getPreprocessedMenuData - z korena menu vyrobi novu datovu strukturu menu pouzitelnu na vykreslenie</a></li><li><a href="global.html#isValidDateStr">isValidDateStr</a></li><li><a href="global.html#isValidEcv">isValidEcv</a></li><li><a href="global.html#isValidID">isValidID</a></li><li><a href="global.html#isValidMail">isValidMail</a></li><li><a href="global.html#isValidPasswordStrong">isValidPasswordStrong</a></li><li><a href="global.html#isValidPhone">isValidPhone</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Thu Jan 07 2021 13:35:30 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

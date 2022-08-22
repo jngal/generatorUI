@@ -1,0 +1,284 @@
+import './Container.scss';
+
+import * as React from 'react';
+
+import { FILTERABLE, PAGE, TABS_TYPE } from './Settings';
+
+import Navigation from './navigation/Navigation';
+import PropTypes from 'prop-types';
+import Settings from './Settings';
+import Sidebar from './sidebar/Sidebar';
+import RefreshDialog from './RefreshDialog';
+import withStorage from './utils/withStorage';
+import withRouter from './utils/withRouter';
+import eventEmitter from './utils/eventEmitter';
+
+export const SIDEBAR_TYPE = {
+  NORMAL: 'normal',
+  FULLSCREEN: 'fullscreen',
+  COMPACT: 'compact',
+}
+
+let _init;
+
+/**
+ * Container component
+ * @module
+ * @param {element} brand - Brand element
+ * @param {object} user - User
+ * @param {Menu} menu - Menu
+ * @param {func} onMenuFilter - On menu filter function
+ * @param {elemetn} stats - Stats element
+ * @param {func} onSignOut - On sign out function
+ * @param {string} theme - Current theme
+ * @param {array} themes - Themes
+ * @param {element} header - Header element
+ * @param {element} footer - Footer element
+ * @param {element} userInfo - User info element
+ * @param {object} uzivatel - Uzivatel
+ * @param {func} applicationSettings - Application settings function
+ * @param {element} manual - Manual element
+ * @param {element} manualList - Manual list element
+ * @param {func} handleConfirmChangePassword - Function on password change submit
+ * @param {string} defaultSidebarType - Default sidebar type
+ * @param {object} sideBarToggleIcons - Sidebar toggle icons
+ * @param {func} navUser - Nav user
+ * @param {bool} isNavBarNotScrollable - In navbar not scrollable
+ * @param {func} onMenuSelect - On menu select function
+ */
+class Container extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.normalSidebarClassNames = "col-3 p-0 w-sidebar";
+    this.compactSidebarClassNames = "col-1 p-0 w-sidebar-compact";
+    this.fullscreenSidebarClassNames = "col p-0 w-sidebar-fullscreen";
+
+    this.state = {
+      sidebarType: props.defaultSidebarType || SIDEBAR_TYPE.NORMAL,
+      isError: false,
+      isOpenSettings: false,
+      theme: {name: "default"},
+      tabsType: null,
+      page: null,
+      filterable: null,
+      isRefreshOpen: true,
+      applicationSettings: null
+    }
+    
+    if(props.provideSession) {
+      props.storage.sessionProviderInit(() => {
+        const afterLoginLocation = props.location && props.location.pathname && props.location.pathname !== "/prihlasenie" && props.location.pathname !== "/login" ? 
+          props.location.pathname + props.location.search : '/';
+        window.location.hash = "#" +afterLoginLocation;
+        window.location.reload();
+      });
+    }
+  }
+
+  getTheme = async () => {
+    let theme = await this.props.storage.getTheme();
+    if(!theme) {
+      theme = {
+        name: this.props.theme || 'default'
+      }
+    }
+    return theme;
+  }
+
+  getFilterable = async () => {
+    let filterable = await this.props.storage.getFilterable();
+    return filterable !== null ? { name: filterable ? "nie" : "áno", filterable } : FILTERABLE[0];
+  }
+
+  handleOpenSettings = async () => {
+    this.setState({
+      isOpenSettings: true,
+      theme: await this.getTheme(),
+      tabsType: await this.props.storage.getTabsType() || TABS_TYPE[0],
+      page: await this.props.storage.getPage() || PAGE[0],
+      filterable: await this.getFilterable(),
+      applicationSettings: await this.props.storage.getApplicationSettings()
+    });
+  }
+
+  handleCloseSettings = () => {
+    this.setState({ isOpenSettings: false });
+  }
+
+  handleChange = (name, value) => {
+    this.setState({ [name]: value });
+  }
+
+  handleSidebarToggle = (event, sidebarType) => {
+    this.setState((state) => ({
+      sidebarType: state.sidebarType === sidebarType ? SIDEBAR_TYPE.NORMAL : sidebarType,
+    }));
+  }
+
+  handleSidebarMenuSelect = (targetRoute, currLocation, routeHistory, isNotExpanded) => {
+    if (isNotExpanded) {
+      if (this.state.sidebarType === SIDEBAR_TYPE.FULLSCREEN) {
+        this.setState({
+          sidebarType: SIDEBAR_TYPE.NORMAL,
+        });
+      }
+    }
+
+    if (this.props.onMenuSelect) {
+      this.props.onMenuSelect(targetRoute, currLocation, routeHistory);
+    }
+  }
+
+  evaluateSidebarClassNames = () => {
+    switch (this.state.sidebarType) {
+      case SIDEBAR_TYPE.COMPACT:
+        return this.compactSidebarClassNames;
+      case SIDEBAR_TYPE.FULLSCREEN:
+        return this.fullscreenSidebarClassNames;
+      default:
+        return this.normalSidebarClassNames;
+    }
+  }
+
+  componentDidCatch(error, info) {
+    this.setState({ isError: true })
+  }
+
+  init = async () => {
+    const theme = await this.getTheme();
+    document.body.className = `theme-${theme.name}`;
+    this.setState({theme});
+  }
+
+  handleChangeSidebar = (type) => {
+    this.setState({ sidebarType: type });
+  }
+
+  componentWillMount() {
+    eventEmitter.on('CHANGE_SIDEBAR', this.handleChangeSidebar);
+  }
+
+  render() {
+    const isAuth = this.props.user !== null;
+    if(!isAuth){
+      _init = false;
+    }
+    if(!_init && isAuth) {
+      _init = true;
+      this.init();
+    }
+
+    const ApplicationSettings = this.props.applicationSettings;
+    const isNavBarNotScrollable = this.props.isNavBarNotScrollable;
+
+    if (this.state.isError) {
+      return (
+        <div className="error">Neočakávaná chyba.</div>
+      );
+    }
+
+    return (
+      <div className='container-fluid p-0'>
+        <div className="row m-0">
+          {isAuth &&
+            <div className={this.evaluateSidebarClassNames()}>
+              <Sidebar
+                onClick={(event) => this.handleSidebarToggle(event, SIDEBAR_TYPE.COMPACT)}
+                menu={this.props.menu}
+                onMenuFilter={this.props.onMenuFilter}
+                stats={this.props.stats}
+                type={this.state.sidebarType}
+                onMenuSelect={this.handleSidebarMenuSelect}
+                sideBarToggleIcons={this.props.sideBarToggleIcons}
+              />
+            </div>
+          }
+          <div className={`col p-0 ${isNavBarNotScrollable ? '':'scrollable-navbar'} ${this.state.sidebarType === SIDEBAR_TYPE.FULLSCREEN ? 'hidden' : ''}`}>
+            {isAuth &&
+              <div className="row m-0">
+                <div className="col p-0">
+                  <Navigation
+                    brand={this.props.brand}
+                    onSignOut={this.props.onSignOut}
+                    onClick={(event) => this.handleSidebarToggle(event, SIDEBAR_TYPE.FULLSCREEN)}
+                    userInfo={this.props.userInfo}
+                    handleOpenSettings={this.handleOpenSettings}
+                    uzivatel={this.props.user.Uzivatel || this.props.uzivatel}
+                    manualProps={this.props.manualProps}
+                    getManual={this.props.getManual}
+                    getListManual={this.props.getListManual}
+                    navUser={this.props.navUser}
+                  />
+                </div>
+              </div>
+            }
+            <div className="row m-0">
+              <div className={`col p-0 ${isNavBarNotScrollable ? 'scrollable-body':''}`}>
+                {(this.props.header && isAuth) &&
+                  <div className="row m-0">
+                    <div className="col p-3">
+                      {this.props.header}
+                    </div>
+                  </div>
+                }
+                <div className="row m-0">
+                  <div className="col p-3">
+                    {this.props.children}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {this.props.footer}
+        <Settings
+          handleConfirmChangePassword={this.props.handleConfirmChangePassword}
+          isOpenSettings={this.state.isOpenSettings}
+          handleCloseSettings={this.handleCloseSettings}
+          handleConfirmSettings={this.handleConfirmSettings}
+          handleChange={this.handleChange}
+          theme={this.state.theme}
+          themes={this.props.themes}
+          filterable={this.state.filterable}
+          page={this.state.page}
+          tabsType={this.state.tabsType}
+          applicationSettings={this.state.applicationSettings}
+        >
+          {ApplicationSettings && 
+            <ApplicationSettings value={this.state.applicationSettings} onChange={value => this.handleChange('applicationSettings', value)} />
+          }
+        </Settings>
+        <RefreshDialog
+          isOpen={this.state.isRefreshOpen} 
+        />
+      </div>
+    );
+  }
+}
+
+Container.propTypes = {
+  brand: PropTypes.element,
+  user: PropTypes.object,
+  menu: PropTypes.object.isRequired,
+  onMenuFilter: PropTypes.func,
+  stats: PropTypes.element,
+  onSignOut: PropTypes.func.isRequired,
+  theme: PropTypes.string,
+  themes: PropTypes.array.isRequired,
+  header: PropTypes.element,
+  footer: PropTypes.element,
+  userInfo: PropTypes.element,
+  uzivatel: PropTypes.object,
+  applicationSettings: PropTypes.func,
+  manual: PropTypes.element,
+  manualList: PropTypes.element,
+  handleConfirmChangePassword: PropTypes.func,
+  defaultSidebarType: PropTypes.string,
+  sideBarToggleIcons: PropTypes.object,
+  navUser: PropTypes.func,
+  isNavBarNotScrollable: PropTypes.bool,
+  onMenuSelect: PropTypes.func,
+}
+
+export default withRouter(withStorage(Container));

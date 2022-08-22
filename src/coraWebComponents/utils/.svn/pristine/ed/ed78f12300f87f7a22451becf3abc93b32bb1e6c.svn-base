@@ -1,0 +1,56 @@
+import CoraError from './coraError';
+import * as storage from './storage';
+
+const showMsg = (msg, msgType = 'ok') => ({
+  type: "SHOW_MSG",
+  msg,
+  msgType
+})
+
+const signOut = () => ({
+  type: "SIGN_OUT"
+});
+
+const hiddenActionTypes = [
+  //VISCO 3 hiddeen action types
+  'UPDATE_DAY_SUCCESS',
+  'GET_MENU_SUCCESS',
+];
+
+const logger = store => next => action => {
+  if (action.type.endsWith("FAILURE")) {
+    if (action.error instanceof CoraError) {
+      store.dispatch(showMsg(action.error.message, "error"));
+      if (action.error.code === '401.000' && action.type !== 'SIGN_IN_FAILURE') {
+        storage.removeUser();
+        store.dispatch(signOut());
+      }
+    }
+    else {
+      store.dispatch(showMsg("Neočakávaná chyba.", "error"));
+    }
+  }
+  else {
+    if ((action.type.startsWith("CREATE") || action.type.startsWith("UPDATE") || action.type.startsWith("DELETE")) && action.type.endsWith("SUCCESS") && !hiddenActionTypes.includes(action.type)) {
+      if (action.res && action.res.UserMessage) {
+        if (action.res.Code === '200.001') {
+          store.dispatch(showMsg(action.res.UserMessage, "warning"));
+        } else {
+          store.dispatch(showMsg(action.res.UserMessage));
+        }
+      }
+      else {
+        store.dispatch(showMsg("OK"));
+      }
+    }
+  }
+
+  //console.log(action);
+  //console.group(action.type)
+  //console.debug('dispatching', action)
+  let result = next(action)
+  //console.groupEnd()
+  return result
+}
+
+export default logger;

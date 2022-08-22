@@ -1,0 +1,31 @@
+@import "../variables";
+@import "../themes";
+
+.k-numerictextbox .k-link .k-icon {
+  @include themed() {
+    color: color($primary) !important;
+  }
+}
+
+.k-numeric-wrap .k-select .k-link {
+  @include themed() {
+    background-color: color($secondarymedium) !important;
+  }
+}
+.numerictextbox {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+
+  .k-numerictextbox {
+    flex: 1;
+  }
+
+  &.disabled-field {
+    .k-numerictextbox {
+      @include themed() {
+        background-color: color($secondarylight) !important;
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+@import './variables';
+@import './themes';
+
+.k-loading-image {
+  position: fixed;
+  @include themed() {
+    color: color($secondarydarker);
+  }
+  background-color: rgba(#000000, 0.2);
+}
+
+.k-loading-color {
+  background-color: transparent !important;
+}

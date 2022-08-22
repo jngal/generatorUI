@@ -1,0 +1,31 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { ChartTitle } from '@progress/kendo-react-charts';
+
+/**
+ * @typedef {Object} titleProps
+ * @property {string} text - Text
+ */
+
+/**
+ * Chart title component
+ * @module
+ * @param {titleProps} titleProps - Title props
+ */
+class ChartTitleComponent extends React.Component {
+  render() {
+    return (
+      <ChartTitle
+        text={this.props.titleProps.text}
+      />
+    )
+  }
+}
+
+ChartTitleComponent.propTypes = {
+  titleProps: PropTypes.shape({
+    text: PropTypes.string,
+  }),
+}
+
+export default ChartTitleComponent;
